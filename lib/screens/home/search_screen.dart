@@ -592,7 +592,7 @@ class _SearchScreenState extends State<SearchScreen>
             'Categoría de servicio',
             Icons.category,
             DropdownButtonFormField<String>(
-              value: _selectedCategory,
+              initialValue: _selectedCategory,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -621,7 +621,7 @@ class _SearchScreenState extends State<SearchScreen>
             'Ubicación',
             Icons.location_on,
             DropdownButtonFormField<String>(
-              value: _selectedLocation,
+              initialValue: _selectedLocation,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -750,7 +750,7 @@ class _SearchScreenState extends State<SearchScreen>
                 subtitle: const Text(
                     'Solo mostrar servicios disponibles inmediatamente'),
                 value: _isAvailableNow,
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
                 onChanged: (value) {
                   setState(() {
                     _isAvailableNow = value;

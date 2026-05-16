@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class UserModel {
   final String id;
+  final String profileId;
+  final String? providerProfileId;
   final String name;
   final String email;
   final String phone;
@@ -16,11 +16,13 @@ class UserModel {
   final double? longitude;
   final double rating;
   final int totalRatings;
-  final List<String> services; // Para proveedores
-  final String? description; // Para proveedores
+  final List<String> services;
+  final String? description;
 
   UserModel({
     required this.id,
+    required this.profileId,
+    this.providerProfileId,
     required this.name,
     required this.email,
     required this.phone,
@@ -39,54 +41,80 @@ class UserModel {
     this.description,
   });
 
-  factory UserModel.fromMap(Map<String, dynamic> map) {
+  factory UserModel.fromSupabase(
+    Map<String, dynamic> userRow, {
+    Map<String, dynamic>? providerRow,
+    List<String> services = const [],
+  }) {
+    final role = (userRow['role'] ?? 'client').toString();
+    final isProvider = providerRow != null || userRow['is_provider'] == true;
+
     return UserModel(
-      id: map['id'] ?? '',
-      name: map['name'] ?? '',
-      email: map['email'] ?? '',
-      phone: map['phone'] ?? '',
-      address: map['address'] ?? '',
-      city: map['city'] ?? '',
-      userType: UserType.values[map['userType'] ?? 0],
-      createdAt: (map['createdAt'] as Timestamp).toDate(),
-      updatedAt: map['updatedAt'] != null
-          ? (map['updatedAt'] as Timestamp).toDate()
-          : null,
-      isActive: map['isActive'] ?? true,
-      profileImageUrl: map['profileImageUrl'],
-      latitude: map['latitude']?.toDouble(),
-      longitude: map['longitude']?.toDouble(),
-      rating: (map['rating'] ?? 0.0).toDouble(),
-      totalRatings: map['totalRatings'] ?? 0,
-      services: List<String>.from(map['services'] ?? []),
-      description: map['description'],
+      id: (userRow['uid'] ?? '').toString(),
+      profileId: (userRow['id'] ?? '').toString(),
+      providerProfileId: providerRow?['id']?.toString(),
+      name: (providerRow?['name'] ?? userRow['name'] ?? '').toString(),
+      email: (userRow['email'] ?? providerRow?['email'] ?? '').toString(),
+      phone: (providerRow?['phone'] ?? userRow['phone'] ?? '').toString(),
+      address:
+          (providerRow?['address'] ?? userRow['address'] ?? '').toString(),
+      city: (providerRow?['city'] ?? userRow['city'] ?? '').toString(),
+      userType: isProvider
+          ? UserType.provider
+          : _roleToUserType(role),
+      createdAt: DateTime.tryParse((userRow['created_at'] ?? '').toString()) ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse((userRow['updated_at'] ?? '').toString()),
+      isActive: (providerRow?['is_active'] ?? userRow['is_active'] ?? true) ==
+          true,
+      profileImageUrl:
+          (providerRow?['avatar_url'] ?? userRow['avatar_url'])?.toString(),
+      latitude: _toDouble(providerRow?['latitude'] ?? userRow['latitude']),
+      longitude: _toDouble(providerRow?['longitude'] ?? userRow['longitude']),
+      rating: _toDouble(providerRow?['rating']) ?? 0.0,
+      totalRatings: _toInt(providerRow?['reviews_count']) ?? 0,
+      services: services,
+      description: providerRow?['bio']?.toString(),
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toUserRow() {
     return {
-      'id': id,
       'name': name,
       'email': email,
       'phone': phone,
       'address': address,
       'city': city,
-      'userType': userType.index,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
-      'isActive': isActive,
-      'profileImageUrl': profileImageUrl,
+      'role': _userTypeToRole(userType),
+      'is_provider': userType == UserType.provider,
+      'is_active': isActive,
+      'avatar_url': profileImageUrl,
       'latitude': latitude,
       'longitude': longitude,
-      'rating': rating,
-      'totalRatings': totalRatings,
-      'services': services,
-      'description': description,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+  }
+
+  Map<String, dynamic> toProviderRow() {
+    return {
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'address': address,
+      'city': city,
+      'bio': description,
+      'avatar_url': profileImageUrl,
+      'is_active': isActive,
+      'latitude': latitude,
+      'longitude': longitude,
+      'updated_at': DateTime.now().toIso8601String(),
     };
   }
 
   UserModel copyWith({
     String? id,
+    String? profileId,
+    String? providerProfileId,
     String? name,
     String? email,
     String? phone,
@@ -106,6 +134,8 @@ class UserModel {
   }) {
     return UserModel(
       id: id ?? this.id,
+      profileId: profileId ?? this.profileId,
+      providerProfileId: providerProfileId ?? this.providerProfileId,
       name: name ?? this.name,
       email: email ?? this.email,
       phone: phone ?? this.phone,
@@ -123,6 +153,51 @@ class UserModel {
       services: services ?? this.services,
       description: description ?? this.description,
     );
+  }
+
+  static UserType _roleToUserType(String role) {
+    switch (role) {
+      case 'provider':
+        return UserType.provider;
+      case 'admin':
+        return UserType.admin;
+      default:
+        return UserType.client;
+    }
+  }
+
+  static String _userTypeToRole(UserType userType) {
+    switch (userType) {
+      case UserType.provider:
+        return 'provider';
+      case UserType.admin:
+        return 'admin';
+      case UserType.client:
+        return 'client';
+    }
+  }
+
+  static double? _toDouble(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is num) {
+      return value.toDouble();
+    }
+    return double.tryParse(value.toString());
+  }
+
+  static int? _toInt(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is int) {
+      return value;
+    }
+    if (value is num) {
+      return value.toInt();
+    }
+    return int.tryParse(value.toString());
   }
 }
 

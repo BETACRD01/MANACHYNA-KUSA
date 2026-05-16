@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class ReviewModel {
   final String id;
   final String bookingId;
@@ -29,37 +27,21 @@ class ReviewModel {
     this.imageUrls = const [],
   });
 
-  factory ReviewModel.fromMap(Map<String, dynamic> map) {
+  factory ReviewModel.fromSupabase(Map<String, dynamic> map) {
     return ReviewModel(
-      id: map['id'] ?? '',
-      bookingId: map['bookingId'] ?? '',
-      clientId: map['clientId'] ?? '',
-      clientName: map['clientName'] ?? '',
-      providerId: map['providerId'] ?? '',
-      providerName: map['providerName'] ?? '',
-      serviceId: map['serviceId'] ?? '',
-      serviceName: map['serviceName'] ?? '',
-      rating: (map['rating'] ?? 0.0).toDouble(),
-      comment: map['comment'],
-      createdAt: (map['createdAt'] as Timestamp).toDate(),
-      imageUrls: List<String>.from(map['imageUrls'] ?? []),
+      id: (map['id'] ?? '').toString(),
+      bookingId: (map['booking_id'] ?? '').toString(),
+      clientId: (map['client_uid'] ?? '').toString(),
+      clientName: (map['client_name'] ?? '').toString(),
+      providerId: (map['provider_uid'] ?? '').toString(),
+      providerName: (map['provider_name'] ?? '').toString(),
+      serviceId: (map['service_id'] ?? '').toString(),
+      serviceName: (map['service_name'] ?? '').toString(),
+      rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
+      comment: map['comment']?.toString(),
+      createdAt: DateTime.tryParse((map['created_at'] ?? '').toString()) ??
+          DateTime.now(),
+      imageUrls: const [],
     );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'bookingId': bookingId,
-      'clientId': clientId,
-      'clientName': clientName,
-      'providerId': providerId,
-      'providerName': providerName,
-      'serviceId': serviceId,
-      'serviceName': serviceName,
-      'rating': rating,
-      'comment': comment,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'imageUrls': imageUrls,
-    };
   }
 }

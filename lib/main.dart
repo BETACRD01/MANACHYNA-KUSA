@@ -1,13 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'firebase_options.dart';
-import 'providers/auth_provider.dart';
-import 'providers/service_provider.dart';
-import 'providers/booking_provider.dart';
-import 'providers/user_provider.dart';
 import 'core/services/firebase_service.dart';
+import 'core/config/supabase_config.dart';
 import 'app.dart';
 
 void main() async {
@@ -19,28 +16,26 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    // 2. Inicializar FirebaseService (esto es lo que faltaba!)
+    // 2. Inicializar Supabase para datos y storage
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      anonKey: SupabaseConfig.publishableKey,
+    );
+
+    // 3. Inicializar FirebaseService (auth + messaging)
     await FirebaseService.initialize();
 
     // Solo mostrar logs en modo debug
     if (kDebugMode) {
-      debugPrint("🔥 Firebase y FirebaseService inicializados correctamente");
+      debugPrint(
+        "Firebase, Supabase y FirebaseService inicializados correctamente",
+      );
     }
 
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => AuthProvider()),
-          ChangeNotifierProvider(create: (_) => ServiceProvider()),
-          ChangeNotifierProvider(create: (_) => BookingProvider()),
-          ChangeNotifierProvider(create: (_) => UserProvider()),
-        ],
-        child: const ManachiyKanKusataApp(),
-      ),
-    );
+    runApp(const ManachiyKanKusataApp());
   } catch (e) {
     if (kDebugMode) {
-      debugPrint("❌ Error al inicializar Firebase: $e");
+      debugPrint("Error al inicializar Firebase: $e");
     }
     // Mostrar una pantalla de error o app básica
     runApp(

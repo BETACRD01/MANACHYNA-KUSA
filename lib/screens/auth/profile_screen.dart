@@ -69,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         _descriptionController.text = user.description ?? '';
       }
     } catch (e) {
-      print('Error loading user data: $e');
+      debugPrint('Error loading user data: $e');
     }
   }
 
@@ -109,6 +109,8 @@ class _ProfileScreenState extends State<ProfileScreen>
       // Crear usuario actualizado
       final userToUpdate = UserModel(
         id: currentUser.id,
+        profileId: currentUser.profileId,
+        providerProfileId: currentUser.providerProfileId,
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         phone: _phoneController.text.trim(),
@@ -240,7 +242,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       backgroundColor: Colors.grey[50],
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
-          print(
+          debugPrint(
               '🏗️ Building ProfileScreen - isLoading: ${authProvider.isLoading}, user: ${authProvider.currentUser?.name ?? "null"}, isInitialized: ${authProvider.isInitialized}');
 
           // 1. Si AuthProvider no está inicializado, mostrar loading
@@ -273,7 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () async {
-                      print('🔄 Refrescando datos del usuario...');
+                      debugPrint('🔄 Refrescando datos del usuario...');
                       await authProvider.refreshUserData();
                     },
                     child: const Text('Reintentar'),
@@ -295,7 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             );
           }
 
-          print('✅ Usuario cargado correctamente: ${user.name}');
+          debugPrint('✅ Usuario cargado correctamente: ${user.name}');
 
           // 4. Mostrar la interfaz normal con overlay de loading si está actualizando
           return LoadingOverlay(
@@ -343,7 +345,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               end: Alignment.bottomCenter,
               colors: [
                 AppColors.primary,
-                AppColors.primary.withOpacity(0.8),
+                AppColors.primary.withValues(alpha: 0.8),
               ],
             ),
           ),
@@ -378,7 +380,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -425,7 +427,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -600,10 +602,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.1),
+                                color: AppColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                    color: AppColors.primary.withOpacity(0.3)),
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.3)),
                               ),
                               child: Text(
                                 service,
@@ -814,7 +817,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -859,7 +862,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -929,7 +932,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.primary,
+            activeThumbColor: AppColors.primary,
           ),
         ],
       ),

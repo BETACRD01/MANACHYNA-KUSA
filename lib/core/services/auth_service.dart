@@ -1,20 +1,17 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../models/user_model.dart';
-import 'firebase_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../models/user_model.dart';
+import 'supabase_service.dart';
 
 class AuthService {
-  static FirebaseAuth get _auth => FirebaseService.auth;
-  static FirebaseFirestore get _firestore => FirebaseService.firestore;
+  static SupabaseClient get _supabase => SupabaseService.client;
 
-  // Obtener usuario actual
-  static User? get currentUser => _auth.currentUser;
+  static User? get currentUser => _supabase.auth.currentUser;
 
-  // Stream de cambios de autenticación
-  static Stream<User?> get authStateChanges => _auth.authStateChanges();
+  static Stream<AuthState> get authStateChanges =>
+      _supabase.auth.onAuthStateChange;
 
-  // Registrar usuario
   static Future<UserModel?> registerUser({
     required String email,
     required String password,
@@ -25,135 +22,286 @@ class AuthService {
     required UserType userType,
   }) async {
     try {
-      // Crear usuario en Firebase Auth
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
+      final response = await _supabase.auth.signUp(
         email: email,
         password: password,
       );
 
-      // Crear modelo de usuario
-      UserModel userModel = UserModel(
-        id: userCredential.user!.uid,
-        name: name,
+      final authUser = response.user;
+      if (authUser == null) {
+        throw Exception('No se pudo crear el usuario en Supabase Auth');
+      }
+
+      await _upsertUserRows(
+        supabaseUid: authUser.id,
         email: email,
+        name: name,
         phone: phone,
         address: address,
         city: city,
         userType: userType,
-        createdAt: DateTime.now(),
-        isActive: true,
       );
 
-      // Guardar datos del usuario en Firestore
-      await _firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set(userModel.toMap());
-
-      return userModel;
+      return getCurrentUserData();
     } catch (e) {
-      if (kDebugMode) print('Error al registrar usuario: $e');
+      if (kDebugMode) {
+        debugPrint('Error al registrar usuario: $e');
+      }
       return null;
     }
   }
 
-  // Iniciar sesión
   static Future<UserModel?> signInUser({
     required String email,
     required String password,
   }) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      final response = await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
 
-      // Obtener datos del usuario desde Firestore
-      DocumentSnapshot userDoc = await _firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .get();
-
-      if (userDoc.exists) {
-        return UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+      final authUser = response.user;
+      if (authUser == null) {
+        throw Exception('No se pudo iniciar sesión en Supabase');
       }
 
-      return null;
+      await _ensureUserProfileExists(
+        supabaseUid: authUser.id,
+        email: email,
+      );
+
+      return getCurrentUserData();
     } catch (e) {
-      if (kDebugMode) print('Error al iniciar sesión: $e');
+      if (kDebugMode) {
+        debugPrint('Error al iniciar sesión: $e');
+      }
       return null;
     }
   }
 
-  // Cerrar sesión
   static Future<void> signOut() async {
     try {
-      await _auth.signOut();
+      await _supabase.auth.signOut();
     } catch (e) {
-      if (kDebugMode) print('Error al cerrar sesión: $e');
+      if (kDebugMode) {
+        debugPrint('Error al cerrar sesión: $e');
+      }
     }
   }
 
-  // Obtener datos del usuario actual
   static Future<UserModel?> getCurrentUserData() async {
     try {
-      if (currentUser != null) {
-        DocumentSnapshot userDoc =
-            await _firestore.collection('users').doc(currentUser!.uid).get();
+      final supabaseUser = _supabase.auth.currentUser;
+      if (supabaseUser == null) {
+        return null;
+      }
 
-        if (userDoc.exists) {
-          return UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
-        }
+      final userRows = await _supabase
+          .from('users')
+          .select()
+          .eq('uid', supabaseUser.id)
+          .limit(1);
+
+      if (userRows.isEmpty) {
+        return null;
+      }
+
+      final userRow = Map<String, dynamic>.from(userRows.first);
+      final providerRows = await _supabase
+          .from('providers')
+          .select()
+          .eq('uid', supabaseUser.id)
+          .limit(1);
+
+      Map<String, dynamic>? providerRow;
+      List<String> providerServices = const [];
+
+      if (providerRows.isNotEmpty) {
+        providerRow = Map<String, dynamic>.from(providerRows.first);
+        providerServices = await _loadProviderServiceNames(
+          providerId: providerRow['id'].toString(),
+        );
+      }
+
+      return UserModel.fromSupabase(
+        userRow,
+        providerRow: providerRow,
+        services: providerServices,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error al obtener datos del usuario: $e');
       }
       return null;
-    } catch (e) {
-      if (kDebugMode) print('Error al obtener datos del usuario: $e');
-      return null;
     }
   }
 
-  // Actualizar perfil de usuario
   static Future<bool> updateUserProfile(UserModel userModel) async {
     try {
-      await _firestore
-          .collection('users')
-          .doc(userModel.id)
-          .update(userModel.toMap());
+      final supabaseUid = _supabase.auth.currentUser?.id;
+      if (supabaseUid == null) {
+        return false;
+      }
+
+      await _supabase
+          .from('users')
+          .update(userModel.toUserRow())
+          .eq('uid', supabaseUid);
+
+      if (userModel.userType == UserType.provider) {
+        final providerRows = await _supabase
+            .from('providers')
+            .select('id')
+            .eq('uid', supabaseUid)
+            .limit(1);
+
+        if (providerRows.isNotEmpty) {
+          await _supabase
+              .from('providers')
+              .update(userModel.toProviderRow())
+              .eq('uid', supabaseUid);
+        }
+      }
+
       return true;
     } catch (e) {
-      if (kDebugMode) print('Error al actualizar perfil: $e');
+      if (kDebugMode) {
+        debugPrint('Error al actualizar perfil: $e');
+      }
       return false;
     }
   }
-// AGREGAR ESTE MÉTODO AL FINAL DE TU AuthService EXISTENTE
 
-  /// Actualiza solo la imagen de perfil del usuario
   static Future<bool> updateProfileImage(String userId, String imageUrl) async {
     try {
-      print('🔄 Actualizando imagen en Firestore para usuario: $userId');
+      await _supabase
+          .from('users')
+          .update({
+            'avatar_url': imageUrl,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('uid', userId);
 
-      await _firestore.collection('users').doc(userId).update({
-        'profileImageUrl': imageUrl,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      await _supabase
+          .from('providers')
+          .update({
+            'avatar_url': imageUrl,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('uid', userId);
 
-      print('✅ Imagen actualizada en Firestore');
       return true;
     } catch (e) {
-      print('❌ Error updating profile image in Firestore: $e');
+      if (kDebugMode) {
+        debugPrint('Error updating profile image: $e');
+      }
       return false;
     }
   }
 
-  // Restablecer contraseña
   static Future<bool> resetPassword(String email) async {
     try {
-      await _auth.sendPasswordResetEmail(email: email);
+      await _supabase.auth.resetPasswordForEmail(email);
       return true;
     } catch (e) {
-      if (kDebugMode) print('Error al enviar email de restablecimiento: $e');
+      if (kDebugMode) {
+        debugPrint('Error al enviar email de restablecimiento: $e');
+      }
       return false;
+    }
+  }
+
+  static Future<void> _ensureUserProfileExists({
+    required String supabaseUid,
+    required String email,
+  }) async {
+    final userRows = await _supabase
+        .from('users')
+        .select('id')
+        .eq('uid', supabaseUid)
+        .limit(1);
+
+    if (userRows.isNotEmpty) {
+      return;
+    }
+
+    final fallbackName = email.split('@').first;
+    await _upsertUserRows(
+      supabaseUid: supabaseUid,
+      email: email,
+      name: fallbackName,
+      phone: '',
+      address: '',
+      city: 'Tena',
+      userType: UserType.client,
+    );
+  }
+
+  static Future<void> _upsertUserRows({
+    required String supabaseUid,
+    required String email,
+    required String name,
+    required String phone,
+    required String address,
+    required String city,
+    required UserType userType,
+  }) async {
+    await _supabase.from('users').upsert({
+      'uid': supabaseUid,
+      'email': email,
+      'name': name,
+      'full_name': name,
+      'phone': phone,
+      'address': address,
+      'city': city,
+      'role': _userRole(userType),
+      'is_provider': userType == UserType.provider,
+      'is_active': true,
+      'updated_at': DateTime.now().toIso8601String(),
+    }, onConflict: 'uid');
+
+    if (userType == UserType.provider) {
+      await _supabase.from('providers').upsert({
+        'uid': supabaseUid,
+        'email': email,
+        'name': name,
+        'full_name': name,
+        'phone': phone,
+        'address': address,
+        'city': city,
+        'status': 'pending',
+        'is_active': true,
+        'is_available': true,
+        'updated_at': DateTime.now().toIso8601String(),
+      }, onConflict: 'uid');
+    }
+  }
+
+  static Future<List<String>> _loadProviderServiceNames({
+    required String providerId,
+  }) async {
+    final rows = await _supabase
+        .from('provider_services')
+        .select('services(name)')
+        .eq('provider_id', providerId)
+        .eq('is_active', true);
+
+    return rows
+        .map((row) => row['services']?['name']?.toString())
+        .whereType<String>()
+        .where((name) => name.isNotEmpty)
+        .toList();
+  }
+
+  static String _userRole(UserType userType) {
+    switch (userType) {
+      case UserType.provider:
+        return 'provider';
+      case UserType.admin:
+        return 'admin';
+      case UserType.client:
+        return 'client';
     }
   }
 }

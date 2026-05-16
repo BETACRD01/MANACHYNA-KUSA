@@ -522,12 +522,14 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     final user = authProvider.currentUser!;
 
     final booking = BookingModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: '',
       clientId: user.id,
+      clientProfileId: user.profileId,
       clientName: user.name,
       providerId: service.providerId,
+      providerProfileId: service.providerProfileId,
       providerName: service.providerName,
-      serviceId: service.id,
+      serviceId: service.catalogServiceId,
       serviceName: service.name,
       scheduledDate: _selectedDate!,
       scheduledTime: _selectedTime!,
@@ -543,10 +545,12 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     bool success = await bookingProvider.createBooking(booking);
 
     if (success && mounted) {
+      final createdBooking =
+          bookingProvider.bookings.isNotEmpty ? bookingProvider.bookings.first : booking;
       Navigator.pushReplacementNamed(
         context,
         AppRoutes.bookingDetail,
-        arguments: booking,
+        arguments: createdBooking,
       );
 
       ScaffoldMessenger.of(context).showSnackBar(

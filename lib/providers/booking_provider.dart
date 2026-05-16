@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../features/bookings/data/booking_repository.dart';
 import '../models/booking_model.dart';
-import '../core/services/firebase_service.dart';
 
 class BookingProvider with ChangeNotifier {
+  BookingProvider({
+    required BookingRepository repository,
+  }) : _repository = repository;
+
+  final BookingRepository _repository;
   List<BookingModel> _bookings = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -25,35 +30,22 @@ class BookingProvider with ChangeNotifier {
   Future<void> loadUserBookings(String userId, {bool isProvider = false}) async {
     _setLoading(true);
     _setError(null);
-    
+
     try {
-      String field = isProvider ? 'providerId' : 'clientId';
-      QuerySnapshot snapshot = await FirebaseService.bookingsCollection
-          .where(field, isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      _bookings = snapshot.docs
-          .map((doc) => BookingModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-
-      _setLoading(false);
+      _bookings = await _repository.loadUserBookings(
+        userId,
+        isProvider: isProvider,
+      );
     } catch (e) {
       _setError('Error al cargar reservas');
+    } finally {
       _setLoading(false);
     }
   }
 
   Future<BookingModel?> getBookingById(String bookingId) async {
     try {
-      DocumentSnapshot doc = await FirebaseService.bookingsCollection
-          .doc(bookingId)
-          .get();
-
-      if (doc.exists) {
-        return BookingModel.fromMap(doc.data() as Map<String, dynamic>);
-      }
-      return null;
+      return await _repository.getBookingById(bookingId);
     } catch (e) {
       _setError('Error al obtener reserva');
       return null;
@@ -63,41 +55,30 @@ class BookingProvider with ChangeNotifier {
   Future<bool> createBooking(BookingModel booking) async {
     _setLoading(true);
     _setError(null);
-    
-    try {
-      await FirebaseService.bookingsCollection
-          .doc(booking.id)
-          .set(booking.toMap());
 
-      _bookings.insert(0, booking);
-      _setLoading(false);
+    try {
+      final created = await _repository.createBooking(booking);
+      if (created != null) {
+        _bookings.insert(0, created);
+      }
+
       return true;
     } catch (e) {
       _setError('Error al crear reserva');
-      _setLoading(false);
       return false;
+    } finally {
+      _setLoading(false);
     }
   }
 
   Future<bool> updateBookingStatus(String bookingId, BookingStatus status) async {
     _setLoading(true);
     _setError(null);
-    
+
     try {
-      Map<String, dynamic> updateData = {
-        'status': status.index,
-        'updatedAt': Timestamp.now(),
-      };
+      await _repository.updateBookingStatus(bookingId, status);
 
-      if (status == BookingStatus.completed) {
-        updateData['completedAt'] = Timestamp.now();
-      }
-
-      await FirebaseService.bookingsCollection
-          .doc(bookingId)
-          .update(updateData);
-
-      int index = _bookings.indexWhere((b) => b.id == bookingId);
+      final index = _bookings.indexWhere((booking) => booking.id == bookingId);
       if (index != -1) {
         _bookings[index] = _bookings[index].copyWith(
           status: status,
@@ -106,29 +87,23 @@ class BookingProvider with ChangeNotifier {
         );
       }
 
-      _setLoading(false);
       return true;
     } catch (e) {
       _setError('Error al actualizar estado de reserva');
-      _setLoading(false);
       return false;
+    } finally {
+      _setLoading(false);
     }
   }
 
   Future<bool> cancelBooking(String bookingId, String reason) async {
     _setLoading(true);
     _setError(null);
-    
-    try {
-      await FirebaseService.bookingsCollection
-          .doc(bookingId)
-          .update({
-        'status': BookingStatus.cancelled.index,
-        'cancellationReason': reason,
-        'updatedAt': Timestamp.now(),
-      });
 
-      int index = _bookings.indexWhere((b) => b.id == bookingId);
+    try {
+      await _repository.cancelBooking(bookingId, reason);
+
+      final index = _bookings.indexWhere((booking) => booking.id == bookingId);
       if (index != -1) {
         _bookings[index] = _bookings[index].copyWith(
           status: BookingStatus.cancelled,
@@ -137,29 +112,25 @@ class BookingProvider with ChangeNotifier {
         );
       }
 
-      _setLoading(false);
       return true;
     } catch (e) {
       _setError('Error al cancelar reserva');
-      _setLoading(false);
       return false;
+    } finally {
+      _setLoading(false);
     }
   }
 
   Future<bool> rateBooking(String bookingId, double rating, String? review) async {
     _setLoading(true);
     _setError(null);
-    
-    try {
-      await FirebaseService.bookingsCollection
-          .doc(bookingId)
-          .update({
-        'rating': rating,
-        'review': review,
-        'updatedAt': Timestamp.now(),
-      });
 
-      int index = _bookings.indexWhere((b) => b.id == bookingId);
+    try {
+      final booking = _bookings.firstWhere((item) => item.id == bookingId);
+
+      await _repository.rateBooking(booking, rating, review);
+
+      final index = _bookings.indexWhere((item) => item.id == bookingId);
       if (index != -1) {
         _bookings[index] = _bookings[index].copyWith(
           rating: rating,
@@ -168,12 +139,12 @@ class BookingProvider with ChangeNotifier {
         );
       }
 
-      _setLoading(false);
       return true;
     } catch (e) {
       _setError('Error al calificar servicio');
-      _setLoading(false);
       return false;
+    } finally {
+      _setLoading(false);
     }
   }
 
@@ -182,7 +153,7 @@ class BookingProvider with ChangeNotifier {
   }
 
   List<BookingModel> getUpcomingBookings() {
-    DateTime now = DateTime.now();
+    final now = DateTime.now();
     return _bookings.where((booking) {
       return booking.status == BookingStatus.confirmed &&
           booking.scheduledDate.isAfter(now);
@@ -190,8 +161,9 @@ class BookingProvider with ChangeNotifier {
   }
 
   List<BookingModel> getCompletedBookings() {
-    return _bookings.where((booking) => 
-        booking.status == BookingStatus.completed).toList();
+    return _bookings
+        .where((booking) => booking.status == BookingStatus.completed)
+        .toList();
   }
 
   void clearError() {

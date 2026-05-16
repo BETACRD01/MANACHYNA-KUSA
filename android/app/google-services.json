@@ -1,41 +1,48 @@
 {
   "project_info": {
-    "project_number": "832653619760",
-    "firebase_url": "https://manachynakusa-default-rtdb.firebaseio.com",
-    "project_id": "manachynakusa",
-    "storage_bucket": "manachynakusa.firebasestorage.app"
+    "project_number": "265582480726",
+    "project_id": "manachyna-kusa-v2-2025",
+    "storage_bucket": "manachyna-kusa-v2-2025.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:832653619760:android:4c676b9c0eb8aabe8133f5",
+        "mobilesdk_app_id": "1:265582480726:android:0c94bc24b77a486660daf7",
         "android_client_info": {
           "package_name": "com.example.flutter_application_manachyna_kusa_2_0"
         }
       },
       "oauth_client": [
         {
-          "client_id": "832653619760-558q0203nbs190p4ueopqlhhsq5pgb0l.apps.googleusercontent.com",
+          "client_id": "265582480726-njfqg365ddrh39k9mqb755hpjkf3uf9o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flutter_application_manachyna_kusa_2_0",
+            "certificate_hash": "20e0b4075e256b5be47de49e8d0a5b68b3150b86"
+          }
+        },
+        {
+          "client_id": "265582480726-6l9507ncg4mfbsdnh9515di0a6r9j8lo.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyD6plAIDdt112LxH7-nPYUjJfwByngedKw"
+          "current_key": "AIzaSyDx57DjS8tt7v3d24aFYTpKHVoUiKLgSgE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "832653619760-558q0203nbs190p4ueopqlhhsq5pgb0l.apps.googleusercontent.com",
+              "client_id": "265582480726-6l9507ncg4mfbsdnh9515di0a6r9j8lo.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "832653619760-7m7osvubv5c8lce3ulnbiag5ijbnf9a5.apps.googleusercontent.com",
+              "client_id": "265582480726-mlmcq2vbm3mf2nnime4uj32tuhhvg22c.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.flutterApplicationManachynaKusa"
+                "bundle_id": "com.example.flutterApplicationManachynaKusa20"
               }
             }
           ]

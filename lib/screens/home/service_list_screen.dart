@@ -383,46 +383,32 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ordenar por'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<String>(
-              title: const Text('Calificación'),
-              value: 'rating',
-              groupValue: _sortBy,
-              onChanged: (value) {
-                setState(() {
-                  _sortBy = value!;
-                });
-                Navigator.pop(context);
-                // Implementar ordenamiento
-              },
-            ),
-            RadioListTile<String>(
-              title: const Text('Precio (menor a mayor)'),
-              value: 'price_asc',
-              groupValue: _sortBy,
-              onChanged: (value) {
-                setState(() {
-                  _sortBy = value!;
-                });
-                Navigator.pop(context);
-                // Implementar ordenamiento
-              },
-            ),
-            RadioListTile<String>(
-              title: const Text('Precio (mayor a menor)'),
-              value: 'price_desc',
-              groupValue: _sortBy,
-              onChanged: (value) {
-                setState(() {
-                  _sortBy = value!;
-                });
-                Navigator.pop(context);
-                // Implementar ordenamiento
-              },
-            ),
-          ],
+        content: RadioGroup<String>(
+          groupValue: _sortBy,
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() {
+              _sortBy = value;
+            });
+            Navigator.pop(context);
+          },
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<String>(
+                title: Text('Calificación'),
+                value: 'rating',
+              ),
+              RadioListTile<String>(
+                title: Text('Precio (menor a mayor)'),
+                value: 'price_asc',
+              ),
+              RadioListTile<String>(
+                title: Text('Precio (mayor a menor)'),
+                value: 'price_desc',
+              ),
+            ],
+          ),
         ),
       ),
     );

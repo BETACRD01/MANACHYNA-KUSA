@@ -231,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             emailController.text.trim(),
                           );
 
-                          if (!mounted) return; // <-- Esto es correcto
+                          if (!context.mounted) return;
 
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(

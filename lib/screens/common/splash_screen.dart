@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
@@ -17,6 +19,7 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  Timer? _navigationTimer;
 
   @override
   void initState() {
@@ -53,25 +56,24 @@ class _SplashScreenState extends State<SplashScreen>
     _animationController.forward();
   }
 
-  Future<void> _initializeApp() async {
-    // Simular carga inicial
-    await Future.delayed(const Duration(seconds: 3));
+  void _initializeApp() {
+    _navigationTimer?.cancel();
+    _navigationTimer = Timer(const Duration(seconds: 3), () async {
+      if (!mounted) return;
 
-    if (mounted) {
-      // Verificar si el usuario está logueado
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.checkAuthStatus();
 
-      if (mounted) {
-        final route =
-            authProvider.isAuthenticated ? AppRoutes.home : AppRoutes.login;
-        Navigator.pushReplacementNamed(context, route);
-      }
-    }
+      if (!mounted) return;
+      final route =
+          authProvider.isAuthenticated ? AppRoutes.home : AppRoutes.login;
+      Navigator.pushReplacementNamed(context, route);
+    });
   }
 
   @override
   void dispose() {
+    _navigationTimer?.cancel();
     _animationController.dispose();
     super.dispose();
   }

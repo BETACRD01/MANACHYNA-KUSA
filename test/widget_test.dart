@@ -7,28 +7,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 
 import 'package:flutter_application_manachyna_kusa_2_0/app.dart';
-import 'package:flutter_application_manachyna_kusa_2_0/providers/auth_provider.dart';
-import 'package:flutter_application_manachyna_kusa_2_0/providers/service_provider.dart';
-import 'package:flutter_application_manachyna_kusa_2_0/providers/booking_provider.dart';
-import 'package:flutter_application_manachyna_kusa_2_0/providers/user_provider.dart';
 
 void main() {
   testWidgets('App loads splash screen', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => AuthProvider()),
-          ChangeNotifierProvider(create: (_) => ServiceProvider()),
-          ChangeNotifierProvider(create: (_) => BookingProvider()),
-          ChangeNotifierProvider(create: (_) => UserProvider()),
-        ],
-        child: const ManachiyKanKusataApp(),
-      ),
-    );
+    await tester.pumpWidget(const ManachiyKanKusataApp());
 
     // Verify that the splash screen loads
     expect(find.text('Mañachiy kan Kusata'), findsOneWidget);
@@ -37,17 +21,7 @@ void main() {
   });
 
   testWidgets('App shows loading indicator', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => AuthProvider()),
-          ChangeNotifierProvider(create: (_) => ServiceProvider()),
-          ChangeNotifierProvider(create: (_) => BookingProvider()),
-          ChangeNotifierProvider(create: (_) => UserProvider()),
-        ],
-        child: const ManachiyKanKusataApp(),
-      ),
-    );
+    await tester.pumpWidget(const ManachiyKanKusataApp());
 
     // Verify that loading indicator is present
     expect(find.byType(CircularProgressIndicator), findsOneWidget);

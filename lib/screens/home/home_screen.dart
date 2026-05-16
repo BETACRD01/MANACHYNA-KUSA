@@ -303,12 +303,12 @@ class _HomeTab extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isMore
                     ? Colors.grey[200]
-                    : AppColors.primary.withOpacity(0.1),
+                    : AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isMore
                       ? Colors.grey[400]!
-                      : AppColors.primary.withOpacity(0.3),
+                      : AppColors.primary.withValues(alpha: 0.3),
                 ),
               ),
               child: Icon(

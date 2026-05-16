@@ -1,10 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class BookingModel {
   final String id;
   final String clientId;
+  final String clientProfileId;
   final String clientName;
   final String providerId;
+  final String? providerProfileId;
   final String providerName;
   final String serviceId;
   final String serviceName;
@@ -26,8 +26,10 @@ class BookingModel {
   BookingModel({
     required this.id,
     required this.clientId,
+    required this.clientProfileId,
     required this.clientName,
     required this.providerId,
+    this.providerProfileId,
     required this.providerName,
     required this.serviceId,
     required this.serviceName,
@@ -47,67 +49,72 @@ class BookingModel {
     this.review,
   });
 
-  factory BookingModel.fromMap(Map<String, dynamic> map) {
+  factory BookingModel.fromSupabase(Map<String, dynamic> row) {
+    final scheduledDate = row['scheduled_date']?.toString();
+
     return BookingModel(
-      id: map['id'] ?? '',
-      clientId: map['clientId'] ?? '',
-      clientName: map['clientName'] ?? '',
-      providerId: map['providerId'] ?? '',
-      providerName: map['providerName'] ?? '',
-      serviceId: map['serviceId'] ?? '',
-      serviceName: map['serviceName'] ?? '',
-      scheduledDate: (map['scheduledDate'] as Timestamp).toDate(),
-      scheduledTime: map['scheduledTime'] ?? '',
-      status: BookingStatus.values[map['status'] ?? 0],
-      totalPrice: (map['totalPrice'] ?? 0.0).toDouble(),
-      notes: map['notes'],
-      address: map['address'],
-      latitude: map['latitude']?.toDouble(),
-      longitude: map['longitude']?.toDouble(),
-      createdAt: (map['createdAt'] as Timestamp).toDate(),
-      updatedAt: map['updatedAt'] != null 
-          ? (map['updatedAt'] as Timestamp).toDate() 
-          : null,
-      completedAt: map['completedAt'] != null 
-          ? (map['completedAt'] as Timestamp).toDate() 
-          : null,
-      cancellationReason: map['cancellationReason'],
-      rating: map['rating']?.toDouble(),
-      review: map['review'],
+      id: (row['id'] ?? '').toString(),
+      clientId: (row['client_uid'] ?? '').toString(),
+      clientProfileId: (row['client_id'] ?? '').toString(),
+      clientName: (row['client_name'] ?? '').toString(),
+      providerId: (row['provider_uid'] ?? '').toString(),
+      providerProfileId: row['provider_id']?.toString(),
+      providerName: (row['provider_name'] ?? '').toString(),
+      serviceId: (row['service_id'] ?? '').toString(),
+      serviceName: (row['service_name'] ?? '').toString(),
+      scheduledDate:
+          DateTime.tryParse(scheduledDate ?? '') ?? DateTime.now(),
+      scheduledTime: (row['scheduled_time'] ?? '').toString(),
+      status: bookingStatusFromSupabase((row['status'] ?? 'pending').toString()),
+      totalPrice: _toDouble(row['total_amount']) ?? 0.0,
+      notes: row['notes']?.toString(),
+      address: row['address']?.toString(),
+      latitude: _toDouble(row['latitude']),
+      longitude: _toDouble(row['longitude']),
+      createdAt: DateTime.tryParse((row['created_at'] ?? '').toString()) ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse((row['updated_at'] ?? '').toString()),
+      completedAt: DateTime.tryParse((row['completed_at'] ?? '').toString()),
+      cancellationReason: row['cancellation_reason']?.toString(),
+      rating: row['review_rating'] != null
+          ? _toDouble(row['review_rating'])
+          : _toDouble((row['reviews'] as Map<String, dynamic>?)?['rating']),
+      review: row['review_comment']?.toString() ??
+          (row['reviews'] as Map<String, dynamic>?)?['comment']?.toString(),
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toInsertRow() {
     return {
-      'id': id,
-      'clientId': clientId,
-      'clientName': clientName,
-      'providerId': providerId,
-      'providerName': providerName,
-      'serviceId': serviceId,
-      'serviceName': serviceName,
-      'scheduledDate': Timestamp.fromDate(scheduledDate),
-      'scheduledTime': scheduledTime,
-      'status': status.index,
-      'totalPrice': totalPrice,
-      'notes': notes,
+      'client_uid': clientId,
+      'client_id': clientProfileId,
+      'client_name': clientName,
+      'provider_uid': providerId,
+      'provider_id': providerProfileId,
+      'provider_name': providerName,
+      'service_id': serviceId,
+      'service_name': serviceName,
+      'status': bookingStatusToSupabase(status),
+      'scheduled_date': _dateOnly(scheduledDate),
+      'scheduled_time': scheduledTime,
+      'duration_quantity': 1,
+      'duration_type': 'hours',
       'address': address,
       'latitude': latitude,
       'longitude': longitude,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
-      'completedAt': completedAt != null ? Timestamp.fromDate(completedAt!) : null,
-      'cancellationReason': cancellationReason,
-      'rating': rating,
-      'review': review,
+      'notes': notes,
+      'subtotal': totalPrice,
+      'total_amount': totalPrice,
     };
   }
 
   BookingModel copyWith({
     String? id,
     String? clientId,
+    String? clientProfileId,
     String? clientName,
     String? providerId,
+    String? providerProfileId,
     String? providerName,
     String? serviceId,
     String? serviceName,
@@ -129,8 +136,10 @@ class BookingModel {
     return BookingModel(
       id: id ?? this.id,
       clientId: clientId ?? this.clientId,
+      clientProfileId: clientProfileId ?? this.clientProfileId,
       clientName: clientName ?? this.clientName,
       providerId: providerId ?? this.providerId,
+      providerProfileId: providerProfileId ?? this.providerProfileId,
       providerName: providerName ?? this.providerName,
       serviceId: serviceId ?? this.serviceId,
       serviceName: serviceName ?? this.serviceName,
@@ -150,6 +159,20 @@ class BookingModel {
       review: review ?? this.review,
     );
   }
+
+  static double? _toDouble(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is num) {
+      return value.toDouble();
+    }
+    return double.tryParse(value.toString());
+  }
+
+  static String _dateOnly(DateTime date) {
+    return date.toIso8601String().split('T').first;
+  }
 }
 
 enum BookingStatus {
@@ -157,5 +180,36 @@ enum BookingStatus {
   confirmed,
   inProgress,
   completed,
-  cancelled
+  cancelled,
+}
+
+BookingStatus bookingStatusFromSupabase(String status) {
+  switch (status) {
+    case 'confirmed':
+      return BookingStatus.confirmed;
+    case 'in_progress':
+      return BookingStatus.inProgress;
+    case 'completed':
+      return BookingStatus.completed;
+    case 'cancelled':
+    case 'rejected':
+      return BookingStatus.cancelled;
+    default:
+      return BookingStatus.pending;
+  }
+}
+
+String bookingStatusToSupabase(BookingStatus status) {
+  switch (status) {
+    case BookingStatus.confirmed:
+      return 'confirmed';
+    case BookingStatus.inProgress:
+      return 'in_progress';
+    case BookingStatus.completed:
+      return 'completed';
+    case BookingStatus.cancelled:
+      return 'cancelled';
+    case BookingStatus.pending:
+      return 'pending';
+  }
 }
