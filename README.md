@@ -1,81 +1,89 @@
 # 🌿 Mañachiy kan Kusata 🌿
 
 <div align="center">
-  <h3>Aplicación multiservicio para conectar a las familias de la provincia de Napo, Ecuador, con los mejores proveedores de servicios domésticos.</h3>
-  <br />
+  <img src="assets/icons/SabiruSports.png" alt="Logo" width="150" height="150" style="border-radius: 20px;"/>
+  <h3>Conectando hogares y servicios de confianza en la provincia de Napo, Ecuador.</h3>
+  
+  ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+  ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
+  ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+  ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 </div>
 
-## 📖 Descripción General
+<br/>
 
-**Mañachiy kan Kusata** es una plataforma tecnológica diseñada con el corazón de la Amazonía ecuatoriana. Su objetivo principal es facilitar el contacto directo entre los hogares de la provincia de Napo y proveedores calificados de servicios domésticos, fomentando el desarrollo local, la confianza y la eficiencia.
+> **Mañachiy kan Kusata** es más que una app; es un puente tecnológico desarrollado con el corazón de la Amazonía ecuatoriana. Diseñada para fomentar la economía local, facilita el contacto directo entre los hogares y proveedores calificados de servicios domésticos.
 
-## ✨ Características Principales
+---
 
-*   🔐 **Autenticación Segura**: Sistema de login y registro integrado con Firebase Auth.
-*   🗺️ **Geolocalización en Tiempo Real**: Integración con Google Maps para ubicar servicios cerca de ti.
-*   ⭐ **Sistema de Confianza**: Calificaciones y reseñas para garantizar la calidad de cada proveedor.
-*   🎨 **Diseño Autóctono**: Interfaz de usuario (UI) responsiva, intuitiva e inspirada en la cultura y geografía de la región amazónica.
-*   📱 **Multiservicio Dinámico**: Amplio catálogo de servicios adaptados a las necesidades locales.
+## ✨ Lo que nos hace únicos
 
-## 🛠️ Servicios Disponibles
+*   🔐 **Seguridad Garantizada**: Ingreso rápido y seguro con Firebase Auth.
+*   🗺️ **Magia Geográfica**: Integración fluida con Google Maps para ubicar al experto más cercano a ti en tiempo real.
+*   ⭐ **Comunidad de Confianza**: Reseñas 100% reales. Tú eliges a los mejores calificados.
+*   🎨 **Identidad Amazónica**: Una interfaz de usuario (UI) moderna, limpia y profundamente inspirada en los colores de nuestra región.
+*   📱 **Catálogo Vivo**: Una lista dinámica y en crecimiento de servicios para tu hogar.
 
-| Categoría | Descripción |
+---
+
+## 🛠️ Servicios al Alcance de tu Mano
+
+| Categoría | ¿Qué incluye? |
 | :--- | :--- |
-| 🧹 **Limpieza doméstica** | Mantenimiento y aseo integral de hogares. |
-| 🚰 **Plomería** | Reparación e instalación de tuberías y sistemas de agua. |
-| 🪚 **Carpintería** | Elaboración y reparación de muebles e infraestructuras de madera. |
-| ⚡ **Electricidad** | Mantenimiento y soluciones eléctricas residenciales. |
-| 🌿 **Adecentamiento de maleza** | Limpieza de terrenos y jardines. |
-| 📦 **Menaje de casa** | Ayuda en mudanzas y organización de bienes del hogar. |
-| ♻️ **Eliminación de desechos** | Recolección y gestión adecuada de residuos. |
+| 🧹 **Limpieza doméstica** | Mantenimiento y aseo integral de hogares, oficinas y espacios privados. |
+| 🚰 **Plomería** | Soluciones rápidas para tuberías, filtraciones y sistemas de agua. |
+| 🪚 **Carpintería** | Creación, reparación y restauración de muebles y estructuras de madera. |
+| ⚡ **Electricidad** | Mantenimiento y soluciones seguras para sistemas eléctricos residenciales. |
+| 🌿 **Mantenimiento verde** | Adecentamiento de maleza, jardinería y cuidado de áreas verdes. |
+| 📦 **Menaje de casa** | Asistencia profesional en mudanzas, embalaje y organización. |
+| ♻️ **Gestión de residuos** | Eliminación y recolección de desechos respetando el medio ambiente. |
 
-## 💻 Stack Tecnológico
+---
 
-El proyecto está construido utilizando tecnologías modernas y escalables:
+## 📚 Documentación Técnica
 
-*   **Frontend**: [Flutter](https://flutter.dev/) (Dart)
-*   **Backend & BaaS**: [Firebase](https://firebase.google.com/) (Autenticación, Firestore, Storage, Cloud Messaging) y [Supabase](https://supabase.com/)
-*   **Mapas y Ubicación**: Google Maps Flutter & Geolocator
-*   **Gestión de Estado**: Provider
-*   **Diseño Visual**: Material Design & Cupertino Icons
+¿Eres desarrollador o quieres conocer cómo funciona la aplicación por dentro? 
+👉 **[Revisa nuestra Documentación Técnica Completa (DOCUMENTATION.md)](DOCUMENTATION.md)** donde explicamos a fondo la arquitectura, bases de datos e inyección de dependencias.
 
-## 🚀 Instalación y Configuración Local
+---
 
-Sigue estos pasos para ejecutar el proyecto en tu entorno local:
+## 🚀 Empezando (Para Desarrolladores)
 
-### Requisitos Previos
-*   Flutter SDK (v2.19.0 o superior)
-*   Dart SDK
-*   Android Studio o Xcode (para emuladores)
+Si deseas compilar el código en tu máquina local, sigue estos pasos:
 
-### Pasos
+### 1️⃣ Clonar el Proyecto
+```bash
+git clone https://github.com/BETACRD01/Proyecto_final_2025.git
+cd Proyecto_final_2025
+```
 
-1. **Clona el repositorio:**
-   ```bash
-   git clone https://github.com/BETACRD01/Proyecto_final_2025.git
-   ```
+### 2️⃣ Instalar Dependencias
+```bash
+flutter pub get
+```
 
-2. **Navega al directorio e instala las dependencias:**
-   ```bash
-   cd Proyecto_final_2025
-   flutter pub get
-   ```
+### 3️⃣ Configurar el Entorno (Claves Privadas)
+Debes solicitar o configurar tus propias credenciales para el backend:
+- `google-services.json` (Android)
+- `GoogleService-Info.plist` (iOS)
+- Variables de entorno de **Supabase** en `lib/core/config/supabase_config.dart`.
 
-3. **Configuración de Firebase/Supabase:**
-   * Crea un proyecto en la Consola de Firebase.
-   * Descarga y coloca los archivos `google-services.json` (Android) y `GoogleService-Info.plist` (iOS) en sus respectivas carpetas.
-   * Configura las credenciales de Supabase en tu entorno si corresponde.
+### 4️⃣ A Correr la Magia
+```bash
+flutter run
+```
 
-4. **Ejecuta la aplicación:**
-   ```bash
-   flutter run
-   ```
+---
 
-## ✒️ Autor
+## ✒️ Creado por
 
-*   **Willian Cerda** - *Desarrollador Principal* - [williancerda0@gmail.com](mailto:williancerda0@gmail.com)
+**Willian Cerda**
+- ✉️ [williancerda0@gmail.com](mailto:williancerda0@gmail.com)
+- 👨‍💻 *Desarrollador Principal e Ingeniero de Software*
 
-## 📄 Licencia
+---
+
+## 📄 Licencia y Derechos de Autor
 
 **Copyright © 2026 Willian Cerda. Todos los derechos reservados.**
 
@@ -85,5 +93,5 @@ Para consultas sobre licencias comerciales o permisos de uso, por favor contacta
 
 ---
 <div align="center">
-  <i>Desarrollado con ❤️ para la comunidad de Napo, Ecuador</i>
+  <i>Desarrollado con ❤️ y mucho café para la comunidad de Napo, Ecuador</i>
 </div>
