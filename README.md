@@ -64,10 +64,10 @@ Incluye arquitectura del sistema, estructura de base de datos e inyección de de
 
 ### Requisitos previos
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) `>= 3.x`
-- Dart `>= 3.x`
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) `>= 3.7.0`
+- [Dart SDK](https://dart.dev/get-dart) `>= 2.19.0`
 - Cuenta activa en Firebase y Supabase
-- Acceso al repositorio con permisos del autor
+- Acceso al repositorio de GitHub con permisos del autor
 
 ### 1️⃣ Clonar el proyecto
 
