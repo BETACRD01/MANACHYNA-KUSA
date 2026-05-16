@@ -77,7 +77,11 @@ Sigue estos pasos para ejecutar el proyecto en tu entorno local:
 
 ## 📄 Licencia
 
-Este proyecto está distribuido bajo la **Licencia MIT**. Siéntete libre de utilizarlo, modificarlo y distribuirlo.
+**Copyright © 2026 Willian Cerda. Todos los derechos reservados.**
+
+Este proyecto es de **código cerrado y uso comercial**. No es de código abierto (Open Source) ni gratuito. La copia, distribución, modificación o uso no autorizado de este código, en su totalidad o en partes, está estrictamente prohibido sin el consentimiento previo, expreso y por escrito del autor. 
+
+Para consultas sobre licencias comerciales o permisos de uso, por favor contactar directamente al propietario.
 
 ---
 <div align="center">
