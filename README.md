@@ -1,7 +1,6 @@
 # 🌿 Mañachiy kan Kusata 🌿
 
 <div align="center">
-  <img src="assets/icons/SabiruSports.png" alt="Logo" width="150" height="150" style="border-radius: 20px;"/>
   <h3>Conectando hogares y servicios de confianza en la provincia de Napo, Ecuador.</h3>
   
   ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
