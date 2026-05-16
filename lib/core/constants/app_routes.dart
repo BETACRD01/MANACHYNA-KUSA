@@ -1,7 +1,6 @@
 class AppRoutes {
   static const String splash = '/';
   static const String login = '/login';
-  static const String register = '/register';
   static const String home = '/home';
   static const String profile = '/profile';
   static const String services = '/services';
@@ -14,8 +13,5 @@ class AppRoutes {
   static const String providerBookings = '/provider-bookings';
   static const String map = '/map';
   static const String chat = '/chat';
-  static const String notifications = '/notifications';
-  static const String settings = '/settings';
-  static const String providerRegistrationForm = '/provider-registration-form';
   static const String search = '/search';
 }

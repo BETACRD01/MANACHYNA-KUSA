@@ -1,264 +1,269 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_routes.dart';
-import '../../core/widgets/custom_button.dart';
-import '../../core/widgets/custom_text_field.dart';
-import '../../core/utils/validators.dart';
 import '../../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({
+    Key? key,
+    this.showBackButton = false,
+    this.title = 'Ingresa a Mañachiy kan Kusata',
+    this.subtitle = 'Usa tu cuenta de Google, Facebook o Microsoft.',
+  }) : super(key: key);
+
+  final bool showBackButton;
+  final String title;
+  final String subtitle;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  AuthProvider? _authProvider;
+  bool _didNavigate = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      _authProvider = context.read<AuthProvider>();
+      _authProvider!.addListener(_handleAuthStateChanged);
+      _handleAuthStateChanged();
+    });
+  }
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _authProvider?.removeListener(_handleAuthStateChanged);
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-      bool success = await authProvider.signIn(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
-
-      if (success && mounted) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text(authProvider.errorMessage ?? 'Error al iniciar sesión'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+  void _handleAuthStateChanged() {
+    if (!mounted || _authProvider == null) {
+      return;
     }
+
+    final authProvider = _authProvider!;
+
+    if (authProvider.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.errorMessage!),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      authProvider.clearError();
+    }
+
+    if (authProvider.successMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.successMessage!),
+          backgroundColor: AppColors.info,
+        ),
+      );
+      authProvider.clearSuccess();
+    }
+
+    if (authProvider.isAuthenticated && !_didNavigate) {
+      _didNavigate = true;
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    }
+  }
+
+  Future<void> _signInWithProvider(OAuthProvider provider) async {
+    final authProvider = context.read<AuthProvider>();
+    _didNavigate = false;
+    await authProvider.signInWithProvider(provider);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: widget.showBackButton
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              foregroundColor: AppColors.textPrimary,
+            )
+          : null,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 40),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final screenWidth = constraints.maxWidth;
+            final screenHeight = constraints.maxHeight;
+            final compactWidth = screenWidth < 360;
+            final compactHeight = screenHeight < 700;
+            final horizontalPadding = compactWidth ? 16.0 : 24.0;
+            final topSpacing = compactHeight ? 24.0 : 52.0;
+            final logoSize = compactWidth ? 76.0 : 88.0;
+            final logoIconSize = compactWidth ? 36.0 : 42.0;
+            final titleSize = compactWidth ? 22.0 : 26.0;
+            final subtitleSize = compactWidth ? 15.0 : 16.0;
+            final buttonHeight = compactWidth ? 58.0 : 64.0;
 
-                // Logo y título
-                Center(
+            return Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(horizontalPadding),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: const Icon(
-                          Icons.home_repair_service,
-                          size: 50,
-                          color: Colors.white,
+                      SizedBox(height: topSpacing),
+                      Center(
+                        child: Container(
+                          width: logoSize,
+                          height: logoSize,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(
+                              compactWidth ? 22 : 24,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.18),
+                                blurRadius: 24,
+                                offset: const Offset(0, 12),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.home_repair_service,
+                            size: logoIconSize,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        AppStrings.appName,
+                      SizedBox(height: compactWidth ? 22 : 28),
+                      Text(
+                        widget.title,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: titleSize,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
+                          height: 1.2,
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        widget.subtitle,
                         textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Bienvenido de vuelta',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: subtitleSize,
                           color: AppColors.textSecondary,
+                          height: 1.45,
                         ),
                       ),
+                      SizedBox(height: compactHeight ? 28 : 36),
+                      _AuthProviderButton(
+                        label: 'Continuar con Google',
+                        assetPath: 'assets/social/google.svg',
+                        height: buttonHeight,
+                        onPressed: () =>
+                            _signInWithProvider(OAuthProvider.google),
+                      ),
+                      const SizedBox(height: 16),
+                      _AuthProviderButton(
+                        label: 'Continuar con Facebook',
+                        assetPath: 'assets/social/facebook.svg',
+                        height: buttonHeight,
+                        onPressed: () =>
+                            _signInWithProvider(OAuthProvider.facebook),
+                      ),
+                      const SizedBox(height: 16),
+                      _AuthProviderButton(
+                        label: 'Continuar con Microsoft',
+                        assetPath: 'assets/social/microsoft.svg',
+                        height: buttonHeight,
+                        onPressed: () =>
+                            _signInWithProvider(OAuthProvider.azure),
+                      ),
+                      SizedBox(height: compactHeight ? 24 : 40),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 48),
-
-                // Campos de entrada
-                CustomTextField(
-                  label: AppStrings.email,
-                  controller: _emailController,
-                  validator: Validators.validateEmail,
-                  isEmail: true,
-                  prefixIcon: Icons.email_outlined,
-                ),
-
-                const SizedBox(height: 20),
-
-                CustomTextField(
-                  label: AppStrings.password,
-                  controller: _passwordController,
-                  validator: Validators.validatePassword,
-                  isPassword: true,
-                  prefixIcon: Icons.lock_outlined,
-                ),
-
-                const SizedBox(height: 16),
-
-                // Olvidé mi contraseña
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _showForgotPasswordDialog,
-                    child: const Text(
-                      AppStrings.forgotPassword,
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Botón de login
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    return CustomButton(
-                      text: AppStrings.login,
-                      onPressed: _handleLogin,
-                      isLoading: authProvider.isLoading,
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-                // Divider
-                const Row(
-                  children: [
-                    Expanded(child: Divider(color: AppColors.divider)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'o',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: AppColors.divider)),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Botón de registro
-                CustomButton(
-                  text: 'Crear cuenta nueva',
-                  onPressed: () {
-                    Navigator.pushNamed(context, AppRoutes.register);
-                  },
-                  isOutlined: true,
-                ),
-
-                const SizedBox(height: 40),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
+}
 
-  void _showForgotPasswordDialog() {
-    final emailController = TextEditingController();
+class _AuthProviderButton extends StatelessWidget {
+  const _AuthProviderButton({
+    required this.label,
+    required this.assetPath,
+    required this.height,
+    required this.onPressed,
+  });
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Recuperar Contraseña'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.',
+  final String label;
+  final String assetPath;
+  final double height;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        return SizedBox(
+          height: height,
+          child: OutlinedButton(
+            onPressed: authProvider.isLoading ? null : onPressed,
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.textPrimary,
+              side: const BorderSide(
+                color: AppColors.divider,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
             ),
-            const SizedBox(height: 16),
-            CustomTextField(
-              label: AppStrings.email,
-              controller: emailController,
-              validator: Validators.validateEmail,
-              isEmail: true,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: authProvider.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        assetPath,
+                        width: 24,
+                        height: 24,
+                      ),
+                      const SizedBox(width: 14),
+                      Flexible(
+                        child: Text(
+                          label,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
           ),
-          Consumer<AuthProvider>(
-            builder: (context, authProvider, child) {
-              return TextButton(
-                onPressed: authProvider.isLoading
-                    ? null
-                    : () async {
-                        if (emailController.text.isNotEmpty) {
-                          bool success = await authProvider.resetPassword(
-                            emailController.text.trim(),
-                          );
-
-                          if (!context.mounted) return;
-
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                success
-                                    ? 'Email de recuperación enviado'
-                                    : 'Error al enviar email',
-                              ),
-                              backgroundColor:
-                                  success ? AppColors.success : AppColors.error,
-                            ),
-                          );
-                        }
-                      },
-                child: authProvider.isLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Enviar'),
-              );
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

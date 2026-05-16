@@ -34,7 +34,8 @@ class AuthProvider with ChangeNotifier {
     try {
       debugPrint('Iniciando AuthProvider con Supabase Auth');
 
-      _authSubscription = AuthService.authStateChanges.listen((authState) async {
+      _authSubscription =
+          AuthService.authStateChanges.listen((authState) async {
         final authUser = authState.session?.user;
 
         if (authUser != null) {
@@ -117,66 +118,20 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> signIn(String email, String password) async {
+  Future<bool> signInWithProvider(OAuthProvider provider) async {
     _setLoading(true);
     _clearError();
     _successMessage = null;
 
     try {
-      _currentUser = await _authRepository.signIn(
-        email: email,
-        password: password,
-      );
-
-      if (_currentUser != null) {
-        _setSuccess('¡Bienvenido de vuelta, ${_currentUser!.name}!');
-        return true;
+      final launched = await _authRepository.signInWithProvider(provider);
+      if (!launched) {
+        _setError('No se pudo abrir el flujo de autenticación');
+        return false;
       }
 
-      _setError('Credenciales incorrectas');
-      return false;
-    } catch (e) {
-      final errorMessage = _getAuthErrorMessage(e.toString());
-      _setError(errorMessage);
-      return false;
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<bool> signUp({
-    required String email,
-    required String password,
-    required String name,
-    required String phone,
-    required String address,
-    required String city,
-    required UserType userType,
-  }) async {
-    _setLoading(true);
-    _clearError();
-    _successMessage = null;
-
-    try {
-      final registeredUser = await _authRepository.signUp(
-        email: email,
-        password: password,
-        name: name,
-        phone: phone,
-        address: address,
-        city: city,
-        userType: userType,
-      );
-
-      if (registeredUser != null) {
-        _setSuccess(
-          '¡Cuenta creada exitosamente! Ya puedes iniciar sesión con tu email 📧',
-        );
-        return true;
-      }
-
-      _setError('Error al crear la cuenta');
-      return false;
+      _setSuccess('Continua el inicio de sesión en el navegador');
+      return true;
     } catch (e) {
       final errorMessage = _getAuthErrorMessage(e.toString());
       _setError(errorMessage);
@@ -255,28 +210,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> resetPassword(String email) async {
-    _setLoading(true);
-    _clearError();
-    _successMessage = null;
-
-    try {
-      final success = await _authRepository.resetPassword(email);
-      if (success) {
-        _setSuccess('Email de recuperación enviado a $email');
-        return true;
-      }
-
-      _setError('Error al enviar email de recuperación');
-      return false;
-    } catch (e) {
-      _setError('Error al restablecer contraseña: ${e.toString()}');
-      return false;
-    } finally {
-      _setLoading(false);
-    }
-  }
-
   Future<void> refreshUserData() async {
     final authUser = AuthService.currentUser;
     if (authUser != null) {
@@ -285,15 +218,14 @@ class AuthProvider with ChangeNotifier {
   }
 
   String _getAuthErrorMessage(String error) {
-    if (error.contains('invalid_credentials')) {
-      return 'Credenciales incorrectas.';
-    } else if (error.contains('email_not_confirmed')) {
-      return 'Debes confirmar tu correo antes de iniciar sesión.';
-    } else if (error.contains('user_already_exists') ||
-        error.contains('already registered')) {
-      return 'Este email ya está registrado. Usa otro email o inicia sesión.';
-    } else if (error.contains('weak_password')) {
-      return 'La contraseña es muy débil. Usa al menos 6 caracteres.';
+    if (error.contains('provider is not enabled')) {
+      return 'Ese proveedor aún no está habilitado en Supabase.';
+    } else if (error.contains('unsupported_provider')) {
+      return 'Ese proveedor no está disponible en la configuración actual.';
+    } else if (error.contains('access_denied')) {
+      return 'El acceso fue cancelado o denegado.';
+    } else if (error.contains('invalid request')) {
+      return 'La configuración OAuth del proveedor está incompleta.';
     } else if (error.contains('network')) {
       return 'Error de conexión. Verifica tu internet e inténtalo de nuevo.';
     }

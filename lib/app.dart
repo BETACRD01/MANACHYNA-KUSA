@@ -17,7 +17,7 @@ class ManachiyKanKusataApp extends StatelessWidget {
         title: 'Mañachiy kan Kusata',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
-        initialRoute: AppRoutes.splash,
+        initialRoute: AppRoutes.login,
         onGenerateRoute: AppRouter.onGenerateRoute,
       ),
     );

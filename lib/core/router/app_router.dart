@@ -5,8 +5,6 @@ import '../../models/booking_model.dart';
 import '../../models/service_model.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/profile_screen.dart';
-import '../../screens/auth/provider_registration_form.dart';
-import '../../screens/auth/register_screen.dart';
 import '../../screens/booking/booking_detail_screen.dart';
 import '../../screens/booking/booking_form_screen.dart';
 import '../../screens/booking/booking_list_screen.dart';
@@ -28,8 +26,6 @@ class AppRouter {
         return _page(const SplashScreen(), settings);
       case AppRoutes.login:
         return _page(const LoginScreen(), settings);
-      case AppRoutes.register:
-        return _page(const RegisterScreen(), settings);
       case AppRoutes.home:
         return _page(const HomeScreen(), settings);
       case AppRoutes.profile:
@@ -53,8 +49,6 @@ class AppRouter {
         return _page(const ProviderServices(), settings);
       case AppRoutes.providerBookings:
         return _page(const ProviderBookings(), settings);
-      case AppRoutes.providerRegistrationForm:
-        return _page(const ProviderRegistrationForm(), settings);
       case AppRoutes.map:
         return _page(const MapScreen(), settings);
       case AppRoutes.chat:

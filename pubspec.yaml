@@ -17,6 +17,7 @@ dependencies:
   path_provider: ^2.1.2
   path: ^1.9.0
   provider: ^6.1.1
+  flutter_svg: ^2.2.0
   cached_network_image: ^3.3.0
   image_picker: ^1.0.4
   intl: ^0.18.1
@@ -36,3 +37,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/social/
