@@ -15,54 +15,117 @@ class ServiceDetailScreen extends StatelessWidget {
     final service = ModalRoute.of(context)!.settings.arguments as ServiceModel;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F7F4),
       body: CustomScrollView(
         slivers: [
-          // App Bar con imagen
           SliverAppBar(
-            expandedHeight: 250,
+            expandedHeight: 310,
             pinned: true,
+            backgroundColor: AppColors.primary,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
-                  gradient: AppColors.primaryGradient,
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF2E7D32), Color(0xFF3E9B49)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(28),
+                    bottomRight: Radius.circular(28),
+                  ),
                 ),
-                child: const Center(
-                  child: Icon(
-                    Icons.home_repair_service,
-                    size: 80,
-                    color: Colors.white,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          width: 78,
+                          height: 78,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: const Icon(
+                            Icons.home_repair_service_rounded,
+                            size: 38,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+                        Text(
+                          service.name,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                Helpers.getServiceCategoryName(
+                                    service.category),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Icon(
+                              Icons.star_rounded,
+                              color: Colors.amber,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${service.rating.toStringAsFixed(1)} · ${service.totalRatings} reseñas',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-
-          // Contenido
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Información básica
-                  _buildBasicInfo(service),
-                  const SizedBox(height: 24),
-
-                  // Descripción
+                  _buildOverviewCards(service),
+                  const SizedBox(height: 28),
                   _buildDescription(service),
-                  const SizedBox(height: 24),
-
-                  // Información del proveedor
+                  const SizedBox(height: 28),
                   _buildProviderInfo(service),
-                  const SizedBox(height: 24),
-
-                  // Calificaciones y reseñas
+                  const SizedBox(height: 28),
                   _buildRatingsSection(service),
-                  const SizedBox(height: 24),
-
-                  // Detalles adicionales
+                  const SizedBox(height: 28),
                   _buildAdditionalDetails(service),
-                  const SizedBox(height: 100), // Espacio para el botón flotante
+                  const SizedBox(height: 112),
                 ],
               ),
             ),
@@ -73,70 +136,23 @@ class ServiceDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBasicInfo(ServiceModel service) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildOverviewCards(ServiceModel service) {
+    return Row(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                service.name,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1 * 255),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                Helpers.getServiceCategoryName(service.category),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+        Expanded(
+          child: _InfoCard(
+            label: 'Precio',
+            value: '\$${service.pricePerHour.toStringAsFixed(0)}/hora',
+            icon: Icons.sell_rounded,
+          ),
         ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            const Icon(Icons.star, color: Colors.amber, size: 20),
-            const SizedBox(width: 4),
-            Text(
-              service.rating.toStringAsFixed(1),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '(${service.totalRatings} reseñas)',
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              '\$${service.pricePerHour.toStringAsFixed(0)}/hora',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
+        const SizedBox(width: 12),
+        Expanded(
+          child: _InfoCard(
+            label: 'Duración',
+            value: '${service.estimatedDuration} min',
+            icon: Icons.schedule_rounded,
+          ),
         ),
       ],
     );
@@ -194,15 +210,15 @@ class ServiceDetailScreen extends StatelessWidget {
 
   Widget _buildProviderInfo(ServiceModel service) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: const [
           BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            color: Color(0x12000000),
+            blurRadius: 18,
+            offset: Offset(0, 8),
           ),
         ],
       ),
@@ -305,15 +321,15 @@ class ServiceDetailScreen extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: const [
               BoxShadow(
-                color: AppColors.shadow,
-                blurRadius: 4,
-                offset: Offset(0, 2),
+                color: Color(0x12000000),
+                blurRadius: 18,
+                offset: Offset(0, 8),
               ),
             ],
           ),
@@ -419,26 +435,37 @@ class ServiceDetailScreen extends StatelessWidget {
   }
 
   Widget _buildDetailItem(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.divider),
+      ),
       child: Row(
         children: [
           Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(width: 12),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
         ],
@@ -448,14 +475,14 @@ class ServiceDetailScreen extends StatelessWidget {
 
   Widget _buildBottomBar(BuildContext context, ServiceModel service) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
       decoration: const BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 8,
-            offset: Offset(0, -2),
+            color: Color(0x12000000),
+            blurRadius: 18,
+            offset: Offset(0, -6),
           ),
         ],
       ),
@@ -468,7 +495,7 @@ class ServiceDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Precio por hora',
+                    'Tarifa estimada',
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
@@ -510,6 +537,59 @@ class ServiceDetailScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x12000000),
+            blurRadius: 18,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppColors.primary, size: 22),
+          const SizedBox(height: 14),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
       ),
     );
   }

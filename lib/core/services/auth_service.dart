@@ -5,6 +5,9 @@ import '../../models/user_model.dart';
 import 'supabase_service.dart';
 
 class AuthService {
+  static const String _mobileRedirectUrl =
+      'io.supabase.manachynakusa://login-callback/';
+
   static SupabaseClient get _supabase => SupabaseService.client;
 
   static User? get currentUser => _supabase.auth.currentUser;
@@ -12,72 +15,13 @@ class AuthService {
   static Stream<AuthState> get authStateChanges =>
       _supabase.auth.onAuthStateChange;
 
-  static Future<UserModel?> registerUser({
-    required String email,
-    required String password,
-    required String name,
-    required String phone,
-    required String address,
-    required String city,
-    required UserType userType,
-  }) async {
-    try {
-      final response = await _supabase.auth.signUp(
-        email: email,
-        password: password,
-      );
-
-      final authUser = response.user;
-      if (authUser == null) {
-        throw Exception('No se pudo crear el usuario en Supabase Auth');
-      }
-
-      await _upsertUserRows(
-        supabaseUid: authUser.id,
-        email: email,
-        name: name,
-        phone: phone,
-        address: address,
-        city: city,
-        userType: userType,
-      );
-
-      return getCurrentUserData();
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error al registrar usuario: $e');
-      }
-      return null;
-    }
-  }
-
-  static Future<UserModel?> signInUser({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      final response = await _supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-
-      final authUser = response.user;
-      if (authUser == null) {
-        throw Exception('No se pudo iniciar sesión en Supabase');
-      }
-
-      await _ensureUserProfileExists(
-        supabaseUid: authUser.id,
-        email: email,
-      );
-
-      return getCurrentUserData();
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error al iniciar sesión: $e');
-      }
-      return null;
-    }
+  static Future<bool> signInWithProvider(OAuthProvider provider) {
+    return _supabase.auth.signInWithOAuth(
+      provider,
+      redirectTo: kIsWeb ? null : _mobileRedirectUrl,
+      authScreenLaunchMode:
+          kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
+    );
   }
 
   static Future<void> signOut() async {
@@ -104,7 +48,21 @@ class AuthService {
           .limit(1);
 
       if (userRows.isEmpty) {
-        return null;
+        await _ensureUserProfileExistsForCurrentUser(supabaseUser);
+        final refreshedUserRows = await _supabase
+            .from('users')
+            .select()
+            .eq('uid', supabaseUser.id)
+            .limit(1);
+
+        if (refreshedUserRows.isEmpty) {
+          return null;
+        }
+
+        final refreshedUserRow = Map<String, dynamic>.from(
+          refreshedUserRows.first,
+        );
+        return UserModel.fromSupabase(refreshedUserRow);
       }
 
       final userRow = Map<String, dynamic>.from(userRows.first);
@@ -175,21 +133,15 @@ class AuthService {
 
   static Future<bool> updateProfileImage(String userId, String imageUrl) async {
     try {
-      await _supabase
-          .from('users')
-          .update({
-            'avatar_url': imageUrl,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('uid', userId);
+      await _supabase.from('users').update({
+        'avatar_url': imageUrl,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('uid', userId);
 
-      await _supabase
-          .from('providers')
-          .update({
-            'avatar_url': imageUrl,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('uid', userId);
+      await _supabase.from('providers').update({
+        'avatar_url': imageUrl,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('uid', userId);
 
       return true;
     } catch (e) {
@@ -200,41 +152,22 @@ class AuthService {
     }
   }
 
-  static Future<bool> resetPassword(String email) async {
-    try {
-      await _supabase.auth.resetPasswordForEmail(email);
-      return true;
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error al enviar email de restablecimiento: $e');
-      }
-      return false;
-    }
-  }
+  static Future<void> _ensureUserProfileExistsForCurrentUser(User authUser) {
+    final metadata = authUser.userMetadata ?? const <String, dynamic>{};
+    final email = authUser.email ?? '${authUser.id}@oauth.local';
+    final name = _resolveDisplayName(authUser, metadata);
+    final avatarUrl = metadata['avatar_url']?.toString();
+    final phone = metadata['phone']?.toString() ?? '';
 
-  static Future<void> _ensureUserProfileExists({
-    required String supabaseUid,
-    required String email,
-  }) async {
-    final userRows = await _supabase
-        .from('users')
-        .select('id')
-        .eq('uid', supabaseUid)
-        .limit(1);
-
-    if (userRows.isNotEmpty) {
-      return;
-    }
-
-    final fallbackName = email.split('@').first;
-    await _upsertUserRows(
-      supabaseUid: supabaseUid,
+    return _upsertUserRows(
+      supabaseUid: authUser.id,
       email: email,
-      name: fallbackName,
-      phone: '',
+      name: name,
+      phone: phone,
       address: '',
       city: 'Tena',
       userType: UserType.client,
+      avatarUrl: avatarUrl,
     );
   }
 
@@ -246,6 +179,7 @@ class AuthService {
     required String address,
     required String city,
     required UserType userType,
+    String? avatarUrl,
   }) async {
     await _supabase.from('users').upsert({
       'uid': supabaseUid,
@@ -258,6 +192,7 @@ class AuthService {
       'role': _userRole(userType),
       'is_provider': userType == UserType.provider,
       'is_active': true,
+      'avatar_url': avatarUrl,
       'updated_at': DateTime.now().toIso8601String(),
     }, onConflict: 'uid');
 
@@ -270,6 +205,7 @@ class AuthService {
         'phone': phone,
         'address': address,
         'city': city,
+        'avatar_url': avatarUrl,
         'status': 'pending',
         'is_active': true,
         'is_available': true,
@@ -303,5 +239,27 @@ class AuthService {
       case UserType.client:
         return 'client';
     }
+  }
+
+  static String _resolveDisplayName(
+    User authUser,
+    Map<String, dynamic> metadata,
+  ) {
+    final candidates = [
+      metadata['full_name'],
+      metadata['name'],
+      metadata['preferred_username'],
+      authUser.email?.split('@').first,
+      'Usuario',
+    ];
+
+    for (final value in candidates) {
+      final text = value?.toString().trim() ?? '';
+      if (text.isNotEmpty) {
+        return text;
+      }
+    }
+
+    return 'Usuario';
   }
 }

@@ -333,20 +333,24 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Widget _buildAppBar(UserModel? user) {
     return SliverAppBar(
-      expandedHeight: 280,
+      expandedHeight: 300,
       floating: false,
       pinned: true,
       backgroundColor: AppColors.primary,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
               colors: [
-                AppColors.primary,
-                AppColors.primary.withValues(alpha: 0.8),
+                Color(0xFF2E7D32),
+                Color(0xFF3E9B49),
               ],
+            ),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(28),
+              bottomRight: Radius.circular(28),
             ),
           ),
           child: SafeArea(
@@ -368,8 +372,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                 Text(
                   user?.email ?? '',
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
+                    color: Colors.white70,
+                    fontSize: 15,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -428,8 +432,8 @@ class _ProfileScreenState extends State<ProfileScreen>
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
@@ -495,26 +499,39 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Widget _buildTabBar() {
     return Container(
-      color: Colors.white,
-      child: TabBar(
-        controller: _tabController,
-        labelColor: AppColors.primary,
-        unselectedLabelColor: Colors.grey,
-        indicatorColor: AppColors.primary,
-        tabs: const [
-          Tab(
-            icon: Icon(Icons.person),
-            text: 'Perfil',
+      color: const Color(0xFFF4F7F4),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: TabBar(
+          controller: _tabController,
+          dividerColor: Colors.transparent,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: Colors.grey,
+          indicator: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(14),
           ),
-          Tab(
-            icon: Icon(Icons.history),
-            text: 'Actividad',
-          ),
-          Tab(
-            icon: Icon(Icons.settings),
-            text: 'Configuración',
-          ),
-        ],
+          tabs: const [
+            Tab(
+              icon: Icon(Icons.person_rounded),
+              text: 'Perfil',
+            ),
+            Tab(
+              icon: Icon(Icons.history_rounded),
+              text: 'Actividad',
+            ),
+            Tab(
+              icon: Icon(Icons.settings_rounded),
+              text: 'Configuración',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -779,13 +796,20 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Widget _buildSectionCard(String title, List<Widget> children) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x12000000),
+            blurRadius: 18,
+            offset: Offset(0, 8),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -793,7 +817,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               title,
               style: const TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 16),
@@ -805,20 +829,27 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Widget _buildStatCard(String title, String value, IconData icon) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x12000000),
+            blurRadius: 18,
+            offset: Offset(0, 8),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 icon,
@@ -835,7 +866,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     value,
                     style: const TextStyle(
                       fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(

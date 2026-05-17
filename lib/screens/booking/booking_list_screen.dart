@@ -53,47 +53,81 @@ class _BookingListScreenState extends State<BookingListScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F7F4),
       appBar: AppBar(
-        title: const Text('Mis Reservas'),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primary,
-          tabs: const [
-            Tab(text: 'Todas'),
-            Tab(text: 'Pendientes'),
-            Tab(text: 'Confirmadas'),
-            Tab(text: 'Completadas'),
-          ],
+        backgroundColor: const Color(0xFFF4F7F4),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: const Text(
+          'Mis reservas',
+          style: TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
-      body: Consumer<BookingProvider>(
-        builder: (context, bookingProvider, child) {
-          if (bookingProvider.isLoading) {
-            return const LoadingWidget(message: 'Cargando reservas...');
-          }
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                dividerColor: Colors.transparent,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.textSecondary,
+                indicator: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                tabs: const [
+                  Tab(text: 'Todas'),
+                  Tab(text: 'Pendientes'),
+                  Tab(text: 'Confirmadas'),
+                  Tab(text: 'Completadas'),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Consumer<BookingProvider>(
+              builder: (context, bookingProvider, child) {
+                if (bookingProvider.isLoading) {
+                  return const LoadingWidget(message: 'Cargando reservas...');
+                }
 
-          if (bookingProvider.errorMessage != null) {
-            return CustomErrorWidget(
-              message: bookingProvider.errorMessage!,
-              onRetry: _loadBookings,
-            );
-          }
+                if (bookingProvider.errorMessage != null) {
+                  return CustomErrorWidget(
+                    message: bookingProvider.errorMessage!,
+                    onRetry: _loadBookings,
+                  );
+                }
 
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              _buildBookingList(bookingProvider.bookings),
-              _buildBookingList(
-                  bookingProvider.getBookingsByStatus(BookingStatus.pending)),
-              _buildBookingList(
-                  bookingProvider.getBookingsByStatus(BookingStatus.confirmed)),
-              _buildBookingList(bookingProvider.getCompletedBookings()),
-            ],
-          );
-        },
+                return TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildBookingList(bookingProvider.bookings),
+                    _buildBookingList(
+                      bookingProvider.getBookingsByStatus(
+                        BookingStatus.pending,
+                      ),
+                    ),
+                    _buildBookingList(
+                      bookingProvider.getBookingsByStatus(
+                        BookingStatus.confirmed,
+                      ),
+                    ),
+                    _buildBookingList(bookingProvider.getCompletedBookings()),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -147,12 +181,12 @@ class _BookingListScreenState extends State<BookingListScreen>
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: const [
           BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            color: Color(0x12000000),
+            blurRadius: 18,
+            offset: Offset(0, 8),
           ),
         ],
       ),
@@ -164,21 +198,20 @@ class _BookingListScreenState extends State<BookingListScreen>
             arguments: booking,
           );
         },
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(22),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header con estado
               Row(
                 children: [
                   Expanded(
                     child: Text(
                       booking.serviceName,
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),
@@ -187,59 +220,36 @@ class _BookingListScreenState extends State<BookingListScreen>
                 ],
               ),
               const SizedBox(height: 8),
-
-              // Información del proveedor/cliente
               Text(
                 booking.providerName,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 12),
-
-              // Fecha y hora
-              Row(
+              Wrap(
+                spacing: 16,
+                runSpacing: 10,
                 children: [
-                  const Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: AppColors.textSecondary,
+                  _MetaPill(
+                    icon: Icons.calendar_today_rounded,
+                    label: Helpers.formatDate(booking.scheduledDate),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    Helpers.formatDate(booking.scheduledDate),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Icon(
-                    Icons.access_time,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    booking.scheduledTime,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
-                    ),
+                  _MetaPill(
+                    icon: Icons.access_time_rounded,
+                    label: booking.scheduledTime,
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Precio y acciones
               Row(
                 children: [
                   Text(
                     Helpers.formatCurrency(booking.totalPrice),
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.primary,
                     ),
                   ),
@@ -306,7 +316,7 @@ class _BookingListScreenState extends State<BookingListScreen>
         text,
         style: TextStyle(
           fontSize: 12,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: textColor,
         ),
       ),
@@ -421,6 +431,41 @@ class _BookingListScreenState extends State<BookingListScreen>
               }
             },
             child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetaPill extends StatelessWidget {
+  const _MetaPill({
+    required this.icon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FB),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: AppColors.textSecondary),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textPrimary,
+            ),
           ),
         ],
       ),

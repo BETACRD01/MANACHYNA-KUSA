@@ -22,13 +22,13 @@ void main() async {
       anonKey: SupabaseConfig.publishableKey,
     );
 
-    // 3. Inicializar FirebaseService (auth + messaging)
+    // 3. Inicializar Firebase Messaging
     await FirebaseService.initialize();
 
     // Solo mostrar logs en modo debug
     if (kDebugMode) {
       debugPrint(
-        "Firebase, Supabase y FirebaseService inicializados correctamente",
+        "Firebase Messaging y Supabase inicializados correctamente",
       );
     }
 

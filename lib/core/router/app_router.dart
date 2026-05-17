@@ -5,8 +5,6 @@ import '../../models/booking_model.dart';
 import '../../models/service_model.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/profile_screen.dart';
-import '../../screens/auth/provider_registration_form.dart';
-import '../../screens/auth/register_screen.dart';
 import '../../screens/booking/booking_detail_screen.dart';
 import '../../screens/booking/booking_form_screen.dart';
 import '../../screens/booking/booking_list_screen.dart';
@@ -23,13 +21,18 @@ import '../../screens/provider/provider_services.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
+    final String routeName = settings.name ?? '';
+
+    // Handle Supabase OAuth deep links and provider error callbacks.
+    if (_isOAuthCallbackRoute(routeName)) {
+      return _page(const LoginScreen(), settings);
+    }
+
+    switch (routeName) {
       case AppRoutes.splash:
         return _page(const SplashScreen(), settings);
       case AppRoutes.login:
         return _page(const LoginScreen(), settings);
-      case AppRoutes.register:
-        return _page(const RegisterScreen(), settings);
       case AppRoutes.home:
         return _page(const HomeScreen(), settings);
       case AppRoutes.profile:
@@ -53,8 +56,6 @@ class AppRouter {
         return _page(const ProviderServices(), settings);
       case AppRoutes.providerBookings:
         return _page(const ProviderBookings(), settings);
-      case AppRoutes.providerRegistrationForm:
-        return _page(const ProviderRegistrationForm(), settings);
       case AppRoutes.map:
         return _page(const MapScreen(), settings);
       case AppRoutes.chat:
@@ -95,5 +96,15 @@ class AppRouter {
         'La ruta ${settings.name} requiere un argumento de tipo $T',
       );
     }
+  }
+
+  static bool _isOAuthCallbackRoute(String routeName) {
+    if (routeName.isEmpty) {
+      return false;
+    }
+
+    return routeName.startsWith('/?') ||
+        routeName.startsWith('/#') ||
+        routeName.startsWith('/login-callback');
   }
 }
