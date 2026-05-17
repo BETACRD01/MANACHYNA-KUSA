@@ -1,4 +1,4 @@
-# 🌿 Mañachiy kan Kusata
+# 🌿 DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"
 
 <div align="center">
 
@@ -15,7 +15,7 @@
 
 ---
 
-> **Mañachiy kan Kusata** es más que una app — es un puente tecnológico desarrollado con el corazón de la Amazonía ecuatoriana.
+> **DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"** es más que una app — es un puente tecnológico desarrollado con el corazón de la Amazonía ecuatoriana.
 > Diseñada para fomentar la economía local, facilita el contacto directo entre hogares y proveedores calificados de servicios domésticos en la provincia de Napo.
 
 <div align="center">

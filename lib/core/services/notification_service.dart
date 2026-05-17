@@ -56,8 +56,9 @@ class NotificationService {
   //   const AndroidNotificationDetails androidPlatformChannelSpecifics =
   //       AndroidNotificationDetails(
   //     'manachiy_channel',
-  //     'Mañachiy Notifications',
-  //     channelDescription: 'Notificaciones de la aplicación Mañachiy kan Kusata',
+  //     'Manachyna Kusa Notifications',
+  //     channelDescription:
+  //         'Notificaciones de la aplicacion DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"',
   //     importance: Importance.max,
   //     priority: Priority.high,
   //   );

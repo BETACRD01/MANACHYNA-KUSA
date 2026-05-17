@@ -103,7 +103,8 @@ class AppRouter {
       return false;
     }
 
-    return routeName.startsWith('/?') ||
+    return routeName == '/' ||
+        routeName.startsWith('/?') ||
         routeName.startsWith('/#') ||
         routeName.startsWith('/login-callback');
   }

@@ -32,7 +32,7 @@ void main() async {
       );
     }
 
-    runApp(const ManachiyKanKusataApp());
+    runApp(const ManachynaKusaApp());
   } catch (e) {
     if (kDebugMode) {
       debugPrint("Error al inicializar Firebase: $e");

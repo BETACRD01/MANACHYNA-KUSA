@@ -1,5 +1,6 @@
 class AppStrings {
-  static const String appName = 'Mañachiy kan Kusata';
+  static const String appName =
+      'DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"';
   static const String appSlogan = 'Servicios del hogar en Napo';
   static const String home = 'Inicio';
   static const String search = 'Buscar';

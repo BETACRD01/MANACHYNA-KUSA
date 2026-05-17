@@ -262,38 +262,20 @@ class _ProfileScreenState extends State<ProfileScreen>
           // 3. Si no hay usuario después de la inicialización, mostrar error
           final user = authProvider.currentUser;
           if (user == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No se pudo cargar el perfil',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () async {
-                      debugPrint('🔄 Refrescando datos del usuario...');
-                      await authProvider.refreshUserData();
-                    },
-                    child: const Text('Reintentar'),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () {
-                      authProvider.signOut();
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/login',
-                        (route) => false,
-                      );
-                    },
-                    child: const Text('Volver al login'),
-                  ),
-                ],
-              ),
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!context.mounted) {
+                return;
+              }
+
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                (route) => false,
+              );
+            });
+
+            return const Center(
+              child: LoadingWidget(message: 'Volviendo al inicio de sesión...'),
             );
           }
 

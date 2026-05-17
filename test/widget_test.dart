@@ -12,16 +12,21 @@ import 'package:flutter_application_manachyna_kusa_2_0/app.dart';
 
 void main() {
   testWidgets('App loads splash screen', (WidgetTester tester) async {
-    await tester.pumpWidget(const ManachiyKanKusataApp());
+    await tester.pumpWidget(const ManachynaKusaApp());
 
     // Verify that the splash screen loads
-    expect(find.text('Mañachiy kan Kusata'), findsOneWidget);
+    expect(
+      find.text(
+        'DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Servicios del hogar en Napo'), findsOneWidget);
     expect(find.text('Cargando...'), findsOneWidget);
   });
 
   testWidgets('App shows loading indicator', (WidgetTester tester) async {
-    await tester.pumpWidget(const ManachiyKanKusataApp());
+    await tester.pumpWidget(const ManachynaKusaApp());
 
     // Verify that loading indicator is present
     expect(find.byType(CircularProgressIndicator), findsOneWidget);

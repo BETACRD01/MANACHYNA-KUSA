@@ -6,15 +6,15 @@ import 'core/di/app_providers.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
-class ManachiyKanKusataApp extends StatelessWidget {
-  const ManachiyKanKusataApp({Key? key}) : super(key: key);
+class ManachynaKusaApp extends StatelessWidget {
+  const ManachynaKusaApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: AppProviders.build(),
       child: MaterialApp(
-        title: 'Mañachiy kan Kusata',
+        title: 'DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         initialRoute: AppRoutes.login,

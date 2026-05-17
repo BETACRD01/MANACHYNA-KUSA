@@ -10,7 +10,8 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({
     Key? key,
     this.showBackButton = false,
-    this.title = 'Ingresa a Mañachiy kan Kusata',
+    this.title =
+        'Ingresa a DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"',
     this.subtitle = 'Usa tu cuenta de Google, Facebook o Microsoft.',
   }) : super(key: key);
 
@@ -25,6 +26,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   AuthProvider? _authProvider;
   bool _didNavigate = false;
+  OAuthProvider? _pendingProvider;
 
   @override
   void initState() {
@@ -54,6 +56,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = _authProvider!;
 
     if (authProvider.errorMessage != null) {
+      setState(() {
+        _pendingProvider = null;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.errorMessage!),
@@ -74,6 +79,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (authProvider.isAuthenticated && !_didNavigate) {
+      setState(() {
+        _pendingProvider = null;
+      });
       _didNavigate = true;
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     }
@@ -82,22 +90,33 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithProvider(OAuthProvider provider) async {
     final authProvider = context.read<AuthProvider>();
     _didNavigate = false;
-    await authProvider.signInWithProvider(provider);
+    setState(() {
+      _pendingProvider = provider;
+    });
+
+    final launched = await authProvider.signInWithProvider(provider);
+    if (!launched && mounted) {
+      setState(() {
+        _pendingProvider = null;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: widget.showBackButton
-          ? AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              foregroundColor: AppColors.textPrimary,
-            )
-          : null,
-      body: Stack(
-        children: [
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: widget.showBackButton
+              ? AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  foregroundColor: AppColors.textPrimary,
+                )
+              : null,
+          body: Stack(
+            children: [
           // Fondo decorativo - Esquina superior derecha
           Positioned(
             top: -50,
@@ -182,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 40),
                           
-                          // Título "Ingresa a \n Mañachiy kan Kusata"
+                          // Título principal de acceso
                           RichText(
                             textAlign: TextAlign.center,
                             text: const TextSpan(
@@ -197,7 +216,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   style: TextStyle(color: Color(0xFF1B2E1E)),
                                 ),
                                 TextSpan(
-                                  text: 'Mañachiy kan Kusata',
+                                  text:
+                                      'DESARROLLO DE APLICACION MOVIL\nMULTISERVICIO "MANACHYNA KUSA"',
                                   style: TextStyle(color: Color(0xFF146A21)),
                                 ),
                               ],
@@ -233,6 +253,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             label: 'Continuar con Google',
                             assetPath: 'assets/social/google.svg',
                             height: buttonHeight,
+                            isLoading:
+                                authProvider.isLoading &&
+                                _pendingProvider == OAuthProvider.google,
                             onPressed: () =>
                                 _signInWithProvider(OAuthProvider.google),
                           ),
@@ -241,6 +264,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             label: 'Continuar con Facebook',
                             assetPath: 'assets/social/facebook.svg',
                             height: buttonHeight,
+                            isLoading:
+                                authProvider.isLoading &&
+                                _pendingProvider == OAuthProvider.facebook,
                             onPressed: () =>
                                 _signInWithProvider(OAuthProvider.facebook),
                           ),
@@ -249,6 +275,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             label: 'Continuar con Microsoft',
                             assetPath: 'assets/social/microsoft.svg',
                             height: buttonHeight,
+                            isLoading:
+                                authProvider.isLoading &&
+                                _pendingProvider == OAuthProvider.azure,
                             onPressed: () =>
                                 _signInWithProvider(OAuthProvider.azure),
                           ),
@@ -285,9 +314,11 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         ),
       ),
-    ],
-  ),
-);
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -296,66 +327,64 @@ class _AuthProviderButton extends StatelessWidget {
     required this.label,
     required this.assetPath,
     required this.height,
+    required this.isLoading,
     required this.onPressed,
   });
 
   final String label;
   final String assetPath;
   final double height;
+  final bool isLoading;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        return SizedBox(
-          height: height,
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: authProvider.isLoading ? null : onPressed,
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.textPrimary,
-              elevation: 0,
-              side: const BorderSide(
-                color: Color(0xFFE5E7EB),
-                width: 1.5,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-            ),
-            child: authProvider.isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  )
-                : Row(
-                    children: [
-                      SvgPicture.asset(
-                        assetPath,
-                        width: 28,
-                        height: 28,
-                      ),
-                      Expanded(
-                        child: Text(
-                          label,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF111827),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 28), // Para balancear el icono de la izquierda y mantener el texto centrado
-                    ],
-                  ),
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: AppColors.textPrimary,
+          elevation: 0,
+          side: const BorderSide(
+            color: Color(0xFFE5E7EB),
+            width: 1.5,
           ),
-        );
-      },
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+        ),
+        child: isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              )
+            : Row(
+                children: [
+                  SvgPicture.asset(
+                    assetPath,
+                    width: 28,
+                    height: 28,
+                  ),
+                  Expanded(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF111827),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 28),
+                ],
+              ),
+      ),
     );
   }
 }
