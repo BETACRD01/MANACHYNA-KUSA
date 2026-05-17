@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_routes.dart';
+import '../../core/utils/helpers.dart';
 import '../../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -58,21 +59,19 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _pendingProvider = null;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authProvider.errorMessage!),
-          backgroundColor: AppColors.error,
-        ),
+      Helpers.showCustomSnackBar(
+        context,
+        message: authProvider.errorMessage!,
+        isError: true,
       );
       authProvider.clearError();
     }
 
     if (authProvider.successMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authProvider.successMessage!),
-          backgroundColor: AppColors.info,
-        ),
+      Helpers.showCustomSnackBar(
+        context,
+        message: authProvider.successMessage!,
+        isError: false,
       );
       authProvider.clearSuccess();
     }
@@ -177,26 +176,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               const Spacer(flex: 2),
-                          // Ícono central (Maletín)
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF3B8E3F), // Verde de la imagen
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF3B8E3F).withValues(alpha: 0.3),
-                                  blurRadius: 30,
-                                  offset: const Offset(0, 15),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.business_center,
-                              size: 50,
-                              color: Colors.white,
-                            ),
+                          // Logo central
+                          Image.asset(
+                            'assets/branding/manachyna_kusa_logo_transparent.png',
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.contain,
                           ),
                           const SizedBox(height: 40),
                           

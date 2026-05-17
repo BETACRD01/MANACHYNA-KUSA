@@ -8,168 +8,227 @@ import '../../core/constants/app_routes.dart';
 import '../../providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+    with TickerProviderStateMixin {
+  late final AnimationController _logoController;
+  late final AnimationController _contentController;
+  late final AnimationController _loaderController;
+
+  late final Animation<double> _logoScale;
+  late final Animation<double> _logoFade;
+  late final Animation<double> _titleFade;
+  late final Animation<Offset> _titleSlide;
+  late final Animation<double> _sloganFade;
+  late final Animation<Offset> _sloganSlide;
+  late final Animation<double> _loaderFade;
+
   Timer? _navigationTimer;
 
   @override
   void initState() {
     super.initState();
-    _initializeAnimations();
-    // Espera un frame para asegurar que el contexto y los providers estén listos
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeApp();
-    });
+    _initAnimations();
+    _startSequence();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeApp());
   }
 
-  void _initializeAnimations() {
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 2),
+  void _initAnimations() {
+    _logoController = AnimationController(
+      duration: const Duration(milliseconds: 900),
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeIn,
-    ));
+    _contentController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.5,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.elasticOut,
-    ));
+    _loaderController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
 
-    _animationController.forward();
+    _logoScale = Tween<double>(begin: 0.4, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.elasticOut),
+    );
+
+    _logoFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: const Interval(0.0, 0.5)),
+    );
+
+    _titleFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+          parent: _contentController, curve: const Interval(0.0, 0.6)),
+    );
+
+    _titleSlide = Tween<Offset>(
+      begin: const Offset(0, 0.4),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _contentController, curve: Curves.easeOutCubic),
+    );
+
+    _sloganFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+          parent: _contentController, curve: const Interval(0.3, 1.0)),
+    );
+
+    _sloganSlide = Tween<Offset>(
+      begin: const Offset(0, 0.6),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _contentController, curve: Curves.easeOutCubic),
+    );
+
+    _loaderFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _loaderController, curve: Curves.easeIn),
+    );
+  }
+
+  Future<void> _startSequence() async {
+    await _logoController.forward();
+    await Future.delayed(const Duration(milliseconds: 100));
+    await _contentController.forward();
+    await Future.delayed(const Duration(milliseconds: 200));
+    _loaderController.forward();
   }
 
   void _initializeApp() {
-    _navigationTimer?.cancel();
-    _navigationTimer = Timer(const Duration(seconds: 3), () async {
+    _navigationTimer = Timer(const Duration(milliseconds: 3200), () async {
       if (!mounted) return;
 
+      final navigator = Navigator.of(context);
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.checkAuthStatus();
 
-      if (!mounted) return;
       final route =
           authProvider.isAuthenticated ? AppRoutes.home : AppRoutes.login;
-      Navigator.pushReplacementNamed(context, route);
+      navigator.pushReplacementNamed(route);
     });
   }
 
   @override
   void dispose() {
     _navigationTimer?.cancel();
-    _animationController.dispose();
+    _logoController.dispose();
+    _contentController.dispose();
+    _loaderController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.primaryGradient,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const Spacer(flex: 2),
+            _buildLogo(),
+            const SizedBox(height: 48),
+            _buildTextContent(),
+            const Spacer(flex: 3),
+            _buildLoader(),
+            const SizedBox(height: 48),
+          ],
         ),
-        child: Center(
-          child: AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return FadeTransition(
-                opacity: _fadeAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo de la aplicación
-                      Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(75),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.home_repair_service,
-                          size: 80,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 40),
+      ),
+    );
+  }
 
-                      // Nombre de la aplicación
-                      const Text(
-                        AppStrings.appName,
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 1.2,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
+  Widget _buildLogo() {
+    return FadeTransition(
+      opacity: _logoFade,
+      child: ScaleTransition(
+        scale: _logoScale,
+        child: Image.asset(
+          'assets/branding/manachyna_kusa_logo_transparent.png',
+          width: 150,
+          height: 150,
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
 
-                      // Slogan
-                      const Text(
-                        AppStrings.appSlogan,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w300,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 60),
-
-                      // Indicador de carga
-                      const SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                          strokeWidth: 3,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      const Text(
-                        'Cargando...',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
+  Widget _buildTextContent() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          SlideTransition(
+            position: _titleSlide,
+            child: FadeTransition(
+              opacity: _titleFade,
+              child: const FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  AppStrings.appName,
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                    letterSpacing: 1.2,
+                    height: 1.2,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-              );
-            },
+              ),
+            ),
           ),
-        ),
+          const SizedBox(height: 12),
+          SlideTransition(
+            position: _sloganSlide,
+            child: FadeTransition(
+              opacity: _sloganFade,
+              child: const Text(
+                AppStrings.appSlogan,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w400,
+                  letterSpacing: 0.2,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoader() {
+    return FadeTransition(
+      opacity: _loaderFade,
+      child: const Column(
+        children: [
+          SizedBox(
+            width: 36,
+            height: 36,
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              strokeWidth: 2.5,
+              strokeCap: StrokeCap.round,
+            ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Cargando...',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }

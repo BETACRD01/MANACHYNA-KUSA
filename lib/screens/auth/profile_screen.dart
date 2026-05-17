@@ -5,7 +5,8 @@ import 'dart:io';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text_field.dart';
-import '../../../core/widgets/loading_widget.dart'; // Tu LoadingWidget
+import '../../../core/widgets/loading_widget.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../models/user_model.dart';
 
@@ -174,17 +175,10 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   void _showSnackBar(String message, {bool isSuccess = false}) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isSuccess ? Colors.green : Colors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
+    Helpers.showCustomSnackBar(
+      context,
+      message: message,
+      isError: !isSuccess,
     );
   }
 

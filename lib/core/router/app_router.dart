@@ -25,7 +25,7 @@ class AppRouter {
 
     // Handle Supabase OAuth deep links and provider error callbacks.
     if (_isOAuthCallbackRoute(routeName)) {
-      return _page(const LoginScreen(), settings);
+      return _page(const SplashScreen(), settings);
     }
 
     switch (routeName) {
@@ -61,7 +61,11 @@ class AppRouter {
       case AppRoutes.chat:
         return _page(const ChatScreen(), settings);
       case AppRoutes.search:
-        return _page(const SearchScreen(), settings);
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _page(SearchScreen(
+          initialQuery: args?['query'] as String?,
+          initialCategory: args?['category'] as String?,
+        ), settings);
       default:
         return _unknown(settings);
     }
@@ -103,8 +107,7 @@ class AppRouter {
       return false;
     }
 
-    return routeName == '/' ||
-        routeName.startsWith('/?') ||
+    return routeName.startsWith('/?') ||
         routeName.startsWith('/#') ||
         routeName.startsWith('/login-callback');
   }

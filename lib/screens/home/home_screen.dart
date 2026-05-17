@@ -10,8 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/service_provider.dart';
 import '../auth/profile_screen.dart';
 import '../booking/booking_list_screen.dart';
-import 'search_screen.dart';
-
+import '../common/chat_screen.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -38,13 +37,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void navigateToSearch({String? initialQuery, String? category}) {
-    setState(() {
-      _currentIndex = 1;
-    });
-    _pageController.animateToPage(
-      1,
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeOutCubic,
+    Navigator.pushNamed(
+      context,
+      AppRoutes.search,
+      arguments: {
+        'query': initialQuery,
+        'category': category,
+      },
     );
   }
 
@@ -61,8 +60,8 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         children: [
           _HomeTab(onNavigateToSearch: navigateToSearch),
-          const SearchScreen(),
           const BookingListScreen(),
+          const ChatScreen(),
           const ProfileScreen(),
         ],
       ),
@@ -96,14 +95,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: AppStrings.home,
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.search_outlined),
-                  selectedIcon: Icon(Icons.search_rounded),
-                  label: AppStrings.search,
-                ),
-                NavigationDestination(
                   icon: Icon(Icons.calendar_month_outlined),
                   selectedIcon: Icon(Icons.calendar_month_rounded),
                   label: AppStrings.bookings,
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.chat_bubble_outline_rounded),
+                  selectedIcon: Icon(Icons.chat_bubble_rounded),
+                  label: AppStrings.chat,
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.person_outline_rounded),

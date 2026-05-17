@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/booking_model.dart';
 import '../../models/service_model.dart';
@@ -81,5 +82,47 @@ class Helpers {
       case BookingStatus.cancelled:
         return 'Cancelado';
     }
+  }
+
+  static void showCustomSnackBar(
+    BuildContext context, {
+    required String message,
+    bool isError = false,
+  }) {
+    if (!context.mounted) return;
+
+    final color = isError ? const Color(0xFFD32F2F) : const Color(0xFF388E3C);
+    final icon = isError ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(icon, color: Colors.white, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: color,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          elevation: 4,
+          duration: const Duration(seconds: 4),
+        ),
+      );
   }
 }
