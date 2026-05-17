@@ -1,4 +1,3 @@
-# 🌿 MANACHYNA KUSA
 
 <div align="center">
 
