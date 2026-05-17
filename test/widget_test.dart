@@ -17,7 +17,7 @@ void main() {
     // Verify that the splash screen loads
     expect(
       find.text(
-        'DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"',
+        'MANACHYNA KUSA',
       ),
       findsOneWidget,
     );

@@ -58,7 +58,7 @@ class NotificationService {
   //     'manachiy_channel',
   //     'Manachyna Kusa Notifications',
   //     channelDescription:
-  //         'Notificaciones de la aplicacion DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"',
+  //         'Notificaciones de la aplicacion MANACHYNA KUSA',
   //     importance: Importance.max,
   //     priority: Priority.high,
   //   );

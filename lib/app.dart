@@ -14,7 +14,7 @@ class ManachynaKusaApp extends StatelessWidget {
     return MultiProvider(
       providers: AppProviders.build(),
       child: MaterialApp(
-        title: 'DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"',
+        title: 'MANACHYNA KUSA',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         initialRoute: AppRoutes.login,

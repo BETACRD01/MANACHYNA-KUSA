@@ -1,6 +1,6 @@
-# 📚 Documentación Técnica: DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"
+# 📚 Documentación Técnica: MANACHYNA KUSA
 
-Esta documentación proporciona una visión técnica completa del proyecto "DESARROLLO DE APLICACION MOVIL MULTISERVICIO \"MANACHYNA KUSA\"", detallando la arquitectura de la aplicación en Flutter, la integración de bases de datos, el manejo de credenciales y el flujo de servicios.
+Esta documentación proporciona una visión técnica completa del proyecto "MANACHYNA KUSA", detallando la arquitectura de la aplicación en Flutter, la integración de bases de datos, el manejo de credenciales y el flujo de servicios.
 
 ---
 

@@ -1,8 +1,8 @@
-# 🌿 DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"
+# 🌿 MANACHYNA KUSA
 
 <div align="center">
 
-![App Banner](docs/images/app_banner.png)
+![App Banner](docs/images/app_banner.svg)
 
 <h3>Conectando hogares y servicios de confianza en la provincia de Napo, Ecuador.</h3>
 
@@ -15,7 +15,7 @@
 
 ---
 
-> **DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"** es más que una app — es un puente tecnológico desarrollado con el corazón de la Amazonía ecuatoriana.
+> **MANACHYNA KUSA** es más que una app — es un puente tecnológico desarrollado con el corazón de la Amazonía ecuatoriana.
 > Diseñada para fomentar la economía local, facilita el contacto directo entre hogares y proveedores calificados de servicios domésticos en la provincia de Napo.
 
 <div align="center">

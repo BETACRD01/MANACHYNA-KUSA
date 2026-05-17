@@ -10,8 +10,7 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({
     Key? key,
     this.showBackButton = false,
-    this.title =
-        'Ingresa a DESARROLLO DE APLICACION MOVIL MULTISERVICIO "MANACHYNA KUSA"',
+    this.title = 'Ingresa a MANACHYNA KUSA',
     this.subtitle = 'Usa tu cuenta de Google, Facebook o Microsoft.',
   }) : super(key: key);
 
@@ -216,8 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   style: TextStyle(color: Color(0xFF1B2E1E)),
                                 ),
                                 TextSpan(
-                                  text:
-                                      'DESARROLLO DE APLICACION MOVIL\nMULTISERVICIO "MANACHYNA KUSA"',
+                                  text: 'MANACHYNA KUSA',
                                   style: TextStyle(color: Color(0xFF146A21)),
                                 ),
                               ],
