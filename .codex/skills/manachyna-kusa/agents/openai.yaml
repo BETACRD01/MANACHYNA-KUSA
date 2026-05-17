@@ -1,0 +1,8 @@
+version: 1
+interface:
+  display_name: MANACHYNA KUSA
+  short_description: Skill de proyecto para la app Flutter MANACHYNA KUSA con Supabase y Firebase Messaging.
+  default_prompt: >-
+    Usa esta skill cuando trabajes en MANACHYNA KUSA. Respeta Supabase como
+    fuente de verdad, deja Firebase solo para messaging y trata el esquema SQL
+    como un borrador vivo que puede cambiar.
