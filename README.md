@@ -1,7 +1,7 @@
 
 <div align="center">
 
-![App Banner](docs/images/app_banner.svg)
+![App Banner](docs/images/app_banner.png)
 
 <h3>Conectando hogares y servicios de confianza en la provincia de Napo, Ecuador.</h3>
 
