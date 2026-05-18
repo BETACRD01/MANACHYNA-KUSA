@@ -25,6 +25,7 @@ Use this skill when the task is about the Flutter app in this repository.
   - Microsoft / Azure
 - No email/password login
 - No manual register screen
+- **Theming**: App fully supports dynamic Light/Dark mode (`ThemeProvider`). Theme preference is persisted via `SharedPreferences`.
 - Firebase usage:
   - `firebase_core`
   - `firebase_messaging`
@@ -49,7 +50,7 @@ Use this skill when the task is about the Flutter app in this repository.
 - Firebase messaging: `lib/core/services/firebase_service.dart`
 - Supabase config: `lib/core/config/supabase_config.dart`
 - Feature data access lives behind repositories in `lib/features/**/data`
-- UI state lives in `lib/providers`
+- UI state and theming live in `lib/providers` (e.g. `ThemeProvider`, `AuthProvider`)
 
 ## Auth-specific guidance
 
