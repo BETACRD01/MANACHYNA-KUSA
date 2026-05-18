@@ -9,6 +9,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
 import '../../providers/service_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/theme_provider.dart';
 
 class AppProviders {
   static List<SingleChildWidget> build() {
@@ -36,6 +37,9 @@ class AppProviders {
         create: (context) => UserProvider(
           repository: context.read<UserRepository>(),
         ),
+      ),
+      ChangeNotifierProvider<ThemeProvider>(
+        create: (_) => ThemeProvider(),
       ),
     ];
   }
