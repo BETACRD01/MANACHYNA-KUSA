@@ -9,6 +9,7 @@ import '../../core/widgets/loading_widget.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
+import 'perfil/perfil_provider_registration_view.dart';
 import 'perfil/perfil_provider_view.dart';
 import 'perfil/perfil_widgets.dart';
 
@@ -117,6 +118,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _showProviderView = false;
+  bool _showProviderRegistration = false;
 
   @override
   Widget build(BuildContext context) {
@@ -149,9 +151,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
             }
 
             if (_showProviderView) {
+              if (_showProviderRegistration) {
+                return PerfilProviderRegistrationView(
+                  user: user,
+                  onBack: () {
+                    setState(() => _showProviderRegistration = false);
+                  },
+                  onSubmitted: _showProviderSubmitted,
+                );
+              }
+
               return PerfilProviderView(
-                onBack: () => setState(() => _showProviderView = false),
-                onApply: _showProviderInfo,
+                onBack: () {
+                  setState(() {
+                    _showProviderView = false;
+                    _showProviderRegistration = false;
+                  });
+                },
+                onApply: () {
+                  setState(() => _showProviderRegistration = true);
+                },
               );
             }
 
@@ -184,10 +203,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showProviderInfo() {
+  void _showProviderSubmitted() {
+    setState(() {
+      _showProviderView = false;
+      _showProviderRegistration = false;
+    });
     Helpers.showCustomSnackBar(
       context,
-      message: 'El registro de proveedor se conectará con Supabase.',
+      message: 'Solicitud creada. Luego se guardará en Supabase para revisión.',
     );
   }
 
