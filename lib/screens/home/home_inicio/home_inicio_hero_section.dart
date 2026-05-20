@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_routes.dart';
 import '../../../core/theme/app_theme_colors.dart';
+import '../../../providers/notification_provider.dart';
 
 class HomeInicioHeroSection extends StatelessWidget {
   const HomeInicioHeroSection({
@@ -51,46 +54,55 @@ class HomeInicioHeroSection extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                color: context.appSurface,
-                shape: BoxShape.circle,
-                boxShadow: context.appCardShadow,
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.notifications_none_rounded,
-                    color: context.appTextPrimary,
-                    size: 28,
-                  ),
-                  const Positioned(
-                    top: 14,
-                    right: 13,
-                    child: CircleAvatar(
-                      radius: 5,
-                      backgroundColor: AppColors.primary,
+            Consumer<NotificationProvider>(
+              builder: (context, notifProvider, _) {
+                return GestureDetector(
+                  onTap: () =>
+                      Navigator.pushNamed(context, AppRoutes.notifications),
+                  child: Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      color: context.appSurface,
+                      shape: BoxShape.circle,
+                      boxShadow: context.appCardShadow,
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Icon(
+                          Icons.notifications_none_rounded,
+                          color: context.appTextPrimary,
+                          size: 28,
+                        ),
+                        if (notifProvider.unreadCount > 0)
+                          const Positioned(
+                            top: 14,
+                            right: 13,
+                            child: CircleAvatar(
+                              radius: 5,
+                              backgroundColor: AppColors.primary,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ],
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 20),
         Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: onSearchTap,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(14),
             child: Ink(
-              padding: const EdgeInsets.fromLTRB(18, 12, 6, 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: context.appSurface,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: context.appBorder),
                 boxShadow: context.appCardShadow,
               ),
@@ -98,39 +110,19 @@ class HomeInicioHeroSection extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.search_rounded,
-                    size: 28,
+                    size: 22,
                     color: context.appTextSecondary,
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Buscar limpieza, plomería, electricidad...',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 14,
                         color: context.appTextSecondary,
                       ),
-                    ),
-                  ),
-                  Container(
-                    width: 58,
-                    height: 58,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x2E2E7D32),
-                          blurRadius: 16,
-                          offset: Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.tune_rounded,
-                      size: 28,
-                      color: Colors.white,
                     ),
                   ),
                 ],

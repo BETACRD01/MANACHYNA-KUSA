@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../models/user_model.dart';
 import 'supabase_service.dart';
 
@@ -10,10 +9,21 @@ class AuthService {
 
   static SupabaseClient get _supabase => SupabaseService.client;
 
-  static User? get currentUser => _supabase.auth.currentUser;
+  static User? get currentUser {
+    try {
+      return _supabase.auth.currentUser;
+    } catch (_) {
+      return null;
+    }
+  }
 
-  static Stream<AuthState> get authStateChanges =>
-      _supabase.auth.onAuthStateChange;
+  static Stream<AuthState> get authStateChanges {
+    try {
+      return _supabase.auth.onAuthStateChange;
+    } catch (_) {
+      return const Stream.empty();
+    }
+  }
 
   static Future<bool> signInWithProvider(OAuthProvider provider) {
     return _supabase.auth.signInWithOAuth(
@@ -28,18 +38,14 @@ class AuthService {
     try {
       await _supabase.auth.signOut();
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error al cerrar sesión: $e');
-      }
+      if (kDebugMode) debugPrint('Error al cerrar sesión: $e');
     }
   }
 
   static Future<UserModel?> getCurrentUserData() async {
     try {
       final supabaseUser = _supabase.auth.currentUser;
-      if (supabaseUser == null) {
-        return null;
-      }
+      if (supabaseUser == null) return null;
 
       final userRows = await _supabase
           .from('users')
@@ -47,25 +53,25 @@ class AuthService {
           .eq('uid', supabaseUser.id)
           .limit(1);
 
+      // Primer login OAuth: crea el perfil y vuelve a consultar
       if (userRows.isEmpty) {
         await _ensureUserProfileExistsForCurrentUser(supabaseUser);
+
         final refreshedUserRows = await _supabase
             .from('users')
             .select()
             .eq('uid', supabaseUser.id)
             .limit(1);
 
-        if (refreshedUserRows.isEmpty) {
-          return null;
-        }
+        if (refreshedUserRows.isEmpty) return null;
 
-        final refreshedUserRow = Map<String, dynamic>.from(
-          refreshedUserRows.first,
+        return UserModel.fromSupabase(
+          Map<String, dynamic>.from(refreshedUserRows.first),
         );
-        return UserModel.fromSupabase(refreshedUserRow);
       }
 
       final userRow = Map<String, dynamic>.from(userRows.first);
+
       final providerRows = await _supabase
           .from('providers')
           .select()
@@ -88,9 +94,7 @@ class AuthService {
         services: providerServices,
       );
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error al obtener datos del usuario: $e');
-      }
+      if (kDebugMode) debugPrint('Error al obtener datos del usuario: $e');
       return null;
     }
   }
@@ -98,9 +102,7 @@ class AuthService {
   static Future<bool> updateUserProfile(UserModel userModel) async {
     try {
       final supabaseUid = _supabase.auth.currentUser?.id;
-      if (supabaseUid == null) {
-        return false;
-      }
+      if (supabaseUid == null) return false;
 
       await _supabase
           .from('users')
@@ -124,30 +126,32 @@ class AuthService {
 
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error al actualizar perfil: $e');
-      }
+      if (kDebugMode) debugPrint('Error al actualizar perfil: $e');
       return false;
     }
   }
 
+  // Solo actualiza la tabla providers si el usuario tiene fila en ella
   static Future<bool> updateProfileImage(String userId, String imageUrl) async {
     try {
-      await _supabase.from('users').update({
-        'avatar_url': imageUrl,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('uid', userId);
+      final now = DateTime.now().toIso8601String();
+      final payload = {'avatar_url': imageUrl, 'updated_at': now};
 
-      await _supabase.from('providers').update({
-        'avatar_url': imageUrl,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('uid', userId);
+      await _supabase.from('users').update(payload).eq('uid', userId);
+
+      final providerRows = await _supabase
+          .from('providers')
+          .select('id')
+          .eq('uid', userId)
+          .limit(1);
+
+      if (providerRows.isNotEmpty) {
+        await _supabase.from('providers').update(payload).eq('uid', userId);
+      }
 
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error updating profile image: $e');
-      }
+      if (kDebugMode) debugPrint('Error al actualizar imagen de perfil: $e');
       return false;
     }
   }
@@ -165,7 +169,7 @@ class AuthService {
       name: name,
       phone: phone,
       address: '',
-      city: 'Tena',
+      city: '', // el usuario completa su ciudad en el perfil
       userType: UserType.client,
       avatarUrl: avatarUrl,
     );
@@ -255,9 +259,7 @@ class AuthService {
 
     for (final value in candidates) {
       final text = value?.toString().trim() ?? '';
-      if (text.isNotEmpty) {
-        return text;
-      }
+      if (text.isNotEmpty) return text;
     }
 
     return 'Usuario';

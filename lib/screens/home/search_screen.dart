@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_routes.dart';
 import '../../core/widgets/loading_widget.dart';
-import '../../core/widgets/error_widget.dart';
 import '../../providers/service_provider.dart';
 import '../../models/service_model.dart';
 
@@ -116,34 +115,43 @@ class _SearchScreenState extends State<SearchScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Buscar Servicios',
+        title: Text(
+          'Buscar servicios',
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            fontSize: 20,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? Colors.white,
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.primary),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              _tabController.animateTo(1);
+            },
+            icon: Icon(Icons.tune, color: theme.colorScheme.primary),
+            tooltip: 'Filtros',
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
             height: 1,
-            color: Colors.grey[200],
+            color: isDark ? const Color(0xFF2B332D) : Colors.grey[100],
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: _clearFilters,
-            icon: const Icon(Icons.clear_all),
-            tooltip: 'Limpiar filtros',
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -169,44 +177,82 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildSearchBar() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(16),
+      color: Colors.transparent,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Column(
         children: [
           Row(
             children: [
               Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  focusNode: _focusNode,
-                  decoration: InputDecoration(
-                    hintText: 'Buscar servicios, proveedores...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDark ? Colors.black54 : Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  onChanged: (value) {
-                    if (value.isNotEmpty) {
+                  child: TextField(
+                    controller: _searchController,
+                    focusNode: _focusNode,
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar servicios, proveedor...',
+                      hintStyle: TextStyle(
+                        color: isDark ? Colors.grey[600] : Colors.grey[400],
+                        fontSize: 15,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: isDark ? Colors.grey[600] : Colors.grey[400],
+                      ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      fillColor: Colors.transparent,
+                      filled: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                    ),
+                    onChanged: (value) {
                       _performSearch();
-                    }
-                  },
-                  onSubmitted: (value) => _performSearch(),
+                    },
+                    onSubmitted: (value) => _performSearch(),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: IconButton(
-                  onPressed: _performSearch,
-                  icon: const Icon(Icons.search, color: Colors.white),
-                  tooltip: 'Buscar',
+              GestureDetector(
+                onTap: _performSearch,
+                child: Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.25),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.search,
+                    color: theme.colorScheme.onPrimary,
+                    size: 24,
+                  ),
                 ),
               ),
             ],
@@ -279,36 +325,56 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildFilterChip(String label, VoidCallback onDelete) {
+    final theme = Theme.of(context);
     return Chip(
       label: Text(
         label,
-        style: const TextStyle(fontSize: 12),
+        style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface),
       ),
-      deleteIcon: const Icon(Icons.close, size: 16),
+      deleteIcon: Icon(Icons.close, size: 16, color: theme.colorScheme.primary),
       onDeleted: onDelete,
-      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-      deleteIconColor: AppColors.primary,
+      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+      deleteIconColor: theme.colorScheme.primary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
+      ),
     );
   }
 
   Widget _buildTabBar() {
+    final theme = Theme.of(context);
     return Container(
-      color: Colors.white,
+      color: theme.cardColor,
       child: TabBar(
         controller: _tabController,
-        labelColor: AppColors.primary,
-        unselectedLabelColor: AppColors.textSecondary,
-        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
-        indicatorColor: AppColors.primary,
+        labelColor: theme.colorScheme.primary,
+        unselectedLabelColor: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
+        labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 15),
+        indicatorColor: theme.colorScheme.primary,
+        indicatorWeight: 3,
+        dividerColor: theme.dividerColor,
         tabs: const [
           Tab(
-            icon: Icon(Icons.list_alt),
-            text: 'Resultados',
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.list_alt, size: 20),
+                SizedBox(width: 8),
+                Text('Resultados'),
+              ],
+            ),
           ),
           Tab(
-            icon: Icon(Icons.filter_list),
-            text: 'Filtros',
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.filter_list, size: 20),
+                SizedBox(width: 8),
+                Text('Filtros'),
+              ],
+            ),
           ),
         ],
       ),
@@ -322,18 +388,51 @@ class _SearchScreenState extends State<SearchScreen>
           return const LoadingWidget();
         }
 
-        final services = serviceProvider.services;
+        final rawServices = serviceProvider.services;
+
+        // Filtrar localmente según el estado de los filtros locales
+        final services = rawServices.where((service) {
+          // 1. Categoría
+          if (_selectedCategory != 'Todos') {
+            final categoryEnum = _mapStringToCategory(_selectedCategory);
+            if (categoryEnum == null || service.category != categoryEnum) {
+              return false;
+            }
+          }
+          // 2. Ubicación
+          if (_selectedLocation != 'Todas las ubicaciones') {
+            final serviceLoc = _getServiceLocation(service);
+            if (serviceLoc.toLowerCase() != _selectedLocation.toLowerCase()) {
+              return false;
+            }
+          }
+          // 3. Rango de precio
+          if (service.pricePerHour < _priceRange.start || service.pricePerHour > _priceRange.end) {
+            return false;
+          }
+          // 4. Calificación
+          if (_selectedRating > 0 && service.rating < _selectedRating) {
+            return false;
+          }
+          // 5. Disponibilidad
+          if (_isAvailableNow && !_getServiceAvailability(service)) {
+            return false;
+          }
+          return true;
+        }).toList();
+
+        if (services.isEmpty) {
+          return _buildEmptyState();
+        }
 
         return Column(
           children: [
-            // Estadísticas de búsqueda
-            _buildSearchStats(services.length),
+            // Tarjeta de estadísticas (X servicios encontrados)
+            _buildStatsCard(services.length),
 
-            // Resultados de búsqueda directamente (SIN categorías populares)
+            // Resultados de búsqueda
             Expanded(
-              child: services.isEmpty
-                  ? _buildEmptyState()
-                  : _buildServicesList(services),
+              child: _buildServicesList(services),
             ),
           ],
         );
@@ -341,28 +440,53 @@ class _SearchScreenState extends State<SearchScreen>
     );
   }
 
-  Widget _buildSearchStats(int totalResults) {
+  Widget _buildStatsCard(int count) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E2420) : Colors.grey[100],
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            '$totalResults servicio${totalResults != 1 ? 's' : ''} encontrado${totalResults != 1 ? 's' : ''}',
-            style: const TextStyle(
+            '$count servicio${count != 1 ? 's' : ''} encontrado${count != 1 ? 's' : ''}',
+            style: TextStyle(
               fontSize: 14,
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const Spacer(),
-          TextButton.icon(
-            onPressed: () => _tabController.animateTo(1),
-            icon: const Icon(Icons.tune, size: 16),
-            label: const Text('Filtros', style: TextStyle(fontSize: 12)),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+          InkWell(
+            onTap: () {
+              _tabController.animateTo(1); // Cambiar a la pestaña de Filtros
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.tune_outlined,
+                    size: 18,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Filtros',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -372,7 +496,7 @@ class _SearchScreenState extends State<SearchScreen>
 
   Widget _buildServicesList(List<ServiceModel> services) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: services.length,
       itemBuilder: (context, index) {
         final service = services[index];
@@ -382,14 +506,17 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildServiceCard(ServiceModel service) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: isDark ? Colors.black38 : Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -410,17 +537,17 @@ class _SearchScreenState extends State<SearchScreen>
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Imagen del servicio
+                // Imagen o icono de la categoría
                 Container(
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     _getCategoryIcon(service.category.name),
-                    color: AppColors.primary,
+                    color: theme.colorScheme.primary,
                     size: 32,
                   ),
                 ),
@@ -433,10 +560,10 @@ class _SearchScreenState extends State<SearchScreen>
                     children: [
                       Text(
                         service.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: theme.colorScheme.onSurface,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -444,9 +571,9 @@ class _SearchScreenState extends State<SearchScreen>
                       const SizedBox(height: 4),
                       Text(
                         service.providerName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.textSecondary,
+                          color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -460,25 +587,25 @@ class _SearchScreenState extends State<SearchScreen>
                           const SizedBox(width: 4),
                           Text(
                             service.rating.toStringAsFixed(1),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
+                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(
+                          Icon(
                             Icons.location_on,
-                            color: AppColors.textSecondary,
+                            color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
                             size: 16,
                           ),
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
                               _getServiceLocation(service),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary,
+                                color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -495,10 +622,10 @@ class _SearchScreenState extends State<SearchScreen>
                   children: [
                     Text(
                       '\$${service.pricePerHour.toStringAsFixed(0)}/h',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -542,7 +669,10 @@ class _SearchScreenState extends State<SearchScreen>
       'Valle de los Chillos',
       'Sur de Quito',
       'Calderón',
-      'Sangolquí'
+      'Sangolquí',
+      'Napo',
+      'Tena',
+      'Archidona'
     ];
     return locations[service.id.hashCode % locations.length];
   }
@@ -552,6 +682,7 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildAdvancedFiltersView() {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -561,23 +692,23 @@ class _SearchScreenState extends State<SearchScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 Icon(
                   Icons.filter_list,
-                  color: AppColors.primary,
+                  color: theme.colorScheme.primary,
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'Refina tu búsqueda con filtros avanzados',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ),
@@ -593,6 +724,7 @@ class _SearchScreenState extends State<SearchScreen>
             Icons.category,
             DropdownButtonFormField<String>(
               initialValue: _selectedCategory,
+              dropdownColor: theme.cardColor,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -604,7 +736,10 @@ class _SearchScreenState extends State<SearchScreen>
               items: _categories.map((category) {
                 return DropdownMenuItem(
                   value: category,
-                  child: Text(category),
+                  child: Text(
+                    category,
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
                 );
               }).toList(),
               onChanged: (value) {
@@ -622,6 +757,7 @@ class _SearchScreenState extends State<SearchScreen>
             Icons.location_on,
             DropdownButtonFormField<String>(
               initialValue: _selectedLocation,
+              dropdownColor: theme.cardColor,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -633,7 +769,10 @@ class _SearchScreenState extends State<SearchScreen>
               items: _locations.map((location) {
                 return DropdownMenuItem(
                   value: location,
-                  child: Text(location),
+                  child: Text(
+                    location,
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
                 );
               }).toList(),
               onChanged: (value) {
@@ -656,7 +795,8 @@ class _SearchScreenState extends State<SearchScreen>
                   min: 5,
                   max: 500,
                   divisions: 99,
-                  activeColor: AppColors.primary,
+                  activeColor: theme.colorScheme.primary,
+                  inactiveColor: theme.colorScheme.primary.withValues(alpha: 0.2),
                   labels: RangeLabels(
                     '\$${_priceRange.start.toInt()}',
                     '\$${_priceRange.end.toInt()}',
@@ -675,16 +815,16 @@ class _SearchScreenState extends State<SearchScreen>
                   children: [
                     Text(
                       'Desde \$${_priceRange.start.toInt()}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textSecondary,
+                        color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
                       ),
                     ),
                     Text(
                       'Hasta \$${_priceRange.end.toInt()}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textSecondary,
+                        color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -715,7 +855,7 @@ class _SearchScreenState extends State<SearchScreen>
                           Icons.star,
                           color: index < _selectedRating
                               ? Colors.amber
-                              : Colors.grey[300],
+                              : (theme.brightness == Brightness.dark ? Colors.grey[700] : Colors.grey[300]),
                           size: 32,
                         ),
                       ),
@@ -726,9 +866,9 @@ class _SearchScreenState extends State<SearchScreen>
                 if (_selectedRating > 0)
                   Text(
                     'Mínimo ${_selectedRating.toInt()} estrella${_selectedRating > 1 ? 's' : ''}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -742,15 +882,20 @@ class _SearchScreenState extends State<SearchScreen>
             Icons.schedule,
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: theme.dividerColor),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: SwitchListTile(
-                title: const Text('Disponible ahora'),
-                subtitle: const Text(
-                    'Solo mostrar servicios disponibles inmediatamente'),
+                title: Text(
+                  'Disponible ahora',
+                  style: TextStyle(color: theme.colorScheme.onSurface),
+                ),
+                subtitle: Text(
+                  'Solo mostrar servicios disponibles inmediatamente',
+                  style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary),
+                ),
                 value: _isAvailableNow,
-                activeThumbColor: AppColors.primary,
+                activeThumbColor: theme.colorScheme.primary,
                 onChanged: (value) {
                   setState(() {
                     _isAvailableNow = value;
@@ -771,19 +916,19 @@ class _SearchScreenState extends State<SearchScreen>
                   onPressed: _clearFilters,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: AppColors.primary),
+                    side: BorderSide(color: theme.colorScheme.primary),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.clear_all, color: AppColors.primary),
-                      SizedBox(width: 8),
+                      Icon(Icons.clear_all, color: theme.colorScheme.primary),
+                      const SizedBox(width: 8),
                       Text(
                         'Limpiar filtros',
-                        style: TextStyle(color: AppColors.primary),
+                        style: TextStyle(color: theme.colorScheme.primary),
                       ),
                     ],
                   ),
@@ -797,20 +942,21 @@ class _SearchScreenState extends State<SearchScreen>
                     _performSearch();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.search, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text(
+                      Icon(Icons.search, color: theme.colorScheme.onPrimary),
+                      const SizedBox(width: 8),
+                      const Text(
                         'Ver resultados',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -824,6 +970,7 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildFilterSection(String title, IconData icon, Widget child) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       child: Column(
@@ -833,16 +980,16 @@ class _SearchScreenState extends State<SearchScreen>
             children: [
               Icon(
                 icon,
-                color: AppColors.primary,
+                color: theme.colorScheme.primary,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ],
@@ -855,31 +1002,437 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildEmptyState() {
-    return EmptyStateWidget(
-      icon: Icons.search_off,
-      message:
-          'No se encontraron servicios\n\nIntenta ajustar tus criterios de búsqueda o explora nuestras categorías',
-      actionText: 'Limpiar filtros',
-      onAction: () => _clearFilters(),
+    final theme = Theme.of(context);
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Tarjeta de estadísticas (0 servicios encontrados)
+          _buildStatsCard(0),
+
+          const SizedBox(height: 24),
+
+          // Ilustración vectorial en Flutter
+          const HouseSearchIllustration(),
+
+          const SizedBox(height: 24),
+
+          // Título y Subtítulo
+          Text(
+            'No se encontraron servicios',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Intenta ajustar tus criterios de búsqueda o explora nuestras categorías',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Chips de categorías rápidas
+          _buildQuickCategoriesRow(),
+
+          const SizedBox(height: 16),
+
+          // Botones de acción inferiores
+          _buildActionButtons(),
+
+          const SizedBox(height: 32),
+        ],
+      ),
     );
+  }
+
+  Widget _buildQuickCategoriesRow() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        alignment: WrapAlignment.center,
+        children: [
+          _buildQuickCategoryItem('Limpieza', Icons.cleaning_services_outlined),
+          _buildQuickCategoryItem('Plomería', Icons.plumbing_outlined),
+          _buildQuickCategoryItem('Electricidad', Icons.electrical_services_outlined),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickCategoryItem(String label, IconData icon) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedCategory = label;
+          _tabController.animateTo(0); // Volver a Resultados
+        });
+        _performSearch();
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.dividerColor),
+          boxShadow: [
+            BoxShadow(
+              color: isDark ? Colors.black26 : Colors.black.withValues(alpha: 0.02),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: theme.colorScheme.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Column(
+        children: [
+          // Limpiar filtros (Filled green)
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _clearFilters,
+              icon: Icon(Icons.tune_outlined, color: theme.colorScheme.onPrimary, size: 20),
+              label: Text(
+                'Limpiar filtros',
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Explorar categorías (Outlined green)
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: OutlinedButton(
+              onPressed: _exploreCategories,
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                backgroundColor: theme.cardColor,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Explorar categorías',
+                    style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: theme.colorScheme.primary,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _exploreCategories() {
+    setState(() {
+      _selectedCategory = 'Todos';
+      _tabController.animateTo(1); // Mover a la pestaña de Filtros
+    });
+  }
+
+  ServiceCategory? _mapStringToCategory(String value) {
+    switch (value) {
+      case 'Limpieza':
+        return ServiceCategory.cleaning;
+      case 'Plomería':
+        return ServiceCategory.plumbing;
+      case 'Carpintería':
+        return ServiceCategory.carpentry;
+      case 'Electricidad':
+        return ServiceCategory.electricity;
+      case 'Jardinería':
+        return ServiceCategory.gardening;
+      case 'Otros':
+      case 'Pintura':
+        return ServiceCategory.other;
+      default:
+        return null;
+    }
   }
 
   IconData _getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
+      case 'cleaning':
       case 'limpieza':
         return Icons.cleaning_services;
+      case 'gardening':
       case 'jardinería':
         return Icons.yard;
+      case 'plumbing':
       case 'plomería':
         return Icons.plumbing;
+      case 'electricity':
       case 'electricidad':
         return Icons.electrical_services;
+      case 'painting':
       case 'pintura':
         return Icons.format_paint;
+      case 'carpentry':
       case 'carpintería':
         return Icons.handyman;
       default:
         return Icons.build;
     }
   }
+}
+
+// ==========================================
+// Widgets y Painters de Ilustración Vectorial
+// ==========================================
+
+class HouseSearchIllustration extends StatelessWidget {
+  const HouseSearchIllustration({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return SizedBox(
+      height: 180,
+      width: 220,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Nube trasera izquierda
+          Positioned(
+            top: 20,
+            left: 30,
+            child: Icon(
+              Icons.cloud_rounded,
+              size: 45,
+              color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.08 : 0.04),
+            ),
+          ),
+          // Nube trasera derecha
+          Positioned(
+            top: 35,
+            right: 40,
+            child: Icon(
+              Icons.cloud_rounded,
+              size: 35,
+              color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.08 : 0.04),
+            ),
+          ),
+          
+          // Silueta de la casa (dibujada con CustomPaint)
+          Positioned(
+            bottom: 10,
+            child: CustomPaint(
+              size: const Size(130, 110),
+              painter: _HousePainter(isDark: isDark),
+            ),
+          ),
+          
+          // Lupa grande superpuesta (dibujada con CustomPaint)
+          Positioned(
+            bottom: 0,
+            right: 15,
+            child: CustomPaint(
+              size: const Size(90, 90),
+              painter: _MagnifyingGlassPainter(isDark: isDark),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HousePainter extends CustomPainter {
+  final bool isDark;
+  _HousePainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paintHouse = Paint()
+      ..color = isDark ? const Color(0xFF1E2820) : const Color(0xFFE8F5E9)
+      ..style = PaintingStyle.fill;
+
+    final paintDetails = Paint()
+      ..color = isDark ? const Color(0xFF111612) : Colors.white
+      ..style = PaintingStyle.fill;
+
+    final paintStroke = Paint()
+      ..color = isDark ? const Color(0xFF2E3D31) : const Color(0xFFC8E6C9)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    // Cuerpo de la casa (rectángulo)
+    final houseRect = RRect.fromRectAndRadius(
+      const Rect.fromLTWH(20, 45, 90, 65),
+      const Radius.circular(8),
+    );
+    canvas.drawRRect(houseRect, paintHouse);
+    canvas.drawRRect(houseRect, paintStroke);
+
+    // Techo (triángulo)
+    final pathRoof = Path()
+      ..moveTo(10, 45)
+      ..lineTo(65, 5)
+      ..lineTo(120, 45)
+      ..close();
+    canvas.drawPath(pathRoof, paintHouse);
+    canvas.drawPath(pathRoof, paintStroke);
+
+    // Ventana central
+    const windowRect = Rect.fromLTWH(50, 55, 30, 30);
+    canvas.drawRect(windowRect, paintDetails);
+    
+    final paintWindowFrame = Paint()
+      ..color = isDark ? const Color(0xFF2E3D31) : const Color(0xFFC8E6C9)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawRect(windowRect, paintWindowFrame);
+    
+    // Divisiones de la ventana
+    canvas.drawLine(const Offset(65, 55), const Offset(65, 85), paintWindowFrame);
+    canvas.drawLine(const Offset(50, 70), const Offset(80, 70), paintWindowFrame);
+
+    // Arbustos laterales (Círculos verdes traslapados)
+    final paintBush = Paint()
+      ..color = (isDark ? const Color(0xFF2E7D32) : const Color(0xFFA5D6A7)).withValues(alpha: 0.4)
+      ..style = PaintingStyle.fill;
+    
+    canvas.drawCircle(const Offset(15, 100), 18, paintBush);
+    canvas.drawCircle(const Offset(115, 100), 22, paintBush);
+    canvas.drawCircle(const Offset(125, 105), 15, paintBush);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _MagnifyingGlassPainter extends CustomPainter {
+  final bool isDark;
+  _MagnifyingGlassPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Sombra de la lupa
+    final shadowPaint = Paint()
+      ..color = Colors.black.withValues(alpha: isDark ? 0.3 : 0.1)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+    canvas.drawCircle(
+      Offset(size.width * 0.45 + 3, size.height * 0.45 + 3),
+      size.width * 0.35,
+      shadowPaint,
+    );
+
+    final greenPrimaryColor = isDark ? const Color(0xFF4CAF50) : const Color(0xFF1B5E20);
+
+    final framePaint = Paint()
+      ..color = greenPrimaryColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8;
+
+    final lensPaint = Paint()
+      ..color = (isDark ? const Color(0xFF4CAF50) : const Color(0xFFC8E6C9)).withValues(alpha: 0.3)
+      ..style = PaintingStyle.fill;
+
+    final handlePaint = Paint()
+      ..color = greenPrimaryColor
+      ..style = PaintingStyle.fill
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 10;
+
+    final double cx = size.width * 0.45;
+    final double cy = size.height * 0.45;
+    final double radius = size.width * 0.32;
+
+    // Lente
+    canvas.drawCircle(Offset(cx, cy), radius, lensPaint);
+    // Marco
+    canvas.drawCircle(Offset(cx, cy), radius, framePaint);
+
+    // Mango de la lupa
+    final double startX = cx + radius * 0.707;
+    final double startY = cy + radius * 0.707;
+    final double endX = size.width * 0.95;
+    final double endY = size.height * 0.95;
+    
+    canvas.drawLine(Offset(startX, startY), Offset(endX, endY), handlePaint);
+
+    // Brillo en el cristal
+    final glarePaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.6)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+
+    final rect = Rect.fromCircle(center: Offset(cx, cy), radius: radius * 0.7);
+    canvas.drawArc(rect, 3.14 + 0.5, 1.0, false, glarePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

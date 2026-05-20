@@ -1,86 +1,123 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'dart:developer' as dev;
-// Comentado temporalmente flutter_local_notifications
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'firebase_service.dart';
 
+/// Complementa a FirebaseService con lógica específica de notificaciones.
+/// FirebaseService maneja: permisos, token, listeners de mensajes.
+/// NotificationService maneja: procesamiento de mensajes y envío via backend.
 class NotificationService {
-  static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-  // Comentado temporalmente
-  // static final FlutterLocalNotificationsPlugin _localNotifications =
-  //     FlutterLocalNotificationsPlugin();
+  static bool _isInitialized = false;
+
+  static bool get isInitialized => _isInitialized;
 
   static Future<void> initialize() async {
-    // Configurar notificaciones locales - comentado temporalmente
-    // const AndroidInitializationSettings initializationSettingsAndroid =
-    //     AndroidInitializationSettings('@mipmap/ic_launcher');
+    if (_isInitialized) return;
 
-    // const InitializationSettings initializationSettings =
-    //     InitializationSettings(
-    //   android: initializationSettingsAndroid,
-    // );
+    try {
+      // Garantiza que FirebaseService esté activo antes de continuar
+      final firebaseReady = await FirebaseService.ensureInitialized();
+      if (!firebaseReady) {
+        if (kDebugMode) {
+          debugPrint('NotificationService: Firebase no disponible');
+        }
+        return;
+      }
 
-    // await _localNotifications.initialize(initializationSettings);
-
-    // Configurar Firebase Messaging
-    await _messaging.requestPermission();
-
-    // Manejar mensajes cuando la app está en primer plano
-    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-
-    // Manejar mensajes cuando la app está en segundo plano
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
+      _isInitialized = true;
+      if (kDebugMode) {
+        debugPrint('NotificationService inicializado');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error al inicializar NotificationService: $e');
+      }
+    }
   }
 
-  static Future<String?> getToken() async {
-    return await _messaging.getToken();
+  /// Procesa un mensaje recibido con la app en primer plano.
+  /// Llamar desde FirebaseService._handleMessage() según el contexto.
+  static void handleForegroundMessage(RemoteMessage message) {
+    if (kDebugMode) {
+      debugPrint('Mensaje en primer plano: ${message.notification?.title}');
+      debugPrint('Datos: ${message.data}');
+    }
+
+    // Aquí puedes mostrar un banner, snackbar o notificación local
+    // según el tipo de mensaje recibido en message.data['type']
+    _routeMessage(message);
   }
 
-  static void _handleForegroundMessage(RemoteMessage message) {
-    // Temporalmente solo imprimir el mensaje
-    dev.log('Mensaje en primer plano: ${message.notification?.title}');
-    // _showLocalNotification(
-    //   title: message.notification?.title ?? 'Nueva notificación',
-    //   body: message.notification?.body ?? '',
-    // );
+  /// Procesa un mensaje cuando el usuario toca la notificación
+  /// con la app en background o cerrada.
+  static void handleBackgroundMessage(RemoteMessage message) {
+    if (kDebugMode) {
+      debugPrint(
+          'App abierta desde notificación: ${message.notification?.title}');
+      debugPrint('Datos: ${message.data}');
+    }
+
+    _routeMessage(message);
   }
 
-  static void _handleBackgroundMessage(RemoteMessage message) {
-    dev.log('Mensaje en segundo plano: ${message.notification?.title}');
+  /// Enruta el mensaje según su tipo para navegación o acciones específicas.
+  static void _routeMessage(RemoteMessage message) {
+    final type = message.data['type'] as String?;
+
+    switch (type) {
+      case 'booking':
+        if (kDebugMode) {
+          debugPrint(
+              'Navegar a detalle de reserva: ${message.data['booking_id']}');
+        }
+        // NavigationService.navigateTo(AppRoutes.bookingDetail, arguments: ...);
+        break;
+      case 'chat':
+        if (kDebugMode) {
+          debugPrint('Navegar a chat: ${message.data['chat_id']}');
+        }
+        // NavigationService.navigateTo(AppRoutes.chat, arguments: ...);
+        break;
+      case 'task':
+        if (kDebugMode) {
+          debugPrint('Navegar a tarea: ${message.data['task_id']}');
+        }
+        // NavigationService.navigateTo(AppRoutes.providerTaskFeed);
+        break;
+      default:
+        if (kDebugMode) {
+          debugPrint('Tipo de notificación no reconocido: $type');
+        }
+    }
   }
 
-  // Comentado temporalmente
-  // static Future<void> _showLocalNotification({
-  //   required String title,
-  //   required String body,
-  // }) async {
-  //   const AndroidNotificationDetails androidPlatformChannelSpecifics =
-  //       AndroidNotificationDetails(
-  //     'manachiy_channel',
-  //     'Manachyna Kusa Notifications',
-  //     channelDescription:
-  //         'Notificaciones de la aplicacion MANACHYNA KUSA',
-  //     importance: Importance.max,
-  //     priority: Priority.high,
-  //   );
-
-  //   const NotificationDetails platformChannelSpecifics =
-  //       NotificationDetails(android: androidPlatformChannelSpecifics);
-
-  //   await _localNotifications.show(
-  //     0,
-  //     title,
-  //     body,
-  //     platformChannelSpecifics,
-  //   );
-  // }
-
-  static Future<void> sendBookingNotification({
+  /// Envía una notificación push mediante tu backend o Firebase Cloud Functions.
+  /// No es posible enviar notificaciones directamente desde el cliente Flutter
+  /// sin un servidor intermedio.
+  ///
+  /// Ejemplo de implementación futura:
+  /// POST https://tu-backend.com/api/notifications
+  /// { "user_id": userId, "title": title, "body": body, "data": data }
+  static Future<void> sendPushNotification({
     required String userId,
     required String title,
     required String body,
+    Map<String, dynamic>? data,
   }) async {
-    // Aquí implementarías el envío de notificaciones push
-    // usando Firebase Cloud Functions o tu backend
-    dev.log('Enviando notificación a $userId: $title');
+    if (kDebugMode) {
+      debugPrint('sendPushNotification → userId: $userId, title: $title');
+      debugPrint('Implementar llamada al backend o Cloud Functions');
+    }
+
+    // TODO: implementar llamada HTTP al backend cuando esté disponible
+    // final response = await http.post(
+    //   Uri.parse('https://tu-backend.com/api/notifications'),
+    //   headers: {'Content-Type': 'application/json'},
+    //   body: jsonEncode({
+    //     'user_id': userId,
+    //     'title': title,
+    //     'body': body,
+    //     'data': data ?? {},
+    //   }),
+    // );
   }
 }

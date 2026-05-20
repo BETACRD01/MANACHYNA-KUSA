@@ -5,6 +5,7 @@ import '../../core/constants/app_routes.dart';
 import '../../core/widgets/loading_widget.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../providers/service_provider.dart';
 import '../../models/user_model.dart';
 import '../../models/booking_model.dart';
@@ -43,10 +44,32 @@ class _ProviderDashboardState extends State<ProviderDashboard> {
       appBar: AppBar(
         title: const Text('Panel de Proveedor'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Navegar a notificaciones
+          Consumer<NotificationProvider>(
+            builder: (context, notifProvider, _) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () {
+                      Navigator.pushNamed(context, AppRoutes.notifications);
+                    },
+                  ),
+                  if (notifProvider.unreadCount > 0)
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: Container(
+                        width: 9,
+                        height: 9,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              );
             },
           ),
         ],
@@ -371,12 +394,10 @@ class _ProviderDashboardState extends State<ProviderDashboard> {
               () => Navigator.pushNamed(context, AppRoutes.profile),
             ),
             _buildActionCard(
-              'Estadísticas',
-              Icons.analytics,
+              'Tareas Solicitadas',
+              Icons.local_activity_rounded,
               AppColors.info,
-              () {
-                // Navegar a estadísticas
-              },
+              () => Navigator.pushNamed(context, AppRoutes.providerTaskFeed),
             ),
           ],
         ),

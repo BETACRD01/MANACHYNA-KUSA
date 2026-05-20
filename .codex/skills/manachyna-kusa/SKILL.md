@@ -73,7 +73,7 @@ Use this skill when the task is about the Flutter app in this repository.
   - storage buckets
   - RLS policies
 - Prefer additive, migration-friendly thinking.
-- Avoid hard-coding assumptions that the current column set is permanent.
+  Avoid hard-coding assumptions that the current column set is permanent.
 
 ## Output expectations
 

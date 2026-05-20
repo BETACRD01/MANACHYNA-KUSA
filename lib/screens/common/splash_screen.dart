@@ -92,10 +92,15 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _startSequence() async {
+    if (!mounted) return;
     await _logoController.forward();
+    if (!mounted) return;
     await Future.delayed(const Duration(milliseconds: 100));
+    if (!mounted) return;
     await _contentController.forward();
+    if (!mounted) return;
     await Future.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
     _loaderController.forward();
   }
 

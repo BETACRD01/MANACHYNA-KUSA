@@ -1,6 +1,5 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
-
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/bookings/data/booking_repository.dart';
 import '../../features/services/data/service_repository.dart';
@@ -10,6 +9,9 @@ import '../../providers/booking_provider.dart';
 import '../../providers/service_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/language_provider.dart';
+import '../../providers/custom_task_provider.dart';
 
 class AppProviders {
   static List<SingleChildWidget> build() {
@@ -40,6 +42,15 @@ class AppProviders {
       ),
       ChangeNotifierProvider<ThemeProvider>(
         create: (_) => ThemeProvider(),
+      ),
+      ChangeNotifierProvider<NotificationProvider>(
+        create: (_) => NotificationProvider(),
+      ),
+      ChangeNotifierProvider<LanguageProvider>(
+        create: (_) => LanguageProvider(),
+      ),
+      ChangeNotifierProvider<CustomTaskProvider>(
+        create: (_) => CustomTaskProvider(),
       ),
     ];
   }

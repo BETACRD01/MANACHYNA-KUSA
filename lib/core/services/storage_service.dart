@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
-
 import '../config/supabase_config.dart';
 import 'supabase_service.dart';
 
@@ -17,13 +15,11 @@ class StorageService {
       final objectPath = '$userId/$fileName';
       final fileBytes = await imageFile.readAsBytes();
 
-      onProgress?.call(0.2);
-
+      onProgress?.call(0.0); // inicio de subida
       await SupabaseService.client.storage
           .from(SupabaseConfig.profileImagesBucket)
           .uploadBinary(objectPath, fileBytes);
-
-      onProgress?.call(1.0);
+      onProgress?.call(1.0); // subida completada
 
       return SupabaseService.client.storage
           .from(SupabaseConfig.profileImagesBucket)
@@ -38,15 +34,11 @@ class StorageService {
 
   static Future<void> deleteProfileImage(String imageUrl) async {
     try {
-      if (imageUrl.isEmpty) {
-        return;
-      }
+      if (imageUrl.isEmpty) return;
 
       const marker = '/object/public/${SupabaseConfig.profileImagesBucket}/';
       final index = imageUrl.indexOf(marker);
-      if (index == -1) {
-        return;
-      }
+      if (index == -1) return;
 
       final objectPath = imageUrl.substring(index + marker.length);
       await SupabaseService.client.storage
@@ -59,6 +51,7 @@ class StorageService {
     }
   }
 
+  // Filtra objetos de sistema como .emptyFolderPlaceholder
   static Future<List<String>> getUserProfileImages(String userId) async {
     try {
       final objects = await SupabaseService.client.storage
@@ -66,6 +59,7 @@ class StorageService {
           .list(path: userId);
 
       return objects
+          .where((o) => !o.name.startsWith('.'))
           .map((object) => SupabaseService.client.storage
               .from(SupabaseConfig.profileImagesBucket)
               .getPublicUrl('$userId/${object.name}'))
@@ -78,17 +72,23 @@ class StorageService {
     }
   }
 
+  // Mantiene solo las 3 imágenes más recientes por usuario
   static Future<void> cleanupOldImages(String userId) async {
     try {
       final objects = await SupabaseService.client.storage
           .from(SupabaseConfig.profileImagesBucket)
           .list(path: userId);
 
-      if (objects.length <= 3) {
-        return;
-      }
+      // Filtra objetos de sistema antes de ordenar
+      final filtered = objects.where((o) => !o.name.startsWith('.')).toList();
 
-      final sorted = [...objects]..sort((a, b) => a.name.compareTo(b.name));
+      if (filtered.length <= 3) return;
+
+      // Ordena por createdAt para no depender del formato del nombre
+      final sorted = [...filtered]..sort(
+          (a, b) => (a.createdAt ?? '').compareTo(b.createdAt ?? ''),
+        );
+
       final pathsToDelete = sorted
           .take(sorted.length - 3)
           .map((object) => '$userId/${object.name}')

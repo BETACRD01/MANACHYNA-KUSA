@@ -1,0 +1,22 @@
+{
+  "name": "manachyna-kusa-project-ai-instructions",
+  "version": "2026-05-20",
+  "source_project": {
+    "supabase_ref": "ikdcqxgecjzgjntejizu",
+    "supabase_name": "Mañachiy kan Kusata",
+    "firebase_project_id": "manachyna-kusa-v2-2025",
+    "snapshot_date": "2026-05-20"
+  },
+  "security_note": "No private credentials, OAuth secrets, user rows, or FCM tokens are included.",
+  "files": [
+    {"path": "PROJECT_AI_INSTRUCTIONS.md", "desc": "Punto de entrada para cualquier IA"},
+    {"path": "PROJECT_SKILL.md", "desc": "Skill resumida del proyecto"},
+    {"path": "CHANGES.md", "desc": "Extracto de cambios recientes"},
+    {"path": "migrations/supabase-schema-working-draft.sql", "desc": "Borrador amplio del esquema SQL"},
+    {"path": "ENVIRONMENT.md", "desc": "Stack y rutas"},
+    {"path": "PROJECT_CREDENTIALS_SAFE.md", "desc": "Inventario seguro de credenciales públicas/redactadas"},
+    {"path": ".env.example", "desc": "Plantilla minima con SUPABASE_URL y SUPABASE_ANON_KEY"},
+    {"path": "references/live-supabase-schema.md", "desc": "Snapshot seguro del esquema real de Supabase"},
+    {"path": "references/public-catalog-seed.json", "desc": "Datos públicos de catálogo sin PII"}
+  ]
+}

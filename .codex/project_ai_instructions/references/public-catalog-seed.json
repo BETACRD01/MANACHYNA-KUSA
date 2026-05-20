@@ -1,0 +1,163 @@
+{
+  "source": {
+    "supabase_ref": "ikdcqxgecjzgjntejizu",
+    "snapshot_date": "2026-05-20",
+    "note": "Only public catalog rows are included. No users, bookings, tokens, or private rows are exported."
+  },
+  "service_categories": [
+    {
+      "name": "Limpieza",
+      "slug": "limpieza",
+      "description": "Servicios de limpieza para hogares y oficinas",
+      "icon": "cleaning",
+      "color": "#1B7F5A",
+      "sort_order": 1,
+      "is_active": true
+    },
+    {
+      "name": "Plomería",
+      "slug": "plomeria",
+      "description": "Reparación e instalación de tuberías y grifería",
+      "icon": "plumbing",
+      "color": "#2563EB",
+      "sort_order": 2,
+      "is_active": true
+    },
+    {
+      "name": "Electricidad",
+      "slug": "electricidad",
+      "description": "Instalaciones y reparaciones eléctricas",
+      "icon": "electrical",
+      "color": "#F59E0B",
+      "sort_order": 3,
+      "is_active": true
+    },
+    {
+      "name": "Pintura",
+      "slug": "pintura",
+      "description": "Pintura interior y exterior",
+      "icon": "painting",
+      "color": "#8B5CF6",
+      "sort_order": 4,
+      "is_active": true
+    },
+    {
+      "name": "Mantenimiento",
+      "slug": "mantenimiento",
+      "description": "Mantenimiento general del hogar",
+      "icon": "maintenance",
+      "color": "#64748B",
+      "sort_order": 5,
+      "is_active": true
+    },
+    {
+      "name": "Agronomía",
+      "slug": "agronomia",
+      "description": "Servicios agrícolas y asesoría técnica",
+      "icon": "agronomy",
+      "color": "#16A34A",
+      "sort_order": 6,
+      "is_active": true
+    },
+    {
+      "name": "Tecnología",
+      "slug": "tecnologia",
+      "description": "Soporte técnico, redes y equipos",
+      "icon": "technology",
+      "color": "#0EA5E9",
+      "sort_order": 7,
+      "is_active": true
+    },
+    {
+      "name": "Marketing",
+      "slug": "marketing",
+      "description": "Publicidad digital para negocios locales",
+      "icon": "marketing",
+      "color": "#EC4899",
+      "sort_order": 8,
+      "is_active": true
+    }
+  ],
+  "services": [
+    {
+      "name": "Limpieza del hogar",
+      "slug": "limpieza-hogar",
+      "category_slug": "limpieza",
+      "short_description": "Casas y oficinas",
+      "base_price": 15,
+      "price_unit": "hour",
+      "estimated_duration_minutes": 180,
+      "is_active": true
+    },
+    {
+      "name": "Plomería básica",
+      "slug": "plomeria-basica",
+      "category_slug": "plomeria",
+      "short_description": "Fugas e instalación",
+      "base_price": 18,
+      "price_unit": "hour",
+      "estimated_duration_minutes": 120,
+      "is_active": true
+    },
+    {
+      "name": "Servicio eléctrico",
+      "slug": "servicio-electrico",
+      "category_slug": "electricidad",
+      "short_description": "Revisión segura",
+      "base_price": 20,
+      "price_unit": "hour",
+      "estimated_duration_minutes": 120,
+      "is_active": true
+    },
+    {
+      "name": "Pintura interior",
+      "slug": "pintura-interior",
+      "category_slug": "pintura",
+      "short_description": "Paredes y acabados",
+      "base_price": 25,
+      "price_unit": "hour",
+      "estimated_duration_minutes": 240,
+      "is_active": true
+    },
+    {
+      "name": "Mantenimiento general",
+      "slug": "mantenimiento-general",
+      "category_slug": "mantenimiento",
+      "short_description": "Reparaciones menores",
+      "base_price": 20,
+      "price_unit": "hour",
+      "estimated_duration_minutes": 180,
+      "is_active": true
+    },
+    {
+      "name": "Asesoría agronómica",
+      "slug": "asesoria-agronomica",
+      "category_slug": "agronomia",
+      "short_description": "Asesoría local",
+      "base_price": 25,
+      "price_unit": "hour",
+      "estimated_duration_minutes": 120,
+      "is_active": true
+    },
+    {
+      "name": "Soporte técnico",
+      "slug": "soporte-tecnico",
+      "category_slug": "tecnologia",
+      "short_description": "Redes y equipos",
+      "base_price": 22,
+      "price_unit": "hour",
+      "estimated_duration_minutes": 120,
+      "is_active": true
+    },
+    {
+      "name": "Publicidad digital",
+      "slug": "publicidad-digital",
+      "category_slug": "marketing",
+      "short_description": "Negocios locales",
+      "base_price": 30,
+      "price_unit": "hour",
+      "estimated_duration_minutes": 180,
+      "is_active": true
+    }
+  ]
+}

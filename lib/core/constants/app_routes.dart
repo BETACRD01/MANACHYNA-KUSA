@@ -14,4 +14,12 @@ class AppRoutes {
   static const String map = '/map';
   static const String chat = '/chat';
   static const String search = '/search';
+  static const String editProfile = '/edit-profile';
+  static const String notifications = '/notifications';
+  static const String language = '/language';
+  static const String helpCenter = '/help-center';
+  static const String contactUs = '/contact-us';
+  static const String customTaskForm = '/custom-task-form';
+  static const String clientCustomTasks = '/client-custom-tasks';
+  static const String providerTaskFeed = '/provider-task-feed';
 }

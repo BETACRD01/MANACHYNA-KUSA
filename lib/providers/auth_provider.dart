@@ -108,13 +108,17 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> checkAuthStatus() async {
-    if (!_isInitialized) {
-      return;
-    }
+    try {
+      if (!_isInitialized) {
+        return;
+      }
 
-    final authUser = AuthService.currentUser;
-    if (authUser != null && _currentUser == null) {
-      await _loadUserData(authUser.id);
+      final authUser = AuthService.currentUser;
+      if (authUser != null && _currentUser == null) {
+        await _loadUserData(authUser.id);
+      }
+    } catch (e) {
+      debugPrint('Error en checkAuthStatus: $e');
     }
   }
 

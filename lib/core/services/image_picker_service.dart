@@ -1,22 +1,64 @@
 // lib/core/services/image_picker_service.dart
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/foundation.dart';
-import 'package:image/image.dart' as img;
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FIX 3 · Función top-level para compute()
+// compute() exige una función top-level (o static) serializable.
+// Recibe los bytes originales y devuelve los bytes procesados,
+// todo dentro de un isolate separado → la UI no se bloquea.
+// ─────────────────────────────────────────────────────────────────────────────
+Uint8List _processImageBytes(Uint8List imageBytes) {
+  final img.Image? decoded = img.decodeImage(imageBytes);
+  if (decoded == null) throw Exception('No se pudo decodificar la imagen');
+
+  // Redimensionar solo si supera el límite
+  final img.Image resized = (decoded.width > ImagePickerService.maxDimension ||
+          decoded.height > ImagePickerService.maxDimension)
+      ? img.copyResize(
+          decoded,
+          width: ImagePickerService.maxDimension,
+          height: ImagePickerService.maxDimension,
+          interpolation: img.Interpolation.linear,
+        )
+      : decoded;
+
+  return Uint8List.fromList(
+    img.encodeJpg(resized, quality: ImagePickerService.jpegQuality),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Servicio principal
+// ─────────────────────────────────────────────────────────────────────────────
 class ImagePickerService {
+  ImagePickerService._(); // clase no instanciable
+
   static final ImagePicker _picker = ImagePicker();
 
-  /// Muestra diálogo para seleccionar fuente de imagen
-  static Future<File?> showImageSourceSelection(BuildContext context) async {
-    return await showModalBottomSheet<File?>(
+  // Constantes expuestas para que _processImageBytes (top-level) las use.
+  static const int maxDimension = 800;
+  static const int jpegQuality = 85;
+  static const double maxFileSizeMB = 15.0;
+
+  // ── UI ──────────────────────────────────────────────────────────────────
+
+  /// Muestra el bottom sheet de selección de fuente.
+  /// Retorna el [File] procesado o `null` si el usuario cancela.
+  static Future<File?> showImageSourceSelection(BuildContext context) {
+    return showModalBottomSheet<File?>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      builder: (sheetContext) => Container(
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -24,11 +66,11 @@ class ImagePickerService {
         child: SafeArea(
           child: Wrap(
             children: [
-              Container(
-                width: double.infinity,
+              Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
+                    // Handle visual
                     Container(
                       width: 40,
                       height: 4,
@@ -50,26 +92,28 @@ class ImagePickerService {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildSourceOption(
-                          context,
+                          sheetContext,
                           icon: Icons.camera_alt,
                           label: 'Cámara',
                           onTap: () async {
-                            Navigator.pop(context);
-                            final file = await pickImageFromCamera();
-                            if (context.mounted) {
-                              Navigator.pop(context, file);
+                            // FIX 1 · Un solo Navigator.pop devuelve el archivo
+                            // y cierra el sheet simultáneamente.
+                            // El sheet permanece en background mientras la cámara
+                            // está activa, lo cual es el comportamiento correcto.
+                            final File? file = await pickImageFromCamera();
+                            if (sheetContext.mounted) {
+                              Navigator.pop(sheetContext, file);
                             }
                           },
                         ),
                         _buildSourceOption(
-                          context,
+                          sheetContext,
                           icon: Icons.photo_library,
                           label: 'Galería',
                           onTap: () async {
-                            Navigator.pop(context);
-                            final file = await pickImageFromGallery();
-                            if (context.mounted) {
-                              Navigator.pop(context, file);
+                            final File? file = await pickImageFromGallery();
+                            if (sheetContext.mounted) {
+                              Navigator.pop(sheetContext, file);
                             }
                           },
                         ),
@@ -103,11 +147,7 @@ class ImagePickerService {
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              size: 40,
-              color: Theme.of(context).primaryColor,
-            ),
+            Icon(icon, size: 40, color: Theme.of(context).primaryColor),
             const SizedBox(height: 10),
             Text(
               label,
@@ -122,184 +162,196 @@ class ImagePickerService {
     );
   }
 
-  /// Selecciona imagen desde la cámara
+  // ── Selección ────────────────────────────────────────────────────────────
+
+  /// Captura una imagen desde la cámara.
   static Future<File?> pickImageFromCamera() async {
     try {
-      // Verificar permisos de cámara
       if (!await _requestCameraPermission()) {
         throw Exception('Permisos de cámara denegados');
       }
 
-      final XFile? pickedFile = await _picker.pickImage(
+      final XFile? picked = await _picker.pickImage(
         source: ImageSource.camera,
         imageQuality: 80,
         maxWidth: 1080,
         maxHeight: 1080,
       );
 
-      if (pickedFile == null) return null;
-
-      // Procesar y optimizar imagen
-      return await _processImage(File(pickedFile.path));
+      if (picked == null) return null;
+      return _processImage(File(picked.path));
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error al tomar foto: $e');
+        debugPrint('pickImageFromCamera: $e');
       }
       rethrow;
     }
   }
 
-  /// Selecciona imagen desde la galería
+  /// Selecciona una imagen desde la galería.
   static Future<File?> pickImageFromGallery() async {
     try {
-      // Verificar permisos de galería
       if (!await _requestGalleryPermission()) {
         throw Exception('Permisos de galería denegados');
       }
 
-      final XFile? pickedFile = await _picker.pickImage(
+      final XFile? picked = await _picker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 80,
         maxWidth: 1080,
         maxHeight: 1080,
       );
 
-      if (pickedFile == null) return null;
-
-      // Procesar y optimizar imagen
-      return await _processImage(File(pickedFile.path));
+      if (picked == null) return null;
+      return _processImage(File(picked.path));
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error al seleccionar de galería: $e');
+        debugPrint('pickImageFromGallery: $e');
       }
       rethrow;
     }
   }
 
-  /// Procesa y optimiza la imagen seleccionada
+  // ── Procesamiento ────────────────────────────────────────────────────────
+
+  /// Valida, redimensiona y comprime la imagen.
   static Future<File> _processImage(File imageFile) async {
+    // FIX 4 · Validar tamaño ANTES de leer los bytes completos en memoria
+    final double sizeMB = await getFileSizeInMB(imageFile);
+    if (sizeMB > maxFileSizeMB) {
+      throw Exception(
+        'La imagen supera el límite permitido de ${maxFileSizeMB.toInt()} MB',
+      );
+    }
+
+    final Uint8List originalBytes = await imageFile.readAsBytes();
+
+    // FIX 3 · compute() delega el trabajo al isolate → UI libre durante
+    // la decodificación/compresión (especialmente notable en gama baja)
+    final Uint8List processedBytes =
+        await compute(_processImageBytes, originalBytes);
+
+    // FIX 5 · Nombre con prefijo reconocible para facilitar la limpieza
+    final Directory tempDir = await getTemporaryDirectory();
+    final String fileName =
+        'mk_img_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final File output = File(path.join(tempDir.path, fileName));
+    await output.writeAsBytes(processedBytes);
+
+    if (kDebugMode) {
+      final double originalKB = originalBytes.length / 1024;
+      final double compressedKB = processedBytes.length / 1024;
+      final double reduction = (originalKB - compressedKB) / originalKB * 100;
+      debugPrint(
+        '✅ Imagen procesada | '
+        '${originalKB.toStringAsFixed(0)} KB → '
+        '${compressedKB.toStringAsFixed(0)} KB | '
+        '${reduction.toStringAsFixed(1)}% reducción',
+      );
+    }
+
+    return output;
+  }
+
+  // ── Limpieza de temporales ───────────────────────────────────────────────
+
+  /// FIX 5 · Elimina los archivos temporales generados por este servicio.
+  ///
+  /// Llamar al cerrar sesión, al salir de la pantalla de perfil,
+  /// o al confirmar que la imagen ya fue subida a Supabase Storage.
+  static Future<void> clearTemporaryFiles() async {
     try {
-      // Leer imagen
-      final Uint8List imageBytes = await imageFile.readAsBytes();
-      img.Image? originalImage = img.decodeImage(imageBytes);
-
-      if (originalImage == null) {
-        throw Exception('No se pudo decodificar la imagen');
-      }
-
-      // Redimensionar si es muy grande (máximo 800x800 para perfil)
-      if (originalImage.width > 800 || originalImage.height > 800) {
-        originalImage = img.copyResize(
-          originalImage,
-          width: 800,
-          height: 800,
-          interpolation: img.Interpolation.linear,
-        );
-      }
-
-      // Convertir a JPEG con compresión
-      final Uint8List processedBytes = Uint8List.fromList(img.encodeJpg(
-        originalImage,
-        quality: 85,
-      ));
-
-      // Guardar imagen procesada
       final Directory tempDir = await getTemporaryDirectory();
-      final String fileName =
-          'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final File processedFile = File(path.join(tempDir.path, fileName));
+      int deleted = 0;
 
-      await processedFile.writeAsBytes(processedBytes);
-
-      if (kDebugMode) {
-        final int originalSize = imageBytes.length;
-        final int newSize = processedBytes.length;
-        final double compressionRatio =
-            ((originalSize - newSize) / originalSize * 100);
-        print(
-            '✅ Imagen procesada: ${compressionRatio.toStringAsFixed(1)}% reducción');
-        print(
-            '   Tamaño original: ${(originalSize / 1024).toStringAsFixed(1)} KB');
-        print('   Tamaño final: ${(newSize / 1024).toStringAsFixed(1)} KB');
+      for (final entity in tempDir.listSync()) {
+        if (entity is File &&
+            path.basename(entity.path).startsWith('mk_img_') &&
+            entity.path.endsWith('.jpg')) {
+          await entity.delete();
+          deleted++;
+        }
       }
 
-      return processedFile;
+      if (kDebugMode && deleted > 0) {
+        debugPrint('🗑 clearTemporaryFiles: $deleted archivo(s) eliminados');
+      }
     } catch (e) {
+      // No relanzar — la limpieza es no crítica
       if (kDebugMode) {
-        print('❌ Error al procesar imagen: $e');
+        debugPrint('clearTemporaryFiles: $e');
       }
-      throw Exception('Error al procesar imagen: $e');
     }
   }
 
-  /// Solicita permisos de cámara
+  // ── Permisos ─────────────────────────────────────────────────────────────
+
   static Future<bool> _requestCameraPermission() async {
     try {
-      final PermissionStatus status = await Permission.camera.request();
-      return status == PermissionStatus.granted;
+      return await Permission.camera.request() == PermissionStatus.granted;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error al solicitar permisos de cámara: $e');
+        debugPrint('_requestCameraPermission: $e');
       }
       return false;
     }
   }
 
-  /// Solicita permisos de galería
   static Future<bool> _requestGalleryPermission() async {
     try {
-      PermissionStatus status;
-
       if (Platform.isAndroid) {
-        // Android 13+ usa diferentes permisos
-        if (await _isAndroid13OrHigher()) {
-          status = await Permission.photos.request();
-        } else {
-          status = await Permission.storage.request();
-        }
-      } else {
-        // iOS usa photos
-        status = await Permission.photos.request();
+        // FIX 2 · Usa device_info_plus para detectar la versión real del SDK
+        final bool isAndroid13 = await _isAndroid13OrHigher();
+        final PermissionStatus status = isAndroid13
+            ? await Permission.photos.request() // API 33+ → READ_MEDIA_IMAGES
+            : await Permission.storage
+                .request(); // API ≤32 → READ_EXTERNAL_STORAGE
+        return status == PermissionStatus.granted;
       }
 
-      return status == PermissionStatus.granted;
+      // iOS: image_picker usa PHPickerViewController desde iOS 14,
+      // que no requiere permisos de usuario explícitos.
+      return true;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error al solicitar permisos de galería: $e');
+        debugPrint('_requestGalleryPermission: $e');
       }
       return false;
     }
   }
 
-  /// Verifica si es Android 13 o superior
+  /// FIX 2 · Detecta Android 13 (API 33) correctamente con device_info_plus.
   static Future<bool> _isAndroid13OrHigher() async {
     if (!Platform.isAndroid) return false;
-
     try {
-      // Esta es una aproximación, en producción podrías usar device_info_plus
-      return true; // Asumir Android moderno por simplicidad
+      final AndroidDeviceInfo info = await DeviceInfoPlugin().androidInfo;
+      return info.version.sdkInt >= 33;
     } catch (e) {
+      if (kDebugMode) {
+        debugPrint('_isAndroid13OrHigher: $e');
+      }
+      // Fallback conservador: usar Permission.storage (compatible con API ≤32)
       return false;
     }
   }
 
-  /// Verifica si una imagen es válida
+  // ── Utilidades públicas ──────────────────────────────────────────────────
+
+  /// Verifica si el archivo es una imagen válida decodificable.
   static Future<bool> isValidImage(File imageFile) async {
     try {
       final Uint8List bytes = await imageFile.readAsBytes();
-      final img.Image? image = img.decodeImage(bytes);
-      return image != null;
-    } catch (e) {
+      return img.decodeImage(bytes) != null;
+    } catch (_) {
       return false;
     }
   }
 
-  /// Obtiene el tamaño de archivo en MB
+  /// Tamaño del archivo en MB.
   static Future<double> getFileSizeInMB(File file) async {
     try {
-      final int bytes = await file.length();
-      return bytes / (1024 * 1024);
-    } catch (e) {
+      return await file.length() / (1024 * 1024);
+    } catch (_) {
       return 0.0;
     }
   }

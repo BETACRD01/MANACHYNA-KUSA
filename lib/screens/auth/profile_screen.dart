@@ -9,6 +9,7 @@ import '../../core/widgets/loading_widget.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../providers/language_provider.dart';
 import 'perfil/perfil_provider_registration_view.dart';
 import 'perfil/perfil_provider_view.dart';
 import 'perfil/perfil_widgets.dart';
@@ -176,7 +177,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             return _PerfilMainView(
               user: user,
-              onEditPhoto: _showEditPhotoMessage,
+              onEditPhoto: () {
+                Navigator.pushNamed(context, AppRoutes.editProfile);
+              },
+              onEditProfile: () {
+                Navigator.pushNamed(context, AppRoutes.editProfile);
+              },
               onOpenProviderView: () {
                 setState(() => _showProviderView = true);
               },
@@ -189,12 +195,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showEditPhotoMessage() {
-    Helpers.showCustomSnackBar(
-      context,
-      message: 'Pronto podrás cambiar tu foto de perfil.',
-    );
-  }
 
   void _showComingSoon() {
     Helpers.showCustomSnackBar(
@@ -340,6 +340,7 @@ class _PerfilMainView extends StatelessWidget {
   const _PerfilMainView({
     required this.user,
     required this.onEditPhoto,
+    required this.onEditProfile,
     required this.onOpenProviderView,
     required this.onMenuTap,
     required this.onLogout,
@@ -347,6 +348,7 @@ class _PerfilMainView extends StatelessWidget {
 
   final UserModel user;
   final VoidCallback onEditPhoto;
+  final VoidCallback onEditProfile;
   final VoidCallback onOpenProviderView;
   final VoidCallback onMenuTap;
   final VoidCallback onLogout;
@@ -354,6 +356,7 @@ class _PerfilMainView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final languageProvider = context.watch<LanguageProvider>();
 
     String themeName = 'Sistema';
     if (themeProvider.themeMode == ThemeMode.light) themeName = 'Claro';
@@ -389,14 +392,17 @@ class _PerfilMainView extends StatelessWidget {
                         icon: Icons.person_outline_rounded,
                         title: 'Editar perfil',
                         subtitle: 'Actualiza tu información personal',
-                        onTap: onMenuTap,
+                        onTap: onEditProfile,
                       ),
-                      PerfilMenuItem(
-                        icon: Icons.lock_outline_rounded,
-                        title: 'Cambiar contraseña',
-                        subtitle: 'Mantén tu cuenta segura',
-                        onTap: onMenuTap,
-                      ),
+                      if (user.userType == UserType.client)
+                        PerfilMenuItem(
+                          icon: Icons.assignment_outlined,
+                          title: 'Mis tareas en casa',
+                          subtitle: 'Ver solicitudes y ofertas de proveedores',
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.clientCustomTasks);
+                          },
+                        ),
                     ],
                   ),
                   const SizedBox(height: 28),
@@ -404,16 +410,12 @@ class _PerfilMainView extends StatelessWidget {
                     title: 'Preferencias',
                     children: [
                       PerfilMenuItem(
-                        icon: Icons.notifications_none_rounded,
-                        title: 'Notificaciones',
-                        subtitle: 'Gestiona tus notificaciones',
-                        onTap: onMenuTap,
-                      ),
-                      PerfilMenuItem(
                         icon: Icons.language_rounded,
                         title: 'Idioma',
-                        subtitle: 'Español',
-                        onTap: onMenuTap,
+                        subtitle: languageProvider.currentLanguageName,
+                        onTap: () {
+                          Navigator.pushNamed(context, AppRoutes.language);
+                        },
                       ),
                       PerfilMenuItem(
                         icon: Icons.dark_mode_outlined,
@@ -433,13 +435,17 @@ class _PerfilMainView extends StatelessWidget {
                         icon: Icons.help_outline_rounded,
                         title: 'Centro de ayuda',
                         subtitle: 'Preguntas frecuentes y más',
-                        onTap: onMenuTap,
+                        onTap: () {
+                          Navigator.pushNamed(context, AppRoutes.helpCenter);
+                        },
                       ),
                       PerfilMenuItem(
                         icon: Icons.mail_outline_rounded,
                         title: 'Contáctanos',
                         subtitle: 'Estamos para ayudarte',
-                        onTap: onMenuTap,
+                        onTap: () {
+                          Navigator.pushNamed(context, AppRoutes.contactUs);
+                        },
                       ),
                     ],
                   ),

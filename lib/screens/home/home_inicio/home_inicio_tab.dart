@@ -74,7 +74,10 @@ class HomeInicioTab extends StatelessWidget {
                         const HomeInicioTrustFeatureRow(),
                         const SizedBox(height: 26),
                         HomeInicioPromoCard(
-                          onTap: () => onNavigateToSearch(),
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.customTaskForm,
+                          ),
                         ),
                         const SizedBox(height: 28),
                         HomeInicioSectionHeader(
