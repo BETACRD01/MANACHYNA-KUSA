@@ -9,11 +9,33 @@ Este archivo sirve para orientar a cualquier IA sin exponer secretos.
 - Public URL: `https://ikdcqxgecjzgjntejizu.supabase.co`
 - Region: `us-east-2`
 - Postgres: `17.6.1.121`
-- Public anon key: `<redacted-public-anon-key>`
+- Public anon key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZGNxeGdlY2p6Z2pudGVqaXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NjUyOTcsImV4cCI6MjA5NDQ0MTI5N30.9AOmDYBhvO0rPJ5Uq5AFXjRvvv4xfQP0xdyQCn3rKHs`
 
-La anon key existe en el código Flutter porque el cliente móvil la necesita.
-Para este paquete quedó redactada para evitar duplicar llaves en archivos
-preparados para subir a un tercero.
+La anon key es public/publishable y el proyecto la usa tanto en
+`lib/core/config/supabase_config.dart` como por inyección en runtime con
+`--dart-define`.
+
+## Runtime injection
+
+Use este comando cuando la app deba arrancar con las credenciales inyectadas:
+
+```bash
+flutter run \
+  --dart-define=SUPABASE_URL=https://ikdcqxgecjzgjntejizu.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZGNxeGdlY2p6Z2pudGVqaXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NjUyOTcsImV4cCI6MjA5NDQ0MTI5N30.9AOmDYBhvO0rPJ5Uq5AFXjRvvv4xfQP0xdyQCn3rKHs
+```
+
+## Current code fallback
+
+```dart
+class SupabaseConfig {
+  static const String url = 'https://ikdcqxgecjzgjntejizu.supabase.co';
+  static const String anonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZGNxeGdlY2p6Z2pudGVqaXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NjUyOTcsImV4cCI6MjA5NDQ0MTI5N30.9AOmDYBhvO0rPJ5Uq5AFXjRvvv4xfQP0xdyQCn3rKHs';
+  static const String profileImagesBucket = 'profile-images';
+  static const String serviceImagesBucket = 'service-images';
+}
+```
 
 ## Firebase
 

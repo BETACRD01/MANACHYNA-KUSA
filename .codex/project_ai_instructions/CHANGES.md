@@ -10,5 +10,7 @@
 - 2026-05-20: El contenido se movió a `.codex/project_ai_instructions/`
   y se renombró para presentarse como instrucciones del proyecto y skill
   para cualquier IA.
+- 2026-05-20: Se añadió la referencia explícita a la inyección de credenciales
+  Supabase con `flutter run --dart-define=...` y al `SupabaseConfig` vigente.
 
 Detalles completos en el repo: `.codex/skills/manachyna-kusa/CHANGES.md`.

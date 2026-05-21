@@ -25,6 +25,26 @@ Rutas útiles en el repo:
 - Supabase config: `lib/core/config/supabase_config.dart`
 - Firebase options: `lib/firebase_options.dart` (contiene IDs, evita subir claves)
 
+Inyección de credenciales en runtime:
+
+```bash
+flutter run \
+  --dart-define=SUPABASE_URL=https://ikdcqxgecjzgjntejizu.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZGNxeGdlY2p6Z2pudGVqaXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NjUyOTcsImV4cCI6MjA5NDQ0MTI5N30.9AOmDYBhvO0rPJ5Uq5AFXjRvvv4xfQP0xdyQCn3rKHs
+```
+
+Fallback actual en código:
+
+```dart
+class SupabaseConfig {
+  static const String url = 'https://ikdcqxgecjzgjntejizu.supabase.co';
+  static const String anonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZGNxeGdlY2p6Z2pudGVqaXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NjUyOTcsImV4cCI6MjA5NDQ0MTI5N30.9AOmDYBhvO0rPJ5Uq5AFXjRvvv4xfQP0xdyQCn3rKHs';
+  static const String profileImagesBucket = 'profile-images';
+  static const String serviceImagesBucket = 'service-images';
+}
+```
+
 Dónde están las credenciales (NO incluirlas en el paquete):
 - Supabase URL y keys: se obtienen desde el panel de Supabase → Settings → API.
 - Supabase anon key: existe en `lib/core/config/supabase_config.dart`; trátala

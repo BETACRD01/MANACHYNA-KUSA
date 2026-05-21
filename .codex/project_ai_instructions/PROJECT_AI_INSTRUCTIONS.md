@@ -32,6 +32,8 @@ Instrucciones rápidas:
 2. Usa `PROJECT_AI_INSTRUCTIONS.md` como punto de entrada.
 3. Si una IA solicita credenciales o accesos, usa `PROJECT_CREDENTIALS_SAFE.md`
    como guía y comparte secretos solo por un canal seguro.
+4. Para ejecutar Flutter con Supabase correctamente, prioriza la inyección por
+   `--dart-define` documentada en `ENVIRONMENT.md` y `PROJECT_CREDENTIALS_SAFE.md`.
 
 Propósito: dar a cualquier IA contexto completo del proyecto
 (arquitectura, dependencias, skill, decisiones y estado de Supabase)

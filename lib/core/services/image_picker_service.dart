@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:logging/logging.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIX 3 · Función top-level para compute()
@@ -44,6 +45,7 @@ class ImagePickerService {
   ImagePickerService._(); // clase no instanciable
 
   static final ImagePicker _picker = ImagePicker();
+  static final Logger _logger = Logger('ImagePickerService');
 
   // Constantes expuestas para que _processImageBytes (top-level) las use.
   static const int maxDimension = 800;
@@ -181,9 +183,7 @@ class ImagePickerService {
       if (picked == null) return null;
       return _processImage(File(picked.path));
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('pickImageFromCamera: $e');
-      }
+      _logger.warning('pickImageFromCamera: $e');
       rethrow;
     }
   }
@@ -205,9 +205,7 @@ class ImagePickerService {
       if (picked == null) return null;
       return _processImage(File(picked.path));
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('pickImageFromGallery: $e');
-      }
+      _logger.warning('pickImageFromGallery: $e');
       rethrow;
     }
   }
@@ -242,7 +240,7 @@ class ImagePickerService {
       final double originalKB = originalBytes.length / 1024;
       final double compressedKB = processedBytes.length / 1024;
       final double reduction = (originalKB - compressedKB) / originalKB * 100;
-      debugPrint(
+      _logger.info(
         '✅ Imagen procesada | '
         '${originalKB.toStringAsFixed(0)} KB → '
         '${compressedKB.toStringAsFixed(0)} KB | '
@@ -274,13 +272,11 @@ class ImagePickerService {
       }
 
       if (kDebugMode && deleted > 0) {
-        debugPrint('🗑 clearTemporaryFiles: $deleted archivo(s) eliminados');
+        _logger.info('clearTemporaryFiles: $deleted archivo(s) eliminados');
       }
     } catch (e) {
       // No relanzar — la limpieza es no crítica
-      if (kDebugMode) {
-        debugPrint('clearTemporaryFiles: $e');
-      }
+      _logger.warning('clearTemporaryFiles: $e');
     }
   }
 
@@ -290,9 +286,7 @@ class ImagePickerService {
     try {
       return await Permission.camera.request() == PermissionStatus.granted;
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_requestCameraPermission: $e');
-      }
+      _logger.warning('_requestCameraPermission: $e');
       return false;
     }
   }
@@ -313,9 +307,7 @@ class ImagePickerService {
       // que no requiere permisos de usuario explícitos.
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_requestGalleryPermission: $e');
-      }
+      _logger.warning('_requestGalleryPermission: $e');
       return false;
     }
   }
@@ -327,9 +319,7 @@ class ImagePickerService {
       final AndroidDeviceInfo info = await DeviceInfoPlugin().androidInfo;
       return info.version.sdkInt >= 33;
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_isAndroid13OrHigher: $e');
-      }
+      _logger.warning('_isAndroid13OrHigher: $e');
       // Fallback conservador: usar Permission.storage (compatible con API ≤32)
       return false;
     }
