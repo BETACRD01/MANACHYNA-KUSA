@@ -10,6 +10,7 @@ import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/language_provider.dart';
+import 'login_content.dart';
 import 'perfil/perfil_provider_registration_view.dart';
 import 'perfil/perfil_provider_view.dart';
 import 'perfil/perfil_widgets.dart';
@@ -137,17 +138,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             final user = authProvider.currentUser;
             if (user == null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!context.mounted) return;
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  AppRoutes.login,
-                  (route) => false,
-                );
-              });
-
-              return const Center(
-                child: LoadingWidget(message: 'Volviendo al inicio...'),
+              return _PerfilLoginView(
+                onAuthenticated: () {
+                  setState(() {});
+                },
               );
             }
 
@@ -320,11 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await authProvider.signOut();
       if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.login,
-        (route) => false,
-      );
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
     } catch (e) {
       if (!mounted) return;
       Helpers.showCustomSnackBar(
@@ -461,6 +451,92 @@ class _PerfilMainView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PerfilLoginView extends StatelessWidget {
+  const _PerfilLoginView({required this.onAuthenticated});
+
+  final VoidCallback onAuthenticated;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(24, 48, 24, 36),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
+              ),
+              gradient: LinearGradient(
+                colors: context.isDarkMode
+                    ? const [Color(0xFF121714), Color(0xFF17251A)]
+                    : const [Color(0xFFFDFDFD), Color(0xFFF4F7F5)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              children: [
+                SizedBox(height: MediaQuery.of(context).padding.top + 8),
+                Icon(
+                  Icons.person_outline_rounded,
+                  size: 72,
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Perfil',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    color: context.isDarkMode
+                        ? context.appTextPrimary
+                        : const Color(0xFF0C2A18),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Inicia sesión para ver\ny gestionar tu perfil',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.4,
+                    color: context.isDarkMode
+                        ? context.appTextSecondary
+                        : const Color(0xFF36533D),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Transform.translate(
+            offset: const Offset(0, -26),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
+                ),
+              ),
+              child: LoginContent(
+                compact: true,
+                onAuthenticated: onAuthenticated,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

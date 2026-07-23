@@ -1,0 +1,3 @@
+-keep class com.example.flutter_application_manachyna_kusa_2_0.** { *; }
+-keep class com.supabase.** { *; }
+-dontwarn com.supabase.**

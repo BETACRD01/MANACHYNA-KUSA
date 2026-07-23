@@ -107,17 +107,5 @@ class NotificationService {
       debugPrint('sendPushNotification → userId: $userId, title: $title');
       debugPrint('Implementar llamada al backend o Cloud Functions');
     }
-
-    // TODO: implementar llamada HTTP al backend cuando esté disponible
-    // final response = await http.post(
-    //   Uri.parse('https://tu-backend.com/api/notifications'),
-    //   headers: {'Content-Type': 'application/json'},
-    //   body: jsonEncode({
-    //     'user_id': userId,
-    //     'title': title,
-    //     'body': body,
-    //     'data': data ?? {},
-    //   }),
-    // );
   }
 }

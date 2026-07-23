@@ -112,9 +112,7 @@ class _SplashScreenState extends State<SplashScreen>
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.checkAuthStatus();
 
-      final route =
-          authProvider.isAuthenticated ? AppRoutes.home : AppRoutes.login;
-      navigator.pushReplacementNamed(route);
+      navigator.pushReplacementNamed(AppRoutes.home);
     });
   }
 
@@ -133,14 +131,15 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Spacer(flex: 2),
+            const Spacer(flex: 3),
             _buildLogo(),
             const SizedBox(height: 48),
             _buildTextContent(),
-            const Spacer(flex: 3),
+            const Spacer(flex: 4),
             _buildLoader(),
-            const SizedBox(height: 48),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -148,15 +147,17 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Widget _buildLogo() {
-    return FadeTransition(
-      opacity: _logoFade,
-      child: ScaleTransition(
-        scale: _logoScale,
-        child: Image.asset(
-          'assets/branding/manachyna_kusa_logo_transparent.png',
-          width: 150,
-          height: 150,
-          fit: BoxFit.contain,
+    return Center(
+      child: FadeTransition(
+        opacity: _logoFade,
+        child: ScaleTransition(
+          scale: _logoScale,
+          child: Image.asset(
+            'assets/branding/manachyna_kusa_logo_transparent.png',
+            width: 160,
+            height: 160,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
@@ -164,26 +165,24 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildTextContent() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SlideTransition(
             position: _titleSlide,
             child: FadeTransition(
               opacity: _titleFade,
-              child: const FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  AppStrings.appName,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
-                    letterSpacing: 1.2,
-                    height: 1.2,
-                  ),
-                  textAlign: TextAlign.center,
+              child: const Text(
+                AppStrings.appName,
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
+                  letterSpacing: 1.2,
+                  height: 1.2,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -214,6 +213,8 @@ class _SplashScreenState extends State<SplashScreen>
     return FadeTransition(
       opacity: _loaderFade,
       child: const Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 36,
@@ -227,6 +228,7 @@ class _SplashScreenState extends State<SplashScreen>
           SizedBox(height: 16),
           Text(
             'Cargando...',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
