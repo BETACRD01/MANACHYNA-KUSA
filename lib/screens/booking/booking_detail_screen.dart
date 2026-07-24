@@ -11,7 +11,9 @@ class BookingDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final booking = ModalRoute.of(context)!.settings.arguments as BookingModel;
+    final routeArgs = ModalRoute.of(context)?.settings.arguments;
+    if (routeArgs == null) return const SizedBox.shrink();
+    final booking = routeArgs as BookingModel;
 
     return Scaffold(
       appBar: AppBar(

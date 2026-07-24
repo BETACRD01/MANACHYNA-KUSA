@@ -16,9 +16,12 @@ class BookingModel {
   final String? address;
   final double? latitude;
   final double? longitude;
+  final int durationQuantity;
+  final String durationType;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final DateTime? completedAt;
+  final DateTime? cancelledAt;
   final String? cancellationReason;
   final double? rating;
   final String? review;
@@ -41,9 +44,12 @@ class BookingModel {
     this.address,
     this.latitude,
     this.longitude,
+    this.durationQuantity = 1,
+    this.durationType = 'hours',
     required this.createdAt,
     this.updatedAt,
     this.completedAt,
+    this.cancelledAt,
     this.cancellationReason,
     this.rating,
     this.review,
@@ -71,16 +77,16 @@ class BookingModel {
       address: row['address']?.toString(),
       latitude: _toDouble(row['latitude']),
       longitude: _toDouble(row['longitude']),
+      durationQuantity: (row['duration_quantity'] as num?)?.toInt() ?? 1,
+      durationType: (row['duration_type']?.toString()) ?? 'hours',
       createdAt: DateTime.tryParse((row['created_at'] ?? '').toString()) ??
           DateTime.now(),
       updatedAt: DateTime.tryParse((row['updated_at'] ?? '').toString()),
       completedAt: DateTime.tryParse((row['completed_at'] ?? '').toString()),
+      cancelledAt: DateTime.tryParse((row['cancelled_at'] ?? '').toString()),
       cancellationReason: row['cancellation_reason']?.toString(),
-      rating: row['review_rating'] != null
-          ? _toDouble(row['review_rating'])
-          : _toDouble((row['reviews'] as Map<String, dynamic>?)?['rating']),
-      review: row['review_comment']?.toString() ??
-          (row['reviews'] as Map<String, dynamic>?)?['comment']?.toString(),
+      rating: _parseReviewRating(row['reviews']),
+      review: _parseReviewComment(row['reviews']),
     );
   }
 
@@ -97,8 +103,8 @@ class BookingModel {
       'status': bookingStatusToSupabase(status),
       'scheduled_date': _dateOnly(scheduledDate),
       'scheduled_time': scheduledTime,
-      'duration_quantity': 1,
-      'duration_type': 'hours',
+      'duration_quantity': durationQuantity,
+      'duration_type': durationType,
       'address': address,
       'latitude': latitude,
       'longitude': longitude,
@@ -126,9 +132,12 @@ class BookingModel {
     String? address,
     double? latitude,
     double? longitude,
+    int? durationQuantity,
+    String? durationType,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? completedAt,
+    DateTime? cancelledAt,
     String? cancellationReason,
     double? rating,
     String? review,
@@ -151,13 +160,41 @@ class BookingModel {
       address: address ?? this.address,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      durationQuantity: durationQuantity ?? this.durationQuantity,
+      durationType: durationType ?? this.durationType,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       completedAt: completedAt ?? this.completedAt,
+      cancelledAt: cancelledAt ?? this.cancelledAt,
       cancellationReason: cancellationReason ?? this.cancellationReason,
       rating: rating ?? this.rating,
       review: review ?? this.review,
     );
+  }
+
+  static double? _parseReviewRating(dynamic reviews) {
+    if (reviews is Map) {
+      final rating = reviews['rating'];
+      if (rating is num) return rating.toDouble();
+      if (rating is String) return double.tryParse(rating);
+    }
+    if (reviews is List && reviews.isNotEmpty) {
+      final review = reviews.first as Map;
+      final rating = review['rating'];
+      if (rating is num) return rating.toDouble();
+    }
+    return null;
+  }
+
+  static String? _parseReviewComment(dynamic reviews) {
+    if (reviews is Map) {
+      return reviews['comment']?.toString();
+    }
+    if (reviews is List && reviews.isNotEmpty) {
+      final review = reviews.first as Map;
+      return review['comment']?.toString();
+    }
+    return null;
   }
 
   static double? _toDouble(dynamic value) {

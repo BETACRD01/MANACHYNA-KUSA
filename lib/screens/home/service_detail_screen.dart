@@ -12,7 +12,9 @@ class ServiceDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final service = ModalRoute.of(context)!.settings.arguments as ServiceModel;
+    final routeArgs = ModalRoute.of(context)?.settings.arguments;
+    if (routeArgs == null) return const SizedBox.shrink();
+    final service = routeArgs as ServiceModel;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F4),

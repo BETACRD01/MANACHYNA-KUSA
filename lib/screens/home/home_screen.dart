@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_routes.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme_colors.dart';
 import '../auth/profile_screen.dart';
 import '../booking/booking_list_screen.dart';
@@ -30,10 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pushNamed(
       context,
       AppRoutes.search,
-      arguments: {
-        'query': initialQuery,
-        'category': category,
-      },
+      arguments: SearchArgs(
+        query: initialQuery,
+        category: category,
+      ),
     );
   }
 

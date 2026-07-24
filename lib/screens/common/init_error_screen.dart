@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../main.dart' as app;
+
 class InitErrorApp extends StatelessWidget {
   const InitErrorApp({super.key});
 
@@ -68,7 +70,7 @@ class _RetryButton extends StatelessWidget {
       width: double.infinity,
       height: 52,
       child: ElevatedButton.icon(
-        onPressed: () {},
+        onPressed: () => app.main(),
         icon: const Icon(Icons.refresh_rounded),
         label: const Text(
           'Reintentar',

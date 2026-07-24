@@ -9,7 +9,7 @@ class BookingRepository {
     final field = isProvider ? 'provider_uid' : 'client_uid';
     final rows = await SupabaseService.client
         .from('bookings')
-        .select()
+        .select('*, reviews(rating, comment)')
         .eq(field, userId)
         .order('created_at', ascending: false);
 
@@ -21,7 +21,7 @@ class BookingRepository {
   Future<BookingModel?> getBookingById(String bookingId) async {
     final rows = await SupabaseService.client
         .from('bookings')
-        .select()
+        .select('*, reviews(rating, comment)')
         .eq('id', bookingId)
         .limit(1);
 

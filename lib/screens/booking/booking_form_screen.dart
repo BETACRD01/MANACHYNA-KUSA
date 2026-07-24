@@ -56,7 +56,9 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final service = ModalRoute.of(context)!.settings.arguments as ServiceModel;
+    final routeArgs = ModalRoute.of(context)?.settings.arguments;
+    if (routeArgs == null) return const SizedBox.shrink();
+    final service = routeArgs as ServiceModel;
 
     return Scaffold(
       appBar: AppBar(
@@ -519,7 +521,15 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final bookingProvider =
         Provider.of<BookingProvider>(context, listen: false);
-    final user = authProvider.currentUser!;
+    final user = authProvider.currentUser;
+    if (user == null) {
+      Helpers.showCustomSnackBar(
+        context,
+        message: 'Debes iniciar sesión para reservar',
+        isError: true,
+      );
+      return;
+    }
 
     final booking = BookingModel(
       id: '',

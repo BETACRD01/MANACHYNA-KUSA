@@ -1,47 +1,39 @@
 class ReviewModel {
   final String id;
   final String bookingId;
-  final String clientId;
-  final String clientName;
-  final String providerId;
-  final String providerName;
-  final String serviceId;
-  final String serviceName;
-  final double rating;
+  final String clientUid;
+  final String providerUid;
+  final int rating;
   final String? comment;
+  final String? providerReply;
   final DateTime createdAt;
-  final List<String> imageUrls;
+  final DateTime updatedAt;
 
   ReviewModel({
     required this.id,
     required this.bookingId,
-    required this.clientId,
-    required this.clientName,
-    required this.providerId,
-    required this.providerName,
-    required this.serviceId,
-    required this.serviceName,
+    required this.clientUid,
+    required this.providerUid,
     required this.rating,
     this.comment,
+    this.providerReply,
     required this.createdAt,
-    this.imageUrls = const [],
+    required this.updatedAt,
   });
 
   factory ReviewModel.fromSupabase(Map<String, dynamic> map) {
     return ReviewModel(
       id: (map['id'] ?? '').toString(),
       bookingId: (map['booking_id'] ?? '').toString(),
-      clientId: (map['client_uid'] ?? '').toString(),
-      clientName: (map['client_name'] ?? '').toString(),
-      providerId: (map['provider_uid'] ?? '').toString(),
-      providerName: (map['provider_name'] ?? '').toString(),
-      serviceId: (map['service_id'] ?? '').toString(),
-      serviceName: (map['service_name'] ?? '').toString(),
-      rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
+      clientUid: (map['client_uid'] ?? '').toString(),
+      providerUid: (map['provider_uid'] ?? '').toString(),
+      rating: (map['rating'] as num?)?.toInt() ?? 0,
       comment: map['comment']?.toString(),
+      providerReply: map['provider_reply']?.toString(),
       createdAt: DateTime.tryParse((map['created_at'] ?? '').toString()) ??
           DateTime.now(),
-      imageUrls: const [],
+      updatedAt: DateTime.tryParse((map['updated_at'] ?? '').toString()) ??
+          DateTime.now(),
     );
   }
 }
