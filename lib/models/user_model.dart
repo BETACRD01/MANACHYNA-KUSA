@@ -8,6 +8,8 @@ class UserModel {
   final String address;
   final String city;
   final UserType userType;
+  final bool hasProviderAccess;
+  final bool hasAdminAccess;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final bool isActive;
@@ -29,6 +31,8 @@ class UserModel {
     required this.address,
     required this.city,
     required this.userType,
+    this.hasProviderAccess = false,
+    this.hasAdminAccess = false,
     required this.createdAt,
     this.updatedAt,
     this.isActive = true,
@@ -41,6 +45,25 @@ class UserModel {
     this.description,
   });
 
+  String get displayEmail {
+    const fallbackDomain = '@manachyna.invalid';
+    if (email.endsWith(fallbackDomain) && email.startsWith('facebook_')) {
+      final facebookId = email.substring(
+        'facebook_'.length,
+        email.length - fallbackDomain.length,
+      );
+      return 'ID de Facebook: $facebookId';
+    }
+    if (email.endsWith(fallbackDomain) && email.startsWith('microsoft_')) {
+      final microsoftId = email.substring(
+        'microsoft_'.length,
+        email.length - fallbackDomain.length,
+      );
+      return 'ID de Microsoft: $microsoftId';
+    }
+    return email;
+  }
+
   factory UserModel.fromSupabase(
     Map<String, dynamic> userRow, {
     Map<String, dynamic>? providerRow,
@@ -48,6 +71,7 @@ class UserModel {
   }) {
     final role = (userRow['role'] ?? 'client').toString();
     final isProvider = providerRow != null || userRow['is_provider'] == true;
+    final isAdmin = role == 'admin';
 
     return UserModel(
       id: (userRow['uid'] ?? '').toString(),
@@ -59,9 +83,9 @@ class UserModel {
       address:
           (providerRow?['address'] ?? userRow['address'] ?? '').toString(),
       city: (providerRow?['city'] ?? userRow['city'] ?? '').toString(),
-      userType: isProvider
-          ? UserType.provider
-          : _roleToUserType(role),
+      userType: _roleToUserType(role),
+      hasProviderAccess: isProvider,
+      hasAdminAccess: isAdmin,
       createdAt: DateTime.tryParse((userRow['created_at'] ?? '').toString()) ??
           DateTime.now(),
       updatedAt: DateTime.tryParse((userRow['updated_at'] ?? '').toString()),
@@ -86,7 +110,7 @@ class UserModel {
       'address': address,
       'city': city,
       'role': _userTypeToRole(userType),
-      'is_provider': userType == UserType.provider,
+      'is_provider': hasProviderAccess,
       'is_active': isActive,
       'avatar_url': profileImageUrl,
       'latitude': latitude,
@@ -121,6 +145,8 @@ class UserModel {
     String? address,
     String? city,
     UserType? userType,
+    bool? hasProviderAccess,
+    bool? hasAdminAccess,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isActive,
@@ -142,6 +168,8 @@ class UserModel {
       address: address ?? this.address,
       city: city ?? this.city,
       userType: userType ?? this.userType,
+      hasProviderAccess: hasProviderAccess ?? this.hasProviderAccess,
+      hasAdminAccess: hasAdminAccess ?? this.hasAdminAccess,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,

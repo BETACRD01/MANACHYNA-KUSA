@@ -202,7 +202,7 @@ class _PerfilHeaderState extends State<PerfilHeader>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    widget.user.email,
+                    widget.user.displayEmail,
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

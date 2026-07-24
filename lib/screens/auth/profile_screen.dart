@@ -314,7 +314,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await authProvider.signOut();
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      setState(() {
+        _showProviderView = false;
+        _showProviderRegistration = false;
+      });
     } catch (e) {
       if (!mounted) return;
       Helpers.showCustomSnackBar(
@@ -384,7 +387,25 @@ class _PerfilMainView extends StatelessWidget {
                         subtitle: 'Actualiza tu información personal',
                         onTap: onEditProfile,
                       ),
-                      if (user.userType == UserType.client)
+                      if (user.hasAdminAccess)
+                        PerfilMenuItem(
+                          icon: Icons.admin_panel_settings_outlined,
+                          title: 'Panel de admin',
+                          subtitle: 'Gestiona proveedores y actividad',
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.adminDashboard);
+                          },
+                        ),
+                      if (user.hasProviderAccess)
+                        PerfilMenuItem(
+                          icon: Icons.dashboard_customize_outlined,
+                          title: 'Panel de proveedor',
+                          subtitle: 'Gestiona servicios y reservas',
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.providerDashboard);
+                          },
+                        ),
+                      if (user.userType == UserType.client && !user.hasProviderAccess)
                         PerfilMenuItem(
                           icon: Icons.assignment_outlined,
                           title: 'Mis tareas en casa',
@@ -439,7 +460,7 @@ class _PerfilMainView extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (user.userType != UserType.provider) ...[
+                  if (!user.hasProviderAccess) ...[
                     const SizedBox(height: 30),
                     PerfilProviderCta(onTap: onOpenProviderView),
                   ],

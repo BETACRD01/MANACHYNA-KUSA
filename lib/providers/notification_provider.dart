@@ -92,7 +92,7 @@ class NotificationProvider extends ChangeNotifier {
 
   List<NotificationModel> _generateInitialNotifications(UserModel user) {
     final now = DateTime.now();
-    final isProvider = user.userType == UserType.provider;
+    final isProvider = user.hasProviderAccess;
     final name = user.name.split(' ').first;
 
     if (isProvider) {

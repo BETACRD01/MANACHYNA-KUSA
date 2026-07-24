@@ -28,7 +28,6 @@ class LoginContent extends StatefulWidget {
 class _LoginContentState extends State<LoginContent> {
   AuthProvider? _authProvider;
   bool _didNavigate = false;
-  OAuthProvider? _pendingProvider;
 
   @override
   void initState() {
@@ -53,9 +52,6 @@ class _LoginContentState extends State<LoginContent> {
     final authProvider = _authProvider!;
 
     if (authProvider.errorMessage != null) {
-      setState(() {
-        _pendingProvider = null;
-      });
       Helpers.showCustomSnackBar(
         context,
         message: authProvider.errorMessage!,
@@ -74,9 +70,6 @@ class _LoginContentState extends State<LoginContent> {
     }
 
     if (authProvider.isAuthenticated && !_didNavigate) {
-      setState(() {
-        _pendingProvider = null;
-      });
       _didNavigate = true;
       widget.onAuthenticated?.call();
     }
@@ -85,16 +78,8 @@ class _LoginContentState extends State<LoginContent> {
   Future<void> _signInWithProvider(OAuthProvider provider) async {
     final authProvider = context.read<AuthProvider>();
     _didNavigate = false;
-    setState(() {
-      _pendingProvider = provider;
-    });
 
-    final launched = await authProvider.signInWithProvider(provider);
-    if (!launched && mounted) {
-      setState(() {
-        _pendingProvider = null;
-      });
-    }
+    await authProvider.signInWithProvider(provider);
   }
 
   @override
@@ -169,8 +154,7 @@ class _LoginContentState extends State<LoginContent> {
                 label: 'Continuar con Google',
                 assetPath: 'assets/social/google.svg',
                 height: buttonHeight,
-                isLoading: authProvider.isLoading &&
-                    _pendingProvider == OAuthProvider.google,
+                isLoading: false,
                 isDisabled: authProvider.isLoading,
                 onPressed: () => _signInWithProvider(OAuthProvider.google),
               ),
@@ -179,8 +163,7 @@ class _LoginContentState extends State<LoginContent> {
                 label: 'Continuar con Facebook',
                 assetPath: 'assets/social/facebook.svg',
                 height: buttonHeight,
-                isLoading: authProvider.isLoading &&
-                    _pendingProvider == OAuthProvider.facebook,
+                isLoading: false,
                 isDisabled: authProvider.isLoading,
                 onPressed: () => _signInWithProvider(OAuthProvider.facebook),
               ),
@@ -189,8 +172,7 @@ class _LoginContentState extends State<LoginContent> {
                 label: 'Continuar con Microsoft',
                 assetPath: 'assets/social/microsoft.svg',
                 height: buttonHeight,
-                isLoading: authProvider.isLoading &&
-                    _pendingProvider == OAuthProvider.azure,
+                isLoading: false,
                 isDisabled: authProvider.isLoading,
                 onPressed: () => _signInWithProvider(OAuthProvider.azure),
               ),

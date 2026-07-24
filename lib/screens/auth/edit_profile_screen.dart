@@ -162,7 +162,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         phone: _completePhoneNumber.trim(),
         address: _addressController.text.trim(),
         city: _cityController.text.trim(),
-        description: user.userType == UserType.provider ? _bioController.text.trim() : null,
+        description: user.hasProviderAccess ? _bioController.text.trim() : null,
       );
 
       final success = await authProvider.updateProfile(updatedUser);
@@ -198,7 +198,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _completePhoneNumber.trim() != user.phone ||
         _addressController.text.trim() != user.address ||
         _cityController.text.trim() != user.city ||
-        (user.userType == UserType.provider && _bioController.text.trim() != (user.description ?? '')) ||
+        (user.hasProviderAccess && _bioController.text.trim() != (user.description ?? '')) ||
         _localImageFile != null;
   }
 
@@ -474,7 +474,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         const SizedBox(height: 20),
         TextFormField(
-          initialValue: user.email,
+          initialValue: user.displayEmail,
           enabled: false,
           style: TextStyle(color: context.appTextSecondary, fontWeight: FontWeight.w600),
           decoration: inputDecorationTheme.copyWith(
@@ -551,7 +551,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             return null;
           },
         ),
-        if (user.userType == UserType.provider) ...[
+        if (user.hasProviderAccess) ...[
           const SizedBox(height: 32),
           Text(
             'PERFIL DE PROVEEDOR',

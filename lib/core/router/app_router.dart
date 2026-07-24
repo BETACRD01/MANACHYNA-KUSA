@@ -6,6 +6,7 @@ import '../../models/service_model.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/profile_screen.dart';
 import '../../screens/auth/edit_profile_screen.dart';
+import '../../screens/admin/admin_dashboard.dart';
 import '../../screens/booking/booking_detail_screen.dart';
 import '../../screens/booking/booking_form_screen.dart';
 import '../../screens/booking/booking_list_screen.dart';
@@ -86,6 +87,9 @@ class AppRouter {
 
       case AppRoutes.providerDashboard:
         return _page(const ProviderDashboard(), settings);
+
+      case AppRoutes.adminDashboard:
+        return _page(const AdminDashboard(), settings);
 
       case AppRoutes.providerServices:
         return _page(const ProviderServices(), settings);

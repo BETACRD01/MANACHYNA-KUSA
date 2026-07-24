@@ -78,7 +78,7 @@ class _ProviderDashboardState extends State<ProviderDashboard> {
         builder: (context, authProvider, child) {
           final user = authProvider.currentUser;
 
-          if (user?.userType != UserType.provider) {
+          if (user?.hasProviderAccess != true) {
             return const Center(
               child: Text('Acceso denegado. Solo para proveedores.'),
             );

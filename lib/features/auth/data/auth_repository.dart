@@ -8,6 +8,18 @@ class AuthRepository {
     return AuthService.signInWithProvider(provider);
   }
 
+  Future<bool> signInWithGoogle() {
+    return AuthService.signInWithGoogle();
+  }
+
+  Future<bool> signInWithFacebook() {
+    return AuthService.signInWithFacebook();
+  }
+
+  Future<bool> signInWithMicrosoft() {
+    return AuthService.signInWithMicrosoft();
+  }
+
   Future<void> signOut() {
     return AuthService.signOut();
   }

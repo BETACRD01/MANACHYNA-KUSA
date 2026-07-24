@@ -1,4 +1,4 @@
-package com.example.flutter_application_manachyna_kusa_2_0
+package com.manachynakusa.app
 
 import io.flutter.embedding.android.FlutterActivity
 

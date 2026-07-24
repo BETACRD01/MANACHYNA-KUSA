@@ -24,3 +24,8 @@ build/
 *.lock
 *.log
 .DS_Store
+
+# Credenciales locales y secretos de Edge Functions
+.env
+.env.*
+!.env.example

@@ -128,16 +128,33 @@ class AuthProvider with ChangeNotifier {
     _successMessage = null;
 
     try {
-      final launched = await _authRepository.signInWithProvider(provider);
+      final bool launched;
+      if (provider == OAuthProvider.google) {
+        launched = await _authRepository.signInWithGoogle();
+      } else if (provider == OAuthProvider.facebook) {
+        launched = await _authRepository.signInWithFacebook();
+      } else if (provider == OAuthProvider.azure) {
+        launched = await _authRepository.signInWithMicrosoft();
+      } else {
+        launched = await _authRepository.signInWithProvider(provider);
+      }
+
       if (!launched) {
-        _setError('No se pudo abrir el flujo de autenticación');
+        _setError('No se pudo iniciar la autenticación');
         return false;
       }
 
-      _setSuccess('Continua el inicio de sesión en el navegador');
+      _setSuccess(
+        provider == OAuthProvider.google ||
+                provider == OAuthProvider.facebook ||
+                provider == OAuthProvider.azure
+            ? 'Inicio de sesión completado'
+            : 'Continua el inicio de sesión en el navegador',
+      );
       return true;
     } catch (e) {
-      final errorMessage = _getAuthErrorMessage(e.toString());
+      debugPrint('Error autenticando con $provider: $e');
+      final errorMessage = _getAuthErrorMessage(e.toString(), provider);
       _setError(errorMessage);
       return false;
     } finally {
@@ -221,17 +238,32 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  String _getAuthErrorMessage(String error) {
+  String _getAuthErrorMessage(String error, OAuthProvider provider) {
+    final providerName = provider == OAuthProvider.facebook
+        ? 'Facebook'
+        : provider == OAuthProvider.google
+            ? 'Google'
+            : provider == OAuthProvider.azure
+                ? 'Microsoft'
+                : 'el proveedor seleccionado';
+
     if (error.contains('provider is not enabled')) {
       return 'Ese proveedor aún no está habilitado en Supabase.';
     } else if (error.contains('unsupported_provider')) {
       return 'Ese proveedor no está disponible en la configuración actual.';
     } else if (error.contains('access_denied')) {
       return 'El acceso fue cancelado o denegado.';
+    } else if (error.contains('canceled') || error.contains('cancelled')) {
+      return 'Inicio de sesión cancelado.';
     } else if (error.contains('invalid request')) {
       return 'La configuración OAuth del proveedor está incompleta.';
     } else if (error.contains('network')) {
       return 'Error de conexión. Verifica tu internet e inténtalo de nuevo.';
+    } else if (error.contains('ID token') || error.contains('access token')) {
+      return 'No se pudo validar la cuenta de $providerName.';
+    } else if (error.contains('ApiException: 10') ||
+        error.contains('DEVELOPER_ERROR')) {
+      return 'Google Sign-In no esta bien configurado para esta app.';
     }
     return 'Error de autenticación';
   }
@@ -244,9 +276,9 @@ class AuthProvider with ChangeNotifier {
     _successMessage = null;
   }
 
-  bool get isProvider => _currentUser?.userType == UserType.provider;
+  bool get isProvider => _currentUser?.hasProviderAccess == true;
   bool get isClient => _currentUser?.userType == UserType.client;
-  bool get isAdmin => _currentUser?.userType == UserType.admin;
+  bool get isAdmin => _currentUser?.hasAdminAccess == true;
   String? get userId => _currentUser?.id;
   String get userName => _currentUser?.name ?? 'Usuario';
   String get userEmail => _currentUser?.email ?? '';

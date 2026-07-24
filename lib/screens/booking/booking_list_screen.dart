@@ -6,7 +6,6 @@ import '../../core/constants/app_routes.dart';
 import '../../core/theme/app_theme_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../models/booking_model.dart';
-import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
 import 'reservas/booking_reservas_data.dart';
@@ -62,7 +61,7 @@ class _BookingListScreenState extends State<BookingListScreen>
 
     await bookingProvider.loadUserBookings(
       user.id,
-      isProvider: user.userType == UserType.provider,
+      isProvider: user.hasProviderAccess,
     );
   }
 

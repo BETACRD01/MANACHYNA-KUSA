@@ -46,7 +46,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDx57DjS8tt7v3d24aFYTpKHVoUiKLgSgE',
-    appId: '1:265582480726:android:0c94bc24b77a486660daf7',
+    appId: '1:265582480726:android:6a6de5f571a8874960daf7',
     messagingSenderId: '265582480726',
     projectId: 'manachyna-kusa-v2-2025',
     storageBucket: 'manachyna-kusa-v2-2025.firebasestorage.app',
@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '265582480726',
     projectId: 'manachyna-kusa-v2-2025',
     storageBucket: 'manachyna-kusa-v2-2025.firebasestorage.app',
-    androidClientId: '265582480726-njfqg365ddrh39k9mqb755hpjkf3uf9o.apps.googleusercontent.com',
+    androidClientId: '265582480726-ahiesironihk30mkn6nljl9i6o89vdh9.apps.googleusercontent.com',
     iosClientId: '265582480726-mlmcq2vbm3mf2nnime4uj32tuhhvg22c.apps.googleusercontent.com',
     iosBundleId: 'com.example.flutterApplicationManachynaKusa20',
   );

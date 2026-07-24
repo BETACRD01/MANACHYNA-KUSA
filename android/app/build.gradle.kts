@@ -168,7 +168,7 @@ fun prepareNativeLibsForPackaging(
 }
 
 android {
-    namespace = "com.example.flutter_application_manachyna_kusa_2_0"
+    namespace = "com.manachynakusa.app"
     compileSdk = 36
     ndkVersion = "28.2.13676358"
 
@@ -183,13 +183,14 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.flutter_application_manachyna_kusa_2_0"
+        applicationId = "com.manachynakusa.app"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         multiDexEnabled = true
         manifestPlaceholders["googleMapsApiKey"] = googleMapsApiKey
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.manachynakusa.app"
     }
 
     signingConfigs {
