@@ -24,7 +24,6 @@ import '../../screens/notifications/notification_list_screen.dart';
 import '../../screens/auth/perfil/language_screen.dart';
 import '../../screens/auth/perfil/help_center_screen.dart';
 import '../../screens/auth/perfil/contact_screen.dart';
-import '../../screens/auth/perfil/legal_document_screen.dart';
 import '../../screens/booking/custom_task_request_screen.dart';
 import '../../screens/booking/client_custom_tasks_screen.dart';
 import '../../screens/provider/provider_task_feed_screen.dart';
@@ -125,18 +124,6 @@ class AppRouter {
 
       case AppRoutes.contactUs:
         return _page(const ContactScreen(), settings);
-
-      case AppRoutes.privacyPolicy:
-        return _page(
-          const LegalDocumentScreen(type: LegalDocumentType.privacy),
-          settings,
-        );
-
-      case AppRoutes.termsOfService:
-        return _page(
-          const LegalDocumentScreen(type: LegalDocumentType.terms),
-          settings,
-        );
 
       case AppRoutes.customTaskForm:
         return _page(const CustomTaskRequestScreen(), settings);

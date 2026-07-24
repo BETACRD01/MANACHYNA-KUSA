@@ -17,9 +17,9 @@ import 'perfil/perfil_provider_view.dart';
 import 'perfil/perfil_widgets.dart';
 
 const String _privacyPolicyUrl =
-    'https://ikdcqxgecjzgjntejizu.supabase.co/functions/v1/legal-pages/privacy';
+    'https://betacrd01.github.io/MANACHYNA-KUSA/legal/privacy.html';
 const String _termsOfServiceUrl =
-    'https://ikdcqxgecjzgjntejizu.supabase.co/functions/v1/legal-pages/terms';
+    'https://betacrd01.github.io/MANACHYNA-KUSA/legal/terms.html';
 
 Future<void> _openExternalUrl(BuildContext context, String url) async {
   final uri = Uri.parse(url);
