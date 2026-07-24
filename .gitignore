@@ -28,4 +28,4 @@ build/
 # Credenciales locales y secretos de Edge Functions
 .env
 .env.*
-!.env.example
+.env.example
