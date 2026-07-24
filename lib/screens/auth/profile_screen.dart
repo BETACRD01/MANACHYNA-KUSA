@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_routes.dart';
@@ -14,6 +15,24 @@ import 'login_content.dart';
 import 'perfil/perfil_provider_registration_view.dart';
 import 'perfil/perfil_provider_view.dart';
 import 'perfil/perfil_widgets.dart';
+
+const String _privacyPolicyUrl =
+    'https://ikdcqxgecjzgjntejizu.supabase.co/functions/v1/legal-pages/privacy';
+const String _termsOfServiceUrl =
+    'https://ikdcqxgecjzgjntejizu.supabase.co/functions/v1/legal-pages/terms';
+
+Future<void> _openExternalUrl(BuildContext context, String url) async {
+  final uri = Uri.parse(url);
+  final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+  if (!opened && context.mounted) {
+    Helpers.showCustomSnackBar(
+      context,
+      message: 'No se pudo abrir el enlace.',
+      isError: true,
+    );
+  }
+}
 
 void _showThemeSelector(BuildContext context, ThemeProvider themeProvider) {
   showModalBottomSheet(
@@ -456,6 +475,22 @@ class _PerfilMainView extends StatelessWidget {
                         subtitle: 'Estamos para ayudarte',
                         onTap: () {
                           Navigator.pushNamed(context, AppRoutes.contactUs);
+                        },
+                      ),
+                      PerfilMenuItem(
+                        icon: Icons.privacy_tip_outlined,
+                        title: 'Política de privacidad',
+                        subtitle: 'Cómo protegemos tus datos',
+                        onTap: () {
+                          _openExternalUrl(context, _privacyPolicyUrl);
+                        },
+                      ),
+                      PerfilMenuItem(
+                        icon: Icons.description_outlined,
+                        title: 'Términos y condiciones',
+                        subtitle: 'Condiciones de uso de la app',
+                        onTap: () {
+                          _openExternalUrl(context, _termsOfServiceUrl);
                         },
                       ),
                     ],

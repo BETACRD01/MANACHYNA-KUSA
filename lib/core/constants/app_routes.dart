@@ -20,6 +20,8 @@ class AppRoutes {
   static const String language = '/language';
   static const String helpCenter = '/help-center';
   static const String contactUs = '/contact-us';
+  static const String privacyPolicy = '/privacy-policy';
+  static const String termsOfService = '/terms-of-service';
   static const String customTaskForm = '/custom-task-form';
   static const String clientCustomTasks = '/client-custom-tasks';
   static const String providerTaskFeed = '/provider-task-feed';

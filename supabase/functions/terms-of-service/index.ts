@@ -1,4 +1,4 @@
-const html = `<!doctype html>
+const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
@@ -50,5 +50,9 @@ const html = `<!doctype html>
 </html>`;
 
 Deno.serve(() => new Response(html, {
-  headers: { "Content-Type": "text/html; charset=utf-8" },
+  headers: {
+    "Content-Type": "text/html; charset=utf-8",
+    "X-Content-Type-Options": "nosniff",
+    "Cache-Control": "no-store, max-age=0",
+  },
 }));
