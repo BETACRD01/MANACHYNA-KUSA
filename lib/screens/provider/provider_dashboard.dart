@@ -8,12 +8,10 @@ import '../../core/theme/app_theme_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/widgets/loading_widget.dart';
 import '../../models/booking_model.dart';
-import '../../models/custom_task_model.dart';
 import '../../models/service_model.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
-import '../../providers/custom_task_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/service_provider.dart';
 
@@ -38,6 +36,7 @@ class ProviderDashboard extends StatefulWidget {
 class _ProviderDashboardState extends State<ProviderDashboard>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  int _currentIndex = 0;
   String _bookingStatusFilter = 'all';
   String _serviceStatusFilter = 'all';
   String _taskCategoryFilter = 'Todas';
@@ -46,6 +45,11 @@ class _ProviderDashboardState extends State<ProviderDashboard>
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    _tabController.addListener(() {
+      if (_currentIndex != _tabController.index) {
+        setState(() => _currentIndex = _tabController.index);
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadPanelData());
   }
 
@@ -76,79 +80,7 @@ class _ProviderDashboardState extends State<ProviderDashboard>
     final hasProviderAccess = user?.hasProviderAccess == true;
 
     return Scaffold(
-      backgroundColor: context.appBackground,
-      appBar: AppBar(
-        title: const Text('Panel de Proveedor'),
-        centerTitle: false,
-        actions: [
-          Consumer<NotificationProvider>(
-            builder: (context, notifProvider, _) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    tooltip: 'Notificaciones',
-                    icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.notifications);
-                    },
-                  ),
-                  if (notifProvider.unreadCount > 0)
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: Container(
-                        width: 9,
-                        height: 9,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          IconButton(
-            tooltip: 'Actualizar',
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: _loadPanelData,
-          ),
-        ],
-        bottom: hasProviderAccess
-            ? TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                indicatorSize: TabBarIndicatorSize.tab,
-                labelStyle:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                unselectedLabelStyle: const TextStyle(fontSize: 12),
-                tabs: const [
-                  Tab(
-                    icon: Icon(Icons.dashboard_rounded, size: 20),
-                    text: 'Resumen',
-                  ),
-                  Tab(
-                    icon: Icon(Icons.calendar_month_rounded, size: 20),
-                    text: 'Reservas',
-                  ),
-                  Tab(
-                    icon: Icon(Icons.home_repair_service_rounded, size: 20),
-                    text: 'Servicios',
-                  ),
-                  Tab(
-                    icon: Icon(Icons.work_outline_rounded, size: 20),
-                    text: 'Trabajos',
-                  ),
-                  Tab(
-                    icon: Icon(Icons.badge_outlined, size: 20),
-                    text: 'Perfil',
-                  ),
-                ],
-              )
-            : null,
-      ),
+      backgroundColor: _providerShellBg,
       body: !hasProviderAccess
           ? const _ProviderAccessDenied()
           : RefreshIndicator(
@@ -188,6 +120,12 @@ class _ProviderDashboardState extends State<ProviderDashboard>
                 ],
               ),
             ),
+      bottomNavigationBar: hasProviderAccess
+          ? _ProviderBottomNav(
+              currentIndex: _currentIndex,
+              onTap: _openTab,
+            )
+          : null,
     );
   }
 }

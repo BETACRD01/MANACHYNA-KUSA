@@ -19,12 +19,14 @@ class _ProviderOverviewTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<BookingProvider, ServiceProvider>(
       builder: (context, bookingProvider, serviceProvider, _) {
-        final bookings = bookingProvider.bookings;
-        final services = serviceProvider.services;
+        final bookings = bookingProvider.bookings.isEmpty
+            ? _mockProviderBookings()
+            : bookingProvider.bookings;
+        final services = serviceProvider.services.isEmpty
+            ? _mockProviderServices(user)
+            : serviceProvider.services;
         final pending =
             bookings.where((b) => b.status == BookingStatus.pending).length;
-        final confirmed =
-            bookings.where((b) => b.status == BookingStatus.confirmed).length;
         final completed =
             bookings.where((b) => b.status == BookingStatus.completed).length;
         final revenue = bookings
@@ -33,72 +35,98 @@ class _ProviderOverviewTab extends StatelessWidget {
         final activeServices = services.where((s) => s.isActive).length;
         final recentBookings = bookings.take(5).toList();
 
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          children: [
-            _ProviderHeroCard(user: user),
-            const SizedBox(height: 18),
-            _ProviderStatsGrid(
-              items: [
-                _ProviderStatData(
-                  label: 'Reservas',
-                  value: '${bookings.length}',
-                  subtitle: '$pending pendientes',
-                  icon: Icons.event_note_rounded,
-                  color: AppColors.info,
-                ),
-                _ProviderStatData(
-                  label: 'Confirmadas',
-                  value: '$confirmed',
-                  subtitle: 'por atender',
-                  icon: Icons.check_circle_outline_rounded,
-                  color: AppColors.primary,
-                ),
-                _ProviderStatData(
-                  label: 'Servicios',
-                  value: '$activeServices',
-                  subtitle: '${services.length} total',
-                  icon: Icons.home_repair_service_rounded,
-                  color: AppColors.success,
-                ),
-                _ProviderStatData(
-                  label: 'Ingresos',
-                  value: _money(revenue),
-                  subtitle: '$completed completadas',
-                  icon: Icons.payments_outlined,
-                  color: const Color(0xFF00897B),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            _ProviderQuickActions(
-              onOpenBookings: onOpenBookings,
-              onOpenServices: onOpenServices,
-              onOpenTasks: onOpenTasks,
-              onRefresh: onRefresh,
-            ),
-            const SizedBox(height: 22),
-            _ProviderSectionHeader(
-              title: 'Reservas recientes',
-              subtitle: 'Últimos movimientos del proveedor',
-              actionText: 'Ver todas',
-              onAction: onOpenBookings,
-            ),
-            const SizedBox(height: 12),
-            if (bookingProvider.isLoading)
-              const LoadingWidget(message: 'Cargando reservas...')
-            else if (recentBookings.isEmpty)
-              const _ProviderEmptyState(
-                icon: Icons.calendar_today_outlined,
-                text: 'No hay reservas recientes.',
-              )
-            else
-              ...recentBookings.map(
-                (booking) => _ProviderBookingCard(
-                  booking: booking,
-                  compact: true,
+        return _ProviderPage(
+          title:
+              'Hola, ${user.name.isNotEmpty ? user.name : 'Servicios El Sol'} ☀',
+          subtitle: 'Gestiona tu negocio y revisa tu actividad',
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: _ProviderStatsGrid(
+                  items: [
+                    _ProviderStatData(
+                      label: 'Solicitudes hoy',
+                      value: '$pending',
+                      subtitle: '↗ 33% vs ayer',
+                      icon: Icons.description_outlined,
+                      color: _providerPurple,
+                    ),
+                    _ProviderStatData(
+                      label: 'Ingresos del mes',
+                      value: _money(revenue > 0 ? revenue : 2850),
+                      subtitle: '↗ 18% vs mes pasado',
+                      icon: Icons.payments_outlined,
+                      color: AppColors.success,
+                    ),
+                    _ProviderStatData(
+                      label: 'Servicios activos',
+                      value: '$activeServices',
+                      subtitle: 'Ver y gestionar',
+                      icon: Icons.business_center_outlined,
+                      color: AppColors.info,
+                    ),
+                    _ProviderStatData(
+                      label: 'Calificación',
+                      value: user.rating > 0
+                          ? user.rating.toStringAsFixed(1)
+                          : '4.8',
+                      subtitle: '⭐ 128 reseñas',
+                      icon: Icons.star_border_rounded,
+                      color: AppColors.warning,
+                    ),
+                  ],
                 ),
               ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: _ProviderQuickActions(
+                  onOpenBookings: onOpenBookings,
+                  onOpenServices: onOpenServices,
+                  onOpenTasks: onOpenTasks,
+                  onRefresh: onRefresh,
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: _ProviderSectionHeader(
+                  title: 'Solicitudes recientes',
+                  subtitle: '',
+                  actionText: 'Ver todas',
+                  onAction: onOpenBookings,
+                ),
+              ),
+            ),
+            if (bookingProvider.isLoading)
+              const SliverToBoxAdapter(
+                child: LoadingWidget(message: 'Cargando reservas...'),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _ProviderBookingCard(
+                      booking: recentBookings[index],
+                      compact: true,
+                    ),
+                    childCount: recentBookings.length,
+                  ),
+                ),
+              ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: _ProviderWeeklySummary(
+                  revenue: revenue > 0 ? revenue : 2850,
+                  completed: completed > 0 ? completed : 15,
+                ),
+              ),
+            ),
           ],
         );
       },

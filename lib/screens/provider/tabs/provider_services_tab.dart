@@ -15,77 +15,104 @@ class _ProviderServicesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ServiceProvider>(
       builder: (context, serviceProvider, _) {
-        final services = _filterServices(serviceProvider.services);
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _ProviderFilterBar(
-                      values: const {
-                        'all': 'Todos',
-                        'active': 'Activos',
-                        'inactive': 'Inactivos',
-                      },
-                      selected: statusFilter,
-                      onChanged: onStatusFilterChanged,
-                      outerPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    tooltip: 'Gestionar servicios',
-                    onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.providerServices)
-                          .then((_) => onRefresh());
-                    },
-                    icon: const Icon(Icons.open_in_new_rounded),
-                  ),
-                ],
+        final user = context.watch<AuthProvider>().currentUser;
+        final source = serviceProvider.services.isEmpty && user != null
+            ? _mockProviderServices(user)
+            : serviceProvider.services;
+        final services = _filterServices(source);
+        final active = source.where((service) => service.isActive).length;
+        return _ProviderPage(
+          title: 'Servicios',
+          subtitle: 'Administra los servicios que ofreces',
+          trailing: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.providerServices)
+                  .then((_) => onRefresh());
+            },
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Nuevo servicio'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _providerPurple,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
-            Expanded(
-              child: serviceProvider.isLoading
-                  ? const LoadingWidget(message: 'Cargando servicios...')
-                  : serviceProvider.errorMessage != null
-                      ? _ProviderErrorState(
-                          message: serviceProvider.errorMessage!,
-                          onRetry: onRefresh,
-                        )
-                      : services.isEmpty
-                          ? _ProviderEmptyState(
-                              icon: Icons.home_repair_service_outlined,
-                              text: statusFilter == 'all'
-                                  ? 'Todavía no tienes servicios registrados.'
-                                  : 'No hay servicios con ese filtro.',
-                              actionText: 'Agregar servicio',
-                              onAction: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.providerServices,
-                                ).then((_) => onRefresh());
-                              },
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                              itemCount: services.length,
-                              itemBuilder: (context, index) {
-                                return _ProviderServiceCard(
-                                  service: services[index],
-                                  onToggle: () =>
-                                      _toggleService(context, services[index]),
-                                  onManage: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      AppRoutes.providerServices,
-                                    ).then((_) => onRefresh());
-                                  },
-                                );
-                              },
-                            ),
+          ),
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  children: [
+                    const Expanded(child: _ProviderSearchBox()),
+                    const SizedBox(width: 10),
+                    Container(
+                      width: 54,
+                      height: 54,
+                      decoration: _providerPanelDecoration(context),
+                      child: const Icon(Icons.filter_alt_outlined,
+                          color: _providerMutedText),
+                    ),
+                  ],
+                ),
+              ),
             ),
+            SliverToBoxAdapter(
+              child: _ProviderFilterBar(
+                values: const {
+                  'all': 'Todos',
+                  'active': 'Activos',
+                  'inactive': 'Pausados',
+                },
+                selected: statusFilter,
+                onChanged: onStatusFilterChanged,
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: _ProviderServicesSummary(
+                  active: active,
+                  total: source.length,
+                  popular: source.isNotEmpty
+                      ? Helpers.getServiceCategoryName(source.first.category)
+                      : 'Carpintería a domicilio',
+                ),
+              ),
+            ),
+            if (serviceProvider.isLoading)
+              const SliverToBoxAdapter(
+                child: LoadingWidget(message: 'Cargando servicios...'),
+              )
+            else if (serviceProvider.errorMessage != null)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _ProviderErrorState(
+                  message: serviceProvider.errorMessage!,
+                  onRetry: onRefresh,
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _ProviderServiceCard(
+                      service: services[index],
+                      onToggle: () => _toggleService(context, services[index]),
+                      onManage: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.providerServices,
+                        ).then((_) => onRefresh());
+                      },
+                    ),
+                    childCount: services.length,
+                  ),
+                ),
+              ),
           ],
         );
       },

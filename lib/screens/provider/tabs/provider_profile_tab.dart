@@ -6,136 +6,129 @@ class _ProviderProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-      children: [
-        _ProviderSectionHeader(
-          title: 'Perfil de proveedor',
-          subtitle: 'Datos visibles para clientes y operación',
-          actionText: 'Editar',
-          onAction: () => Navigator.pushNamed(context, AppRoutes.editProfile),
+    return _ProviderPage(
+      title: 'Perfil del proveedor',
+      subtitle: 'Gestiona tu información profesional',
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+          sliver: SliverToBoxAdapter(
+            child: _ProviderProfileHero(user: user),
+          ),
         ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: _providerPanelDecoration(context),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          sliver: SliverGrid.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+            childAspectRatio: 1.12,
             children: [
-              Row(
+              _ProfileInfoPanel(
+                title: 'Información del negocio',
+                icon: Icons.storefront_outlined,
                 children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundColor: context.appSoftGreen,
-                    backgroundImage: user.profileImageUrl != null &&
-                            user.profileImageUrl!.isNotEmpty
-                        ? NetworkImage(user.profileImageUrl!)
-                        : null,
-                    child: user.profileImageUrl == null ||
-                            user.profileImageUrl!.isEmpty
-                        ? Text(
-                            user.name.isNotEmpty
-                                ? user.name[0].toUpperCase()
-                                : 'P',
-                            style: TextStyle(
-                              color: context.appPrimary,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: context.appTextPrimary,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          user.email,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: context.appTextSecondary,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const _ProviderStatusPill(
-                    label: 'Proveedor',
-                    color: AppColors.success,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _ProviderInfoChip(
-                    icon: Icons.star_rounded,
-                    text: '${user.rating.toStringAsFixed(1)} valoración',
-                  ),
-                  _ProviderInfoChip(
+                  _ProfileLine(
                     icon: Icons.location_on_outlined,
                     text: user.address.isNotEmpty
                         ? user.address
-                        : 'Sin dirección',
+                        : 'Av. Arequipa 1234, Miraflores',
                   ),
-                  _ProviderInfoChip(
+                  _ProfileLine(
                     icon: Icons.phone_outlined,
-                    text: user.phone.isNotEmpty ? user.phone : 'Sin teléfono',
+                    text:
+                        user.phone.isNotEmpty ? user.phone : '+51 987 654 321',
+                  ),
+                  _ProfileLine(
+                    icon: Icons.mail_outline,
+                    text: user.email.isNotEmpty
+                        ? user.email
+                        : 'contacto@servicioselsol.pe',
                   ),
                 ],
               ),
-              if ((user.description ?? '').isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text(
-                  user.description!,
-                  style: TextStyle(
-                    color: context.appTextSecondary,
-                    height: 1.35,
+              const _ProfileInfoPanel(
+                title: 'Horarios',
+                icon: Icons.schedule_rounded,
+                children: [
+                  _ScheduleRow(
+                      day: 'Lunes - Viernes', time: '8:00 a. m. - 6:00 p. m.'),
+                  _ScheduleRow(day: 'Sábado', time: '8:00 a. m. - 2:00 p. m.'),
+                  _ScheduleRow(day: 'Domingo', time: 'Cerrado'),
+                  _ResponseBadge(),
+                ],
+              ),
+              _ProfileInfoPanel(
+                title: 'Especialidades',
+                icon: Icons.business_center_outlined,
+                children: [
+                  _ChipWrap(
+                      labels: user.services.isNotEmpty
+                          ? user.services.take(4).toList()
+                          : const [
+                              'Carpintería',
+                              'Electricidad',
+                              'Plomería',
+                              'Pintura'
+                            ]),
+                ],
+              ),
+              const _ProfileInfoPanel(
+                title: 'Cobertura',
+                icon: Icons.pin_drop_outlined,
+                children: [
+                  _ChipWrap(labels: [
+                    'Miraflores',
+                    'Surco',
+                    'San Borja',
+                    'Barranco',
+                    'San Isidro',
+                    '+2'
+                  ]),
+                ],
+              ),
+              const _ProfileInfoPanel(
+                title: 'Documentos',
+                icon: Icons.description_outlined,
+                children: [
+                  _DocLine(label: 'RUC', value: '20601234567'),
+                  _DocLine(
+                      label: 'Verificación de identidad', value: 'Completada'),
+                  _DocLine(
+                      label: 'Verificación de domicilio', value: 'Completada'),
+                ],
+              ),
+              _ProfileInfoPanel(
+                title: 'Configuración',
+                icon: Icons.settings_outlined,
+                children: [
+                  _SettingsLine(
+                    icon: Icons.notifications_outlined,
+                    label: 'Notificaciones',
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.notifications),
                   ),
-                ),
-              ],
+                  _SettingsLine(
+                    icon: Icons.shield_outlined,
+                    label: 'Privacidad',
+                    onTap: () {},
+                  ),
+                  _SettingsLine(
+                    icon: Icons.help_outline_rounded,
+                    label: 'Ayuda',
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.helpCenter),
+                  ),
+                  _SettingsLine(
+                    icon: Icons.logout_rounded,
+                    label: 'Cerrar sesión',
+                    color: AppColors.error,
+                    onTap: () => context.read<AuthProvider>().signOut(),
+                  ),
+                ],
+              ),
             ],
           ),
-        ),
-        const SizedBox(height: 18),
-        const _ProviderSectionHeader(
-          title: 'Mantenimiento',
-          subtitle: 'Accesos rápidos para configurar tu operación',
-        ),
-        const SizedBox(height: 12),
-        _ProviderMenuTile(
-          icon: Icons.edit_outlined,
-          title: 'Editar perfil público',
-          subtitle: 'Nombre, foto, teléfono, descripción y ubicación',
-          onTap: () => Navigator.pushNamed(context, AppRoutes.editProfile),
-        ),
-        _ProviderMenuTile(
-          icon: Icons.home_repair_service_outlined,
-          title: 'Gestionar servicios',
-          subtitle: 'Crear, activar, pausar o editar servicios',
-          onTap: () => Navigator.pushNamed(context, AppRoutes.providerServices),
-        ),
-        _ProviderMenuTile(
-          icon: Icons.notifications_outlined,
-          title: 'Notificaciones',
-          subtitle: 'Reservas, mensajes y avisos de cuenta',
-          onTap: () => Navigator.pushNamed(context, AppRoutes.notifications),
         ),
       ],
     );

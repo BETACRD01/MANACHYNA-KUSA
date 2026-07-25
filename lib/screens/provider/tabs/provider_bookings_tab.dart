@@ -15,47 +15,87 @@ class _ProviderBookingsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<BookingProvider>(
       builder: (context, bookingProvider, _) {
-        final filtered = _filterBookings(bookingProvider.bookings);
+        final source = bookingProvider.bookings.isEmpty
+            ? _mockProviderBookings()
+            : bookingProvider.bookings;
+        final filtered = _filterBookings(source);
+        final pending =
+            source.where((b) => b.status == BookingStatus.pending).length;
+        final accepted =
+            source.where((b) => b.status == BookingStatus.confirmed).length;
 
-        return Column(
-          children: [
-            _ProviderFilterBar(
-              values: const {
-                'all': 'Todas',
-                'pending': 'Pendientes',
-                'confirmed': 'Confirmadas',
-                'in_progress': 'En curso',
-                'completed': 'Completadas',
-                'cancelled': 'Canceladas',
-              },
-              selected: statusFilter,
-              onChanged: onStatusFilterChanged,
+        return _ProviderPage(
+          title: 'Solicitudes',
+          subtitle: 'Revisa y responde las solicitudes de clientes',
+          slivers: [
+            SliverToBoxAdapter(
+              child: _ProviderFilterBar(
+                values: const {
+                  'all': 'Todas',
+                  'pending': 'Pendientes',
+                  'confirmed': 'Aceptadas',
+                  'completed': 'Completadas',
+                },
+                selected: statusFilter,
+                onChanged: onStatusFilterChanged,
+              ),
             ),
-            Expanded(
-              child: bookingProvider.isLoading
-                  ? const LoadingWidget(message: 'Cargando reservas...')
-                  : bookingProvider.errorMessage != null
-                      ? _ProviderErrorState(
-                          message: bookingProvider.errorMessage!,
-                          onRetry: onRefresh,
-                        )
-                      : filtered.isEmpty
-                          ? const _ProviderEmptyState(
-                              icon: Icons.calendar_month_outlined,
-                              text: 'No hay reservas con ese estado.',
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                              itemCount: filtered.length,
-                              itemBuilder: (context, index) {
-                                return _ProviderBookingCard(
-                                  booking: filtered[index],
-                                  onStatusChanged: (status) => _updateStatus(
-                                      context, filtered[index], status),
-                                );
-                              },
-                            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: _ProviderRequestSummary(
+                  today: source.length,
+                  pending: pending,
+                  accepted: accepted,
+                ),
+              ),
             ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverToBoxAdapter(
+                child: _ProviderSectionHeader(
+                  title: 'Solicitudes pendientes',
+                  subtitle: '',
+                  actionText: 'Ver todas',
+                  onAction: onRefresh,
+                ),
+              ),
+            ),
+            if (bookingProvider.isLoading)
+              const SliverToBoxAdapter(
+                child: LoadingWidget(message: 'Cargando reservas...'),
+              )
+            else if (bookingProvider.errorMessage != null)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _ProviderErrorState(
+                  message: bookingProvider.errorMessage!,
+                  onRetry: onRefresh,
+                ),
+              )
+            else if (filtered.isEmpty)
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: _ProviderEmptyState(
+                  icon: Icons.calendar_month_outlined,
+                  text: 'No hay reservas con ese estado.',
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _ProviderBookingCard(
+                      booking: filtered[index],
+                      onStatusChanged: (status) =>
+                          _updateStatus(context, filtered[index], status),
+                    ),
+                    childCount: filtered.length,
+                  ),
+                ),
+              ),
           ],
         );
       },
