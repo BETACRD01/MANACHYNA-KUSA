@@ -27,7 +27,7 @@
 
 | | Característica | Descripción |
 |---|---|---|
-| 🔐 | **Seguridad Garantizada** | Ingreso rápido y seguro con Firebase Auth. |
+| 🔐 | **Seguridad Garantizada** | Ingreso rápido y seguro con Supabase Auth (Google, Facebook, Microsoft). |
 | 🗺️ | **Magia Geográfica** | Integración con Google Maps para ubicar al experto más cercano en tiempo real. |
 | ⭐ | **Comunidad de Confianza** | Reseñas 100% reales. Tú eliges a los mejores calificados. |
 | 🎨 | **Identidad Amazónica** | UI moderna, limpia y profundamente inspirada en los colores de nuestra región. |

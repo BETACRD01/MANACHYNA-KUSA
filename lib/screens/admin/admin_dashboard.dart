@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/theme/app_theme_colors.dart';
 import '../../core/widgets/loading_widget.dart';
 import '../../features/admin/data/admin_repository.dart';
 import '../../providers/auth_provider.dart';
 
-part 'tabs/overview_tab.dart';
-part 'tabs/providers_tab.dart';
-part 'tabs/bookings_tab.dart';
-part 'tabs/services_tab.dart';
-part 'tabs/reports_tab.dart';
-part 'widgets/overview_widgets.dart';
-part 'widgets/admin_shared_widgets.dart';
+import 'shared/admin_colors.dart';
+import 'shared/ui/admin_shared_widgets.dart';
+
+import 'overview/ui/overview_screen.dart';
+import 'users/ui/users_screen.dart';
+import 'providers/ui/providers_screen.dart';
+import 'providers/controllers/providers_controller.dart';
+import 'reports/ui/reports_screen.dart';
+import 'profile/ui/profile_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({Key? key}) : super(key: key);
@@ -26,24 +26,25 @@ class _AdminDashboardState extends State<AdminDashboard>
     with SingleTickerProviderStateMixin {
   final AdminRepository _repository = AdminRepository();
   late TabController _tabController;
+  int _currentIndex = 0;
 
   Future<AdminDashboardData>? _dashboardFuture;
-  String? _busyProviderId;
-  final TextEditingController _providerSearchCtrl = TextEditingController();
-  String _providerStatusFilter = 'all';
-  String _bookingStatusFilter = 'all';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    _tabController.addListener(() {
+      if (_currentIndex != _tabController.index) {
+        setState(() => _currentIndex = _tabController.index);
+      }
+    });
     _dashboardFuture = _repository.loadDashboard();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _providerSearchCtrl.dispose();
     super.dispose();
   }
 
@@ -62,46 +63,7 @@ class _AdminDashboardState extends State<AdminDashboard>
     final isAdmin = user?.hasAdminAccess == true;
 
     return Scaffold(
-      backgroundColor: context.appBackground,
-      appBar: AppBar(
-        title: const Text('Panel de Administración'),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            tooltip: 'Actualizar',
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: _reload,
-          ),
-        ],
-        bottom: isAdmin
-            ? TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                indicatorSize: TabBarIndicatorSize.tab,
-                labelStyle:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                unselectedLabelStyle: const TextStyle(fontSize: 12),
-                tabs: const [
-                  Tab(
-                      icon: Icon(Icons.dashboard_rounded, size: 20),
-                      text: 'Resumen'),
-                  Tab(
-                      icon: Icon(Icons.engineering_outlined, size: 20),
-                      text: 'Proveedores'),
-                  Tab(
-                      icon: Icon(Icons.calendar_month_rounded, size: 20),
-                      text: 'Reservas'),
-                  Tab(
-                      icon:
-                          Icon(Icons.miscellaneous_services_outlined, size: 20),
-                      text: 'Servicios'),
-                  Tab(
-                      icon: Icon(Icons.analytics_rounded, size: 20),
-                      text: 'Reportes'),
-                ],
-              )
-            : null,
-      ),
+      backgroundColor: adminShellBg,
       body: isAdmin
           ? FutureBuilder<AdminDashboardData>(
               future: _dashboardFuture,
@@ -110,14 +72,14 @@ class _AdminDashboardState extends State<AdminDashboard>
                   return const LoadingWidget(message: 'Cargando panel...');
                 }
                 if (snapshot.hasError) {
-                  return _AdminErrorView(
+                  return AdminErrorView(
                     message: _extractMessage(snapshot.error),
                     onRetry: _reload,
                   );
                 }
                 final data = snapshot.data;
                 if (data == null) {
-                  return _AdminErrorView(
+                  return AdminErrorView(
                     message: 'No se recibieron datos del panel.',
                     onRetry: _reload,
                   );
@@ -126,37 +88,20 @@ class _AdminDashboardState extends State<AdminDashboard>
                   controller: _tabController,
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    _OverviewTab(
+                    OverviewTab(
                       data: data,
                       onRefresh: _reload,
                       onReloadSilent: _reloadSilent,
+                      onOpenProviders: () => _tabController.animateTo(2),
                       onOpenReports: () => _tabController.animateTo(4),
                     ),
-                    _ProvidersTab(
-                      repository: _repository,
-                      busyProviderId: _busyProviderId,
-                      searchCtrl: _providerSearchCtrl,
-                      statusFilter: _providerStatusFilter,
-                      onStatusFilterChanged: (v) {
-                        setState(() => _providerStatusFilter = v);
-                      },
-                      onAction: (id) => setState(() => _busyProviderId = id),
-                      onActionDone: () {
-                        setState(() => _busyProviderId = null);
-                        _reloadSilent();
-                      },
-                      onError: (msg) => _showSnack(msg),
+                    AdminUsersTab(stats: data.stats),
+                    ChangeNotifierProvider(
+                      create: (_) => ProvidersController(repository: _repository),
+                      child: const ProvidersScreen(),
                     ),
-                    _BookingsTab(
-                      repository: _repository,
-                      statusFilter: _bookingStatusFilter,
-                      onStatusFilterChanged: (v) {
-                        setState(() => _bookingStatusFilter = v);
-                      },
-                    ),
-                    _ServicesTab(
-                        repository: _repository, onRefresh: _reloadSilent),
-                    _ReportsTab(repository: _repository),
+                    ReportsTab(repository: _repository),
+                    AdminProfileTab(user: user!, stats: data.stats),
                   ],
                 );
               },
@@ -175,12 +120,13 @@ class _AdminDashboardState extends State<AdminDashboard>
                 ],
               ),
             ),
+      bottomNavigationBar: isAdmin
+          ? AdminBottomNav(
+              currentIndex: _currentIndex,
+              onTap: (index) => _tabController.animateTo(index),
+            )
+          : null,
     );
-  }
-
-  void _showSnack(String msg) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   String _extractMessage(dynamic error) {

@@ -7,7 +7,7 @@ import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../models/user_model.dart';
+import '../../models/user/user_model.dart';
 import 'supabase_service.dart';
 
 class AuthService {

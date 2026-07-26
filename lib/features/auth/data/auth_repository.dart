@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/services/auth_service.dart';
-import '../../../models/user_model.dart';
+import '../../../models/user/user_model.dart';
 
 class AuthRepository {
   Future<bool> signInWithProvider(OAuthProvider provider) {

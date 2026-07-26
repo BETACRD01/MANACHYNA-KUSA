@@ -1,7 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../features/bookings/data/booking_repository.dart';
-import '../models/booking_model.dart';
+import '../models/booking/booking_model.dart';
 
 class BookingProvider with ChangeNotifier {
   BookingProvider({
@@ -17,6 +18,10 @@ class BookingProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  // ---------------------------------------------------------------------------
+  // HELPERS DE ESTADO INTERNOS
+  // ---------------------------------------------------------------------------
+
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
@@ -27,9 +32,19 @@ class BookingProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Inicia una operación: activa loading, limpia error, y notifica UNA sola vez.
+  void _beginOperation() {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  // ---------------------------------------------------------------------------
+  // OPERACIONES
+  // ---------------------------------------------------------------------------
+
   Future<void> loadUserBookings(String userId, {bool isProvider = false}) async {
-    _setLoading(true);
-    _setError(null);
+    _beginOperation();
 
     try {
       _bookings = await _repository.loadUserBookings(
@@ -37,33 +52,37 @@ class BookingProvider with ChangeNotifier {
         isProvider: isProvider,
       );
     } catch (e) {
+      debugPrint('[BookingProvider.loadUserBookings] $e');
       _setError('Error al cargar reservas');
     } finally {
       _setLoading(false);
     }
   }
 
+  /// Consulta puntual de detalle — NO activa _setLoading globalmente para no
+  /// bloquear la UI completa. El widget llamante maneja su propio estado visual.
   Future<BookingModel?> getBookingById(String bookingId) async {
     try {
       return await _repository.getBookingById(bookingId);
     } catch (e) {
+      debugPrint('[BookingProvider.getBookingById] $e');
       _setError('Error al obtener reserva');
       return null;
     }
   }
 
   Future<bool> createBooking(BookingModel booking) async {
-    _setLoading(true);
-    _setError(null);
+    _beginOperation();
 
     try {
+      // BookingRepository.createBooking usa .single() y retorna BookingModel
+      // no nulable. Si el insert falla, .single() lanza una excepción que
+      // es capturada por el catch de abajo.
       final created = await _repository.createBooking(booking);
-      if (created != null) {
-        _bookings.insert(0, created);
-      }
-
+      _bookings.insert(0, created);
       return true;
     } catch (e) {
+      debugPrint('[BookingProvider.createBooking] $e');
       _setError('Error al crear reserva');
       return false;
     } finally {
@@ -72,8 +91,7 @@ class BookingProvider with ChangeNotifier {
   }
 
   Future<bool> updateBookingStatus(String bookingId, BookingStatus status) async {
-    _setLoading(true);
-    _setError(null);
+    _beginOperation();
 
     try {
       await _repository.updateBookingStatus(bookingId, status);
@@ -89,6 +107,7 @@ class BookingProvider with ChangeNotifier {
 
       return true;
     } catch (e) {
+      debugPrint('[BookingProvider.updateBookingStatus] $e');
       _setError('Error al actualizar estado de reserva');
       return false;
     } finally {
@@ -97,8 +116,7 @@ class BookingProvider with ChangeNotifier {
   }
 
   Future<bool> cancelBooking(String bookingId, String reason) async {
-    _setLoading(true);
-    _setError(null);
+    _beginOperation();
 
     try {
       await _repository.cancelBooking(bookingId, reason);
@@ -114,6 +132,7 @@ class BookingProvider with ChangeNotifier {
 
       return true;
     } catch (e) {
+      debugPrint('[BookingProvider.cancelBooking] $e');
       _setError('Error al cancelar reserva');
       return false;
     } finally {
@@ -121,15 +140,36 @@ class BookingProvider with ChangeNotifier {
     }
   }
 
+  /// Califica una reserva.
+  ///
+  /// Si la reserva no está en la lista local _bookings (puede pasar al llegar
+  /// desde un deep link o notificación sin haber llamado a loadUserBookings),
+  /// se trae del repositorio como fallback antes de calificar.
   Future<bool> rateBooking(String bookingId, double rating, String? review) async {
-    _setLoading(true);
-    _setError(null);
+    _beginOperation();
 
     try {
-      final booking = _bookings.firstWhere((item) => item.id == bookingId);
+      // Intentamos encontrar la reserva en la lista local primero (O(n)).
+      // Si no está (deep link, notificación, etc.), la traemos del repositorio.
+      BookingModel? booking = _bookings.cast<BookingModel?>().firstWhere(
+        (item) => item?.id == bookingId,
+        orElse: () => null,
+      );
+
+      if (booking == null) {
+        debugPrint('[BookingProvider.rateBooking] bookingId=$bookingId no estaba '
+            'en _bookings — cargando desde repositorio como fallback.');
+        booking = await _repository.getBookingById(bookingId);
+      }
+
+      if (booking == null) {
+        _setError('No se encontró la reserva. Recarga la lista e intenta de nuevo.');
+        return false;
+      }
 
       await _repository.rateBooking(booking, rating, review);
 
+      // Actualiza la copia local si existe en la lista.
       final index = _bookings.indexWhere((item) => item.id == bookingId);
       if (index != -1) {
         _bookings[index] = _bookings[index].copyWith(
@@ -141,12 +181,17 @@ class BookingProvider with ChangeNotifier {
 
       return true;
     } catch (e) {
+      debugPrint('[BookingProvider.rateBooking] $e');
       _setError('Error al calificar servicio');
       return false;
     } finally {
       _setLoading(false);
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // GETTERS DE CONVENIENCIA (SÍNCRONOS)
+  // ---------------------------------------------------------------------------
 
   List<BookingModel> getBookingsByStatus(BookingStatus status) {
     return _bookings.where((booking) => booking.status == status).toList();

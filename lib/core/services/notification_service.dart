@@ -81,7 +81,7 @@ class NotificationService {
         if (kDebugMode) {
           debugPrint('Navegar a tarea: ${message.data['task_id']}');
         }
-        // NavigationService.navigateTo(AppRoutes.providerTaskFeed);
+        // NavigationService.navigateTo(AppRoutes.providerDashboard);
         break;
       default:
         if (kDebugMode) {

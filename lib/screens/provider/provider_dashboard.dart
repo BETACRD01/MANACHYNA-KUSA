@@ -1,30 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_routes.dart';
-import '../../core/theme/app_theme_colors.dart';
-import '../../core/utils/helpers.dart';
-import '../../core/widgets/loading_widget.dart';
-import '../../models/booking_model.dart';
-import '../../models/service_model.dart';
-import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
-import '../../providers/notification_provider.dart';
 import '../../providers/service_provider.dart';
 
-part 'tabs/provider_bookings_tab.dart';
-part 'tabs/provider_overview_tab.dart';
-part 'tabs/provider_profile_tab.dart';
-part 'tabs/provider_services_tab.dart';
-part 'tabs/provider_work_feed_tab.dart';
-part 'widgets/provider_booking_widgets.dart';
-part 'widgets/provider_common_widgets.dart';
-part 'widgets/provider_overview_widgets.dart';
-part 'widgets/provider_service_widgets.dart';
-part 'widgets/provider_task_widgets.dart';
+import 'shared/ui/provider_shared_widgets.dart';
+import 'overview/ui/overview_screen.dart';
+import 'bookings/ui/bookings_screen.dart';
+import 'services/ui/services_screen.dart';
+import 'work_feed/ui/work_feed_screen.dart';
+import 'profile/ui/profile_screen.dart';
 
 class ProviderDashboard extends StatefulWidget {
   const ProviderDashboard({Key? key}) : super(key: key);
@@ -80,48 +66,48 @@ class _ProviderDashboardState extends State<ProviderDashboard>
     final hasProviderAccess = user?.hasProviderAccess == true;
 
     return Scaffold(
-      backgroundColor: _providerShellBg,
+      backgroundColor: providerShellBg,
       body: !hasProviderAccess
-          ? const _ProviderAccessDenied()
+          ? const ProviderAccessDenied()
           : RefreshIndicator(
               onRefresh: _loadPanelData,
               child: TabBarView(
                 controller: _tabController,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  _ProviderOverviewTab(
+                  ProviderOverviewTab(
                     user: user!,
                     onOpenBookings: () => _openTab(1),
                     onOpenServices: () => _openTab(2),
                     onOpenTasks: () => _openTab(3),
                     onRefresh: _loadPanelData,
                   ),
-                  _ProviderBookingsTab(
+                  ProviderBookingsTab(
                     statusFilter: _bookingStatusFilter,
                     onStatusFilterChanged: (value) {
                       setState(() => _bookingStatusFilter = value);
                     },
                     onRefresh: _loadPanelData,
                   ),
-                  _ProviderServicesTab(
+                  ProviderServicesTab(
                     statusFilter: _serviceStatusFilter,
                     onStatusFilterChanged: (value) {
                       setState(() => _serviceStatusFilter = value);
                     },
                     onRefresh: _loadPanelData,
                   ),
-                  _ProviderWorkFeedTab(
+                  ProviderWorkFeedTab(
                     categoryFilter: _taskCategoryFilter,
                     onCategoryChanged: (value) {
                       setState(() => _taskCategoryFilter = value);
                     },
                   ),
-                  _ProviderProfileTab(user: user),
+                  ProviderProfileTab(user: user),
                 ],
               ),
             ),
       bottomNavigationBar: hasProviderAccess
-          ? _ProviderBottomNav(
+          ? ProviderBottomNav(
               currentIndex: _currentIndex,
               onTap: _openTab,
             )

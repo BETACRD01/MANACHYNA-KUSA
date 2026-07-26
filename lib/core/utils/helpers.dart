@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../models/booking_model.dart';
-import '../../models/service_model.dart';
+import '../../models/booking/booking_model.dart';
+import '../../models/service/service_model.dart';
 
 class Helpers {
   static String formatCurrency(double amount) {

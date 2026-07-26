@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/notification_model.dart';
-import '../models/user_model.dart';
+import '../models/notification/notification_model.dart';
+import '../models/user/user_model.dart';
 
 class NotificationProvider extends ChangeNotifier {
   static const String _prefsKey = 'app_notifications';

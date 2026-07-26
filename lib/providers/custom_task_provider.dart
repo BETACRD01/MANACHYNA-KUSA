@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/custom_task_model.dart';
+import '../models/custom_task/custom_task_model.dart';
 
 class CustomTaskProvider with ChangeNotifier {
   final List<CustomTaskModel> _tasks = [];

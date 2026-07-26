@@ -1,32 +1,29 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_routes.dart';
-import '../../models/booking_model.dart';
-import '../../models/service_model.dart';
-import '../../screens/auth/login_screen.dart';
-import '../../screens/auth/profile_screen.dart';
-import '../../screens/auth/edit_profile_screen.dart';
+import '../../models/booking/booking_model.dart';
+import '../../models/service/service_model.dart';
+import '../../screens/auth/ui/login_screen.dart';
+import '../../screens/customer/profile/ui/profile_tab.dart';
+import '../../screens/customer/profile/ui/views/edit_profile_screen.dart';
 import '../../screens/admin/admin_dashboard.dart';
-import '../../screens/booking/booking_detail_screen.dart';
-import '../../screens/booking/booking_form_screen.dart';
-import '../../screens/booking/booking_list_screen.dart';
-import '../../screens/common/chat_screen.dart';
+import '../../screens/customer/bookings/ui/booking_detail_screen.dart';
+import '../../screens/customer/bookings/ui/booking_form_screen.dart';
+import '../../screens/customer/bookings/ui/bookings_tab.dart';
+import '../../screens/customer/chat/ui/chat_tab.dart';
 import '../../screens/common/map_screen.dart';
 import '../../screens/common/splash_screen.dart';
-import '../../screens/home/home_screen.dart';
-import '../../screens/home/search_screen.dart';
-import '../../screens/home/service_detail_screen.dart';
-import '../../screens/home/service_list_screen.dart';
-import '../../screens/provider/provider_bookings.dart';
+import '../../screens/customer/customer_dashboard.dart';
+import '../../screens/customer/home/ui/search_screen.dart';
+import '../../screens/customer/home/ui/service_detail_screen.dart';
+import '../../screens/customer/home/ui/service_list_screen.dart';
 import '../../screens/provider/provider_dashboard.dart';
-import '../../screens/provider/provider_services.dart';
 import '../../screens/notifications/notification_list_screen.dart';
-import '../../screens/auth/perfil/language_screen.dart';
-import '../../screens/auth/perfil/help_center_screen.dart';
-import '../../screens/auth/perfil/contact_screen.dart';
-import '../../screens/booking/custom_task_request_screen.dart';
-import '../../screens/booking/client_custom_tasks_screen.dart';
-import '../../screens/provider/provider_task_feed_screen.dart';
+import '../../screens/customer/profile/ui/views/language_screen.dart';
+import '../../screens/customer/profile/ui/views/help_center_screen.dart';
+import '../../screens/customer/profile/ui/views/contact_screen.dart';
+import '../../screens/customer/bookings/ui/custom_task_request_screen.dart';
+import '../../screens/customer/bookings/ui/client_custom_tasks_screen.dart';
 
 // Argumento tipado para SearchScreen
 class SearchArgs {
@@ -91,17 +88,11 @@ class AppRouter {
       case AppRoutes.adminDashboard:
         return _page(const AdminDashboard(), settings);
 
-      case AppRoutes.providerServices:
-        return _page(const ProviderServices(), settings);
-
-      case AppRoutes.providerBookings:
-        return _page(const ProviderBookings(), settings);
-
       case AppRoutes.map:
         return _page(const MapScreen(), settings);
 
       case AppRoutes.chat:
-        return _page(const ChatScreen(), settings);
+        return _page(const ChatTab(), settings);
 
       case AppRoutes.search:
         final args = settings.arguments as SearchArgs?;
@@ -130,9 +121,6 @@ class AppRouter {
 
       case AppRoutes.clientCustomTasks:
         return _page(const ClientCustomTasksScreen(), settings);
-
-      case AppRoutes.providerTaskFeed:
-        return _page(const ProviderTaskFeedScreen(), settings);
 
       default:
         return _unknown(settings);

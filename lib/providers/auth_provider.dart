@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/services/auth_service.dart';
 import '../features/auth/data/auth_repository.dart';
-import '../models/user_model.dart';
+import '../models/user/user_model.dart';
 
 class AuthProvider with ChangeNotifier {
   AuthProvider({
@@ -30,10 +30,19 @@ class AuthProvider with ChangeNotifier {
   bool get isAuthenticated => _currentUser != null;
   bool get isInitialized => _isInitialized;
 
+  // ---------------------------------------------------------------------------
+  // INICIALIZACIÓN
+  // ---------------------------------------------------------------------------
+
   Future<void> _initializeAuth() async {
     try {
       debugPrint('Iniciando AuthProvider con Supabase Auth');
 
+      // Se depende ÚNICAMENTE del stream para cargar los datos del usuario.
+      // onAuthStateChange siempre emite el estado actual al suscribirse
+      // (incluyendo la sesión existente si la hay), por lo que el bloque
+      // síncrono "AuthService.currentUser" que existía antes era redundante
+      // y podía causar una doble llamada a _loadUserData() para el mismo uid.
       _authSubscription =
           AuthService.authStateChanges.listen((authState) async {
         final authUser = authState.session?.user;
@@ -46,13 +55,6 @@ class AuthProvider with ChangeNotifier {
           notifyListeners();
         }
       });
-
-      final currentAuthUser = AuthService.currentUser;
-      if (currentAuthUser != null) {
-        await _loadUserData(currentAuthUser.id);
-      } else {
-        _setLoading(false);
-      }
 
       _isInitialized = true;
       notifyListeners();
@@ -72,7 +74,7 @@ class AuthProvider with ChangeNotifier {
       final userData = await _authRepository.getCurrentUser();
       if (userData != null) {
         _currentUser = userData;
-        _clearError();
+        _clearMessages();
       } else {
         _setError('No se encontraron datos del usuario');
       }
@@ -83,6 +85,10 @@ class AuthProvider with ChangeNotifier {
       _setLoading(false);
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // HELPERS DE ESTADO INTERNOS
+  // ---------------------------------------------------------------------------
 
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
@@ -103,9 +109,18 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void _clearError() {
+  /// Limpia ambos mensajes y notifica UNA SOLA VEZ.
+  /// Todos los métodos públicos y privados que necesiten limpiar mensajes
+  /// deben usar este helper en lugar de asignar directamente los campos.
+  void _clearMessages() {
     _errorMessage = null;
+    _successMessage = null;
+    notifyListeners();
   }
+
+  // ---------------------------------------------------------------------------
+  // AUTH PÚBLICA
+  // ---------------------------------------------------------------------------
 
   Future<void> checkAuthStatus() async {
     try {
@@ -124,8 +139,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> signInWithProvider(OAuthProvider provider) async {
     _setLoading(true);
-    _clearError();
-    _successMessage = null;
+    _clearMessages();
 
     try {
       final bool launched;
@@ -144,6 +158,15 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
+      // Para Google, Facebook y Microsoft en NATIVO: el `true` significa que
+      // signInWithIdToken() ya completó y la sesión de Supabase está activa.
+      // El authStateChanges stream actualizará _currentUser automáticamente.
+      //
+      // En WEB: los tres proveedores redirigen al flujo OAuth estándar
+      // (signInWithOAuth), por lo que `true` solo indica que el browser fue
+      // abierto. El mensaje "Inicio de sesión completado" no es 100% preciso
+      // en web, pero el stream de authStateChanges actualiza el estado igualmente
+      // al regresar del redirect, por lo que no causa un bug funcional.
       _setSuccess(
         provider == OAuthProvider.google ||
                 provider == OAuthProvider.facebook ||
@@ -167,7 +190,6 @@ class AuthProvider with ChangeNotifier {
     try {
       await _authRepository.signOut();
       _currentUser = null;
-      _clearError();
       _setSuccess('Sesión cerrada correctamente');
     } catch (e) {
       _setError('Error al cerrar sesión: ${e.toString()}');
@@ -178,8 +200,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> updateProfile(UserModel updatedUser) async {
     _setLoading(true);
-    _clearError();
-    _successMessage = null;
+    _clearMessages();
 
     try {
       final success = await _authRepository.updateProfile(updatedUser);
@@ -201,8 +222,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> updateProfileImageUrl(String imageUrl) async {
     _setLoading(true);
-    _clearError();
-    _successMessage = null;
+    _clearMessages();
 
     try {
       if (_currentUser == null) {
@@ -210,10 +230,19 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
-      final success = await _authRepository.updateProfileImage(
-        _currentUser!.id,
-        imageUrl,
-      );
+      // Guardamos el id ANTES del await para no depender de _currentUser
+      // después del punto de suspensión, donde un signOut concurrente
+      // disparado por authStateChanges podría haberlo puesto en null.
+      final userId = _currentUser!.id;
+
+      final success = await _authRepository.updateProfileImage(userId, imageUrl);
+
+      // Comprobación post-await: el stream pudo haber puesto _currentUser
+      // en null mientras esperábamos la respuesta del servidor.
+      if (_currentUser == null) {
+        _setError('La sesión expiró durante la actualización de imagen');
+        return false;
+      }
 
       if (success) {
         _currentUser = _currentUser!.copyWith(profileImageUrl: imageUrl);
@@ -237,6 +266,10 @@ class AuthProvider with ChangeNotifier {
       await _loadUserData(authUser.id);
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // HELPERS PRIVADOS
+  // ---------------------------------------------------------------------------
 
   String _getAuthErrorMessage(String error, OAuthProvider provider) {
     final providerName = provider == OAuthProvider.facebook
@@ -268,13 +301,22 @@ class AuthProvider with ChangeNotifier {
     return 'Error de autenticación';
   }
 
-  void clearError() => _clearError();
-  void clearSuccess() => _successMessage = null;
+  // ---------------------------------------------------------------------------
+  // API PÚBLICA PARA LIMPIAR MENSAJES DESDE LA UI
+  // ---------------------------------------------------------------------------
 
-  void clearMessages() {
-    _clearError();
-    _successMessage = null;
-  }
+  /// Limpia el mensaje de error y notifica a los listeners.
+  void clearError() => _clearMessages();
+
+  /// Limpia el mensaje de éxito y notifica a los listeners.
+  void clearSuccess() => _clearMessages();
+
+  /// Limpia ambos mensajes y notifica a los listeners.
+  void clearMessages() => _clearMessages();
+
+  // ---------------------------------------------------------------------------
+  // GETTERS DE CONVENIENCIA
+  // ---------------------------------------------------------------------------
 
   bool get isProvider => _currentUser?.hasProviderAccess == true;
   bool get isClient => _currentUser?.userType == UserType.client;

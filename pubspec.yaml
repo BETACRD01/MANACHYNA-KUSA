@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.19.0 <4.0.0'
+  sdk: '>=3.8.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -35,12 +35,17 @@ dependencies:
   intl_phone_field: ^3.2.0
   device_info_plus: ^12.4.0
   logging: ^1.1.0
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
   flutter_launcher_icons: ^0.14.3
+  build_runner: ^2.15.1
+  freezed: ^4.0.0-dev.3
+  json_serializable: ^6.14.0
 
 flutter_launcher_icons:
   android: true

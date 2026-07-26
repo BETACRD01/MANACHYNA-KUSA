@@ -10,8 +10,6 @@ class AppRoutes {
   static const String bookingDetail = '/booking-detail';
   static const String providerDashboard = '/provider-dashboard';
   static const String adminDashboard = '/admin-dashboard';
-  static const String providerServices = '/provider-services';
-  static const String providerBookings = '/provider-bookings';
   static const String map = '/map';
   static const String chat = '/chat';
   static const String search = '/search';
@@ -22,5 +20,4 @@ class AppRoutes {
   static const String contactUs = '/contact-us';
   static const String customTaskForm = '/custom-task-form';
   static const String clientCustomTasks = '/client-custom-tasks';
-  static const String providerTaskFeed = '/provider-task-feed';
 }

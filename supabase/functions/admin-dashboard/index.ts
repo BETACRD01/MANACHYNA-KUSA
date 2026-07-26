@@ -44,67 +44,92 @@ async function countRows(admin: ReturnType<typeof createClient>, table: string, 
   return r.count ?? 0;
 }
 
+async function safeCountRows(admin: ReturnType<typeof createClient>, table: string, filter?: (q: any) => any) {
+  try {
+    return await countRows(admin, table, filter);
+  } catch (error) {
+    console.warn(`admin-dashboard count fallback for ${table}:`, error);
+    return 0;
+  }
+}
+
+async function safeQuery<T>(
+  label: string,
+  fallback: T,
+  run: () => Promise<{ data: T | null; error: unknown }>,
+) {
+  try {
+    const result = await run();
+    if (result.error) {
+      console.warn(`admin-dashboard query fallback for ${label}:`, result.error);
+      return fallback;
+    }
+    return result.data ?? fallback;
+  } catch (error) {
+    console.warn(`admin-dashboard query fallback for ${label}:`, error);
+    return fallback;
+  }
+}
+
 async function overview(admin: ReturnType<typeof createClient>) {
   const [
     totalUsers, totalProviders, pendingProviders,
     activeProviders, totalBookings, pendingBookings,
     activeServices, completedBookings, cancelledBookings,
   ] = await Promise.all([
-    countRows(admin, "users"),
-    countRows(admin, "providers"),
-    countRows(admin, "providers", (q) => q.eq("status", "pending")),
-    countRows(admin, "providers", (q) => q.eq("is_active", true)),
-    countRows(admin, "bookings"),
-    countRows(admin, "bookings", (q) => q.eq("status", "pending")),
-    countRows(admin, "provider_services", (q) => q.eq("is_active", true)),
-    countRows(admin, "bookings", (q) => q.eq("status", "completed")),
-    countRows(admin, "bookings", (q) => q.eq("status", "cancelled")),
+    safeCountRows(admin, "users"),
+    safeCountRows(admin, "providers"),
+    safeCountRows(admin, "providers", (q) => q.eq("status", "pending")),
+    safeCountRows(admin, "providers", (q) => q.eq("is_active", true)),
+    safeCountRows(admin, "bookings"),
+    safeCountRows(admin, "bookings", (q) => q.eq("status", "pending")),
+    safeCountRows(admin, "provider_services", (q) => q.eq("is_active", true)),
+    safeCountRows(admin, "bookings", (q) => q.eq("status", "completed")),
+    safeCountRows(admin, "bookings", (q) => q.eq("status", "cancelled")),
   ]);
 
   const end = new Date();
   const start = new Date(end.getFullYear(), end.getMonth(), 1);
   const [newUsersThisMonth, newProvidersThisMonth] = await Promise.all([
-    countRows(admin, "users", (q) => q.gte("created_at", start.toISOString())),
-    countRows(admin, "providers", (q) => q.gte("created_at", start.toISOString())),
+    safeCountRows(admin, "users", (q) => q.gte("created_at", start.toISOString())),
+    safeCountRows(admin, "providers", (q) => q.gte("created_at", start.toISOString())),
   ]);
 
   const [payments, ratings] = await Promise.all([
-    admin
-      .from("payments")
-      .select("amount, status")
-      .in("status", ["paid", "completed", "succeeded"]),
-    admin
-      .from("reviews")
-      .select("rating")
-      .eq("is_visible", true),
+    safeQuery("payments", [] as any[], () =>
+      admin
+        .from("payments")
+        .select("amount, status")
+        .in("status", ["paid", "completed", "succeeded"])),
+    safeQuery("reviews", [] as any[], () =>
+      admin
+        .from("reviews")
+        .select("rating")
+        .eq("is_visible", true)),
   ]);
-  if (payments.error) throw payments.error;
-  if (ratings.error) throw ratings.error;
 
-  const revenueTotal = (payments.data ?? []).reduce(
+  const revenueTotal = payments.reduce(
     (sum: number, p: any) => sum + (Number(p.amount) || 0),
     0,
   );
-  const validRatings = (ratings.data ?? [])
+  const validRatings = ratings
     .map((r: any) => Number(r.rating))
     .filter((rating: number) => Number.isFinite(rating) && rating > 0);
   const avgRating = validRatings.length > 0
     ? validRatings.reduce((sum: number, rating: number) => sum + rating, 0) / validRatings.length
     : 0;
 
-  const providers = await admin
-    .from("providers")
-    .select("id, uid, name, full_name, email, phone, city, address, status, is_active, rating, reviews_count, created_at, updated_at")
-    .order("created_at", { ascending: false })
-    .limit(50);
-  if (providers.error) throw providers.error;
+  const providers = await safeQuery("overview.providers", [] as any[], () =>
+    admin
+      .from("providers")
+      .select("*")
+      .limit(50));
 
-  const bookings = await admin
-    .from("bookings")
-    .select("id, status, service_name, client_name, provider_name, total_amount, scheduled_date, created_at")
-    .order("created_at", { ascending: false })
-    .limit(8);
-  if (bookings.error) throw bookings.error;
+  const bookings = await safeQuery("overview.bookings", [] as any[], () =>
+    admin
+      .from("bookings")
+      .select("*")
+      .limit(8));
 
   return {
     stats: {
@@ -122,37 +147,36 @@ async function overview(admin: ReturnType<typeof createClient>) {
       new_users_this_month: newUsersThisMonth,
       new_providers_this_month: newProvidersThisMonth,
     },
-    providers: providers.data ?? [],
-    recent_bookings: bookings.data ?? [],
+    providers,
+    recent_bookings: bookings,
   };
 }
 
 async function reports(admin: ReturnType<typeof createClient>) {
   const privateSchema = admin.schema("private");
   const [overviewReport, dailyActivity, bookingStatus] = await Promise.all([
-    privateSchema
-      .from("report_overview")
-      .select("sort_order, metric, value")
-      .order("sort_order", { ascending: true }),
-    privateSchema
-      .from("report_daily_activity")
-      .select("day, new_users, new_providers, bookings_created, bookings_completed, booking_amount, payments_amount, messages_sent")
-      .order("day", { ascending: false })
-      .limit(30),
-    privateSchema
-      .from("report_booking_status")
-      .select("status, bookings, total_amount")
-      .order("bookings", { ascending: false }),
+    safeQuery("report_overview", [] as any[], () =>
+      privateSchema
+        .from("report_overview")
+        .select("sort_order, metric, value")
+        .order("sort_order", { ascending: true })),
+    safeQuery("report_daily_activity", [] as any[], () =>
+      privateSchema
+        .from("report_daily_activity")
+        .select("day, new_users, new_providers, bookings_created, bookings_completed, booking_amount, payments_amount, messages_sent")
+        .order("day", { ascending: false })
+        .limit(30)),
+    safeQuery("report_booking_status", [] as any[], () =>
+      privateSchema
+        .from("report_booking_status")
+        .select("status, bookings, total_amount")
+        .order("bookings", { ascending: false })),
   ]);
 
-  if (overviewReport.error) throw overviewReport.error;
-  if (dailyActivity.error) throw dailyActivity.error;
-  if (bookingStatus.error) throw bookingStatus.error;
-
   return {
-    overview: overviewReport.data ?? [],
-    daily_activity: (dailyActivity.data ?? []).reverse(),
-    booking_status: bookingStatus.data ?? [],
+    overview: overviewReport,
+    daily_activity: dailyActivity.reverse(),
+    booking_status: bookingStatus,
   };
 }
 
@@ -164,42 +188,47 @@ async function listProviders(admin: ReturnType<typeof createClient>, body: Recor
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  let countQuery = admin.from("providers").select("id", { count: "exact", head: true });
-  let dataQuery = admin
-    .from("providers")
-    .select("id, uid, name, full_name, email, phone, city, address, status, is_active, rating, reviews_count, created_at")
-    .order("created_at", { ascending: false })
-    .range(from, to);
+  let count = 0;
+  let items: any[] = [];
+  try {
+    let countQuery = admin.from("providers").select("id", { count: "exact", head: true });
+    let dataQuery = admin
+      .from("providers")
+      .select("*")
+      .range(from, to);
 
-  if (status && status !== "all") {
-    const filter = status === "active" ? { is_active: true } : { status };
-    countQuery = countQuery.match(filter);
-    dataQuery = dataQuery.match(filter);
+    if (status && status !== "all") {
+      const filter = status === "active" ? { is_active: true } : { status };
+      countQuery = countQuery.match(filter);
+      dataQuery = dataQuery.match(filter);
+    }
+
+    if (search) {
+      const pattern = `%${search}%`;
+      countQuery = countQuery.or(`name.ilike.${pattern},full_name.ilike.${pattern},email.ilike.${pattern},phone.ilike.${pattern}`);
+      dataQuery = dataQuery.or(`name.ilike.${pattern},full_name.ilike.${pattern},email.ilike.${pattern},phone.ilike.${pattern}`);
+    }
+
+    const [countResult, dataResult] = await Promise.all([countQuery, dataQuery]);
+    if (countResult.error) throw countResult.error;
+    if (dataResult.error) throw dataResult.error;
+    count = countResult.count ?? 0;
+    items = (dataResult.data ?? []).map((p: any) => ({
+      ...p,
+      city: p.city ?? "",
+      rating: p.rating ?? 0,
+      reviews_count: p.reviews_count ?? 0,
+    }));
+  } catch (error) {
+    console.warn("admin-dashboard listProviders fallback:", error);
   }
-
-  if (search) {
-    const pattern = `%${search}%`;
-    countQuery = countQuery.or(`name.ilike.${pattern},full_name.ilike.${pattern},email.ilike.${pattern},phone.ilike.${pattern}`);
-    dataQuery = dataQuery.or(`name.ilike.${pattern},full_name.ilike.${pattern},email.ilike.${pattern},phone.ilike.${pattern}`);
-  }
-
-  const [countResult, dataResult] = await Promise.all([countQuery, dataQuery]);
-  if (countResult.error) throw countResult.error;
-  if (dataResult.error) throw dataResult.error;
-
-  const items = (dataResult.data ?? []).map((p: any) => ({
-    ...p,
-    city: p.city ?? "",
-    rating: p.rating ?? 0,
-    reviews_count: p.reviews_count ?? 0,
-  }));
 
   return json({
     items,
-    total: countResult.count ?? 0,
+    total: count,
     page,
     page_size: pageSize,
-    has_more: (from + pageSize) < (countResult.count ?? 0),
+    has_more: (from + pageSize) < count,
   });
 }
 
@@ -210,43 +239,48 @@ async function listBookings(admin: ReturnType<typeof createClient>, body: Record
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  let countQuery = admin.from("bookings").select("id", { count: "exact", head: true });
-  let dataQuery = admin
-    .from("bookings")
-    .select("id, status, service_name, client_name, provider_name, total_amount, scheduled_date, created_at")
-    .order("created_at", { ascending: false })
-    .range(from, to);
+  let count = 0;
+  let items: any[] = [];
+  try {
+    let countQuery = admin.from("bookings").select("id", { count: "exact", head: true });
+    let dataQuery = admin
+      .from("bookings")
+      .select("*")
+      .range(from, to);
 
-  if (status && status !== "all") {
-    countQuery = countQuery.eq("status", status);
-    dataQuery = dataQuery.eq("status", status);
+    if (status && status !== "all") {
+      countQuery = countQuery.eq("status", status);
+      dataQuery = dataQuery.eq("status", status);
+    }
+
+    const [countResult, dataResult] = await Promise.all([countQuery, dataQuery]);
+    if (countResult.error) throw countResult.error;
+    if (dataResult.error) throw dataResult.error;
+    count = countResult.count ?? 0;
+    items = dataResult.data ?? [];
+  } catch (error) {
+    console.warn("admin-dashboard listBookings fallback:", error);
   }
 
-  const [countResult, dataResult] = await Promise.all([countQuery, dataQuery]);
-  if (countResult.error) throw countResult.error;
-  if (dataResult.error) throw dataResult.error;
-
   return json({
-    items: dataResult.data ?? [],
-    total: countResult.count ?? 0,
+    items,
+    total: count,
     page,
     page_size: pageSize,
-    has_more: (from + pageSize) < (countResult.count ?? 0),
+    has_more: (from + pageSize) < count,
   });
 }
 
 async function listServices(admin: ReturnType<typeof createClient>) {
-  const { data: services, error } = await admin
-    .from("services")
-    .select("id, name, is_active, base_price, created_at, category:service_categories(name)")
-    .order("name", { ascending: true });
-
-  if (error) throw error;
+  const services = await safeQuery("services", [] as any[], () =>
+    admin
+      .from("services")
+      .select("id, name, is_active, base_price, created_at, category:service_categories(name)"));
 
   const items = await Promise.all((services ?? []).map(async (s: any) => {
     const [provCount, bookCount] = await Promise.all([
-      countRows(admin, "provider_services", (q) => q.eq("service_id", s.id).eq("is_active", true)),
-      countRows(admin, "bookings", (q) => q.eq("service_name", s.name)),
+      safeCountRows(admin, "provider_services", (q) => q.eq("service_id", s.id).eq("is_active", true)),
+      safeCountRows(admin, "bookings", (q) => q.eq("service_name", s.name)),
     ]);
     return {
       id: s.id,

@@ -17,13 +17,16 @@ Tecnologías principales:
 - Dart packages: supabase_flutter, firebase_messaging, geolocator, etc.
 
 Rutas útiles en el repo:
-- Skill y documentación: `.codex/skills/manachyna-kusa/SKILL.md`
-- Registro de cambios: `.codex/skills/manachyna-kusa/CHANGES.md`
-- Borrador SQL incluido: `migrations/supabase-schema-working-draft.sql`
+- Skill y documentación: `.codex/project_ai_instructions/PROJECT_SKILL.md`
+- Registro de cambios: `.codex/project_ai_instructions/CHANGES.md`
+- Borrador SQL incluido: `.codex/project_ai_instructions/migrations/supabase-schema-working-draft.sql`
 - Supabase client wrapper: `lib/core/services/supabase_service.dart`
 - Firebase messaging: `lib/core/services/firebase_service.dart`
 - Supabase config: `lib/core/config/supabase_config.dart`
 - Firebase options: `lib/firebase_options.dart` (contiene IDs, evita subir claves)
+- Arquitectura de pantallas: `docs/mobile/architecture.md`
+- Base de datos documentada: `docs/backend/database.md`
+- Autenticación documentada: `docs/backend/AUTHENTICATION_AND_BACKEND.md`
 
 Inyección de credenciales en runtime:
 
