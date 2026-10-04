@@ -51,11 +51,24 @@
 
 ## 📚 Documentación Técnica
 
-¿Eres desarrollador o quieres entender cómo funciona la aplicación por dentro?
+¿Eres desarrollador o quieres entender cómo funciona la plataforma por dentro?
 
-👉 **[Documentación Técnica Completa → DOCUMENTATION.md](DOCUMENTATION.md)**
+👉 **[Documentación Técnica Completa → docs/DOCUMENTATION.md](docs/DOCUMENTATION.md)**
 
-Incluye arquitectura del sistema, estructura de base de datos e inyección de dependencias.
+Incluye la arquitectura de la app móvil, el frontend web en React, el diseño de la base de datos PostgreSQL en Supabase y el pipeline de CI/CD en Google Cloud.
+
+---
+
+## 🏗️ Estructura del Monorepo
+
+```text
+MANACHYNA-KUSA/
+├── mobile/       # 📱 Aplicación móvil completa (Flutter: Android e iOS)
+├── frontend/     # ⚛️ Plataforma web oficial (React + Vite + TypeScript + Tailwind)
+├── supabase/     # ☁️ Esquemas de base de datos PostgreSQL, migraciones y Edge Functions
+├── docs/         # 📖 Documentación técnica detallada
+└── .github/      # 🚀 Pipeline de CI/CD para despliegue automatizado en Google Cloud VM
+```
 
 ---
 
@@ -64,40 +77,35 @@ Incluye arquitectura del sistema, estructura de base de datos e inyección de de
 ### Requisitos previos
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) `>= 3.7.0`
-- [Dart SDK](https://dart.dev/get-dart) `>= 2.19.0`
+- [Node.js](https://nodejs.org/) `>= 20.0.0` y npm
 - Cuenta activa en Firebase y Supabase
-- Acceso al repositorio de GitHub con permisos del autor
 
 ### 1️⃣ Clonar el proyecto
 
 ```bash
-git clone https://github.com/BETACRD01/Proyecto_final_2025.git
-cd Proyecto_final_2025
+git clone https://github.com/BETACRD01/MANACHYNA-KUSA.git
+cd MANACHYNA-KUSA
 ```
 
-### 2️⃣ Instalar dependencias
+### 2️⃣ Ejecutar la Aplicación Móvil (Flutter)
 
 ```bash
+cd mobile
 flutter pub get
-```
-
-### 3️⃣ Configurar el entorno
-
-Debes obtener o configurar tus propias credenciales de backend:
-
-| Archivo | Plataforma | Descripción |
-|---|---|---|
-| `google-services.json` | Android | Credenciales de Firebase para Android |
-| `GoogleService-Info.plist` | iOS | Credenciales de Firebase para iOS |
-| `lib/core/config/supabase_config.dart` | All | Variables de entorno de Supabase |
-
-> ⚠️ **Importante:** Ninguna credencial está incluida en el repositorio. Contáctate con el autor para obtener acceso autorizado.
-
-### 4️⃣ Ejecutar la aplicación
-
-```bash
 flutter run
 ```
+
+### 3️⃣ Ejecutar el Frontend Web (React)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 4️⃣ Despliegue en Producción
+* **Web:** Al hacer `push` a la rama `main`, **GitHub Actions** compila automáticamente el frontend y lo despliega vía SSH seguro a la Máquina Virtual de Google Cloud bajo el dominio `manachynakusa.duckdns.org`.
+* **Móvil:** Genera el bundle de producción para Google Play con `cd mobile && flutter build appbundle --release`.
 
 ---
 
