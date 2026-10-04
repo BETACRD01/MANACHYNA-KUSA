@@ -29,12 +29,37 @@ interface Service {
   price_unit: string;
 }
 
+function getInitialTab(): 'home' | 'terms' | 'privacy' {
+  if (typeof window === 'undefined') return 'home';
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  if (path.includes('term') || path.includes('condicion') || hash.includes('terms')) return 'terms';
+  if (path.includes('privac') || hash.includes('privacy')) return 'privacy';
+  return 'home';
+}
+
 export function App() {
-  const [currentTab, setCurrentTab] = useState<'home' | 'terms' | 'privacy'>('home');
+  const [currentTab, setCurrentTab] = useState<'home' | 'terms' | 'privacy'>(getInitialTab);
   const [categories, setCategories] = useState<Category[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [backendStatus, setBackendStatus] = useState<'connected' | 'error' | 'checking'>('checking');
+
+  const navigateTo = (tab: 'home' | 'terms' | 'privacy') => {
+    setCurrentTab(tab);
+    const targetPath = tab === 'home' ? '/' : `/${tab}`;
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, '', targetPath);
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentTab(getInitialTab());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -78,7 +103,7 @@ export function App() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div
             className="flex items-center gap-3 cursor-pointer"
-            onClick={() => setCurrentTab('home')}
+            onClick={() => navigateTo('home')}
           >
             <div className="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-black text-xl shadow-xs">
               M
@@ -93,7 +118,7 @@ export function App() {
 
           <nav className="flex items-center gap-1 sm:gap-2">
             <button
-              onClick={() => setCurrentTab('home')}
+              onClick={() => navigateTo('home')}
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 ${
                 currentTab === 'home'
                   ? 'bg-emerald-50 text-emerald-800'
@@ -105,7 +130,7 @@ export function App() {
             </button>
 
             <button
-              onClick={() => setCurrentTab('terms')}
+              onClick={() => navigateTo('terms')}
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 ${
                 currentTab === 'terms'
                   ? 'bg-emerald-50 text-emerald-800'
@@ -117,7 +142,7 @@ export function App() {
             </button>
 
             <button
-              onClick={() => setCurrentTab('privacy')}
+              onClick={() => navigateTo('privacy')}
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 ${
                 currentTab === 'privacy'
                   ? 'bg-emerald-50 text-emerald-800'
@@ -381,13 +406,13 @@ export function App() {
 
           <div className="flex items-center gap-6">
             <button
-              onClick={() => setCurrentTab('terms')}
+              onClick={() => navigateTo('terms')}
               className="hover:text-emerald-400 transition-colors"
             >
               Términos del Servicio
             </button>
             <button
-              onClick={() => setCurrentTab('privacy')}
+              onClick={() => navigateTo('privacy')}
               className="hover:text-emerald-400 transition-colors"
             >
               Política de Privacidad

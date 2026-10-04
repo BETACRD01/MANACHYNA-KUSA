@@ -17,9 +17,9 @@ import 'views/provider_view.dart';
 import 'widgets/profile_widgets.dart';
 
 const String _privacyPolicyUrl =
-    'https://betacrd01.github.io/MANACHYNA-KUSA/legal/privacy.html';
+    'https://manachynakusa.duckdns.org/privacy';
 const String _termsOfServiceUrl =
-    'https://betacrd01.github.io/MANACHYNA-KUSA/legal/terms.html';
+    'https://manachynakusa.duckdns.org/terms';
 
 Future<void> _openExternalUrl(BuildContext context, String url) async {
   final uri = Uri.parse(url);
