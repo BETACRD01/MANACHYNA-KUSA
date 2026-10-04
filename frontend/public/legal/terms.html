@@ -3,204 +3,651 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Terminos y condiciones - MANACHYNA KUSA</title>
+  <title>Términos y Condiciones de Uso · MANACHYNA KUSA</title>
   <style>
     :root {
-      --green: #176b32;
-      --green-2: #2f8f46;
-      --ink: #173022;
-      --muted: #617369;
-      --line: #dfe9e1;
-      --soft: #f3f8f3;
-      --paper: #ffffff;
+      --primary: #064e3b;
+      --primary-light: #059669;
+      --primary-bg: #ecfdf5;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --accent-badge: #dcfce7;
+      --accent-text: #166534;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      margin: 0;
-      background: #eef5ef;
-      color: var(--ink);
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
     }
 
     .shell {
-      max-width: 960px;
+      max-width: 1040px;
       margin: 0 auto;
-      padding: 28px 16px 54px;
+      padding: 32px 16px 64px;
     }
 
-    .nav {
+    .header-nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      margin-bottom: 22px;
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 12px;
-      color: var(--green);
-      font-weight: 900;
-      letter-spacing: .04em;
-    }
-
-    .mark {
-      display: grid;
-      place-items: center;
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: var(--green);
-      color: #fff;
-      font-weight: 900;
-    }
-
-    .badge {
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .hero {
-      padding: 40px;
-      border-radius: 22px;
-      background: linear-gradient(135deg, var(--green), var(--green-2));
-      color: #fff;
-      box-shadow: 0 18px 48px rgba(23, 48, 34, .20);
-    }
-
-    .eyebrow {
-      margin: 0 0 10px;
-      color: rgba(255, 255, 255, .76);
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin: 0;
-      max-width: 720px;
-      font-size: clamp(34px, 7vw, 62px);
-      line-height: 1.05;
-    }
-
-    .intro {
-      max-width: 700px;
-      margin: 16px 0 0;
-      color: rgba(255, 255, 255, .9);
-      font-size: 17px;
-    }
-
-    .updated {
-      display: inline-flex;
-      margin-top: 20px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .14);
-      font-size: 13px;
+      text-decoration: none;
+      color: var(--primary);
       font-weight: 800;
+      font-size: 1.1rem;
     }
 
-    .document {
-      margin-top: 20px;
-      padding: 8px 36px 30px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--paper);
-      box-shadow: 0 16px 40px rgba(23, 48, 34, .08);
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.25rem;
     }
 
-    section {
-      padding: 24px 0;
-      border-bottom: 1px solid var(--line);
+    .nav-links {
+      display: flex;
+      gap: 12px;
     }
 
-    section:last-child { border-bottom: 0; }
-
-    h2 {
-      margin: 0 0 8px;
-      color: var(--green);
-      font-size: 21px;
-      line-height: 1.25;
+    .nav-btn {
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 10px;
+      transition: all 0.2s;
     }
 
-    p {
-      margin: 0;
-      color: #43534a;
+    .nav-btn-active {
+      background: var(--primary-bg);
+      color: var(--primary);
     }
 
-    .contact {
-      margin-top: 18px;
-      padding: 18px;
-      border-radius: 14px;
-      background: var(--soft);
-      color: var(--muted);
+    .nav-btn-alt {
+      background: #f1f5f9;
+      color: var(--text-muted);
     }
 
-    footer {
-      padding: 24px 0 0;
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
+    .nav-btn-alt:hover {
+      background: #e2e8f0;
+      color: var(--text);
     }
 
-    @media (max-width: 700px) {
-      .shell { padding: 14px 10px 34px; }
-      .nav { margin-bottom: 14px; }
-      .hero { padding: 28px 20px; border-radius: 18px; }
-      .document { padding: 2px 18px 20px; border-radius: 16px; }
-      .badge { display: none; }
+    .banner {
+      background: linear-gradient(135deg, #022c22, #064e3b, #0f172a);
+      color: #fff;
+      border-radius: 24px;
+      padding: 40px 32px;
+      margin-bottom: 36px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge-pill {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+      margin-bottom: 16px;
+    }
+
+    .banner h1 {
+      font-size: 2.25rem;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .banner p {
+      color: #d1fae5;
+      font-size: 1rem;
+      max-width: 720px;
+      margin-bottom: 24px;
+    }
+
+    .banner-actions {
+      display: flex;
+      gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 20px;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
+
+    .toc-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toc-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.825rem;
+      font-weight: 500;
+      line-height: 1.4;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: all 0.15s;
+    }
+
+    .toc-link:hover {
+      background: var(--primary-bg);
+      color: var(--primary);
+    }
+
+    .toc-num {
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 0.75rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 24px;
+      scroll-margin-top: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      font-family: monospace;
+    }
+
+    .card-header h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .highlight-box {
+      background: #f0fdf4;
+      border-left: 4px solid var(--primary-light);
+      padding: 14px 18px;
+      border-radius: 0 12px 12px 0;
+      color: #065f46;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    .card p {
+      color: #334155;
+      font-size: 0.925rem;
+      margin-bottom: 14px;
+    }
+
+    .card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .bullet-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 24px;
+      margin: 18px 0;
+    }
+
+    .bullet-box h4 {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .bullet-box ul {
+      padding-left: 18px;
+      color: #334155;
+      font-size: 0.9rem;
+    }
+
+    .bullet-box li {
+      margin-bottom: 8px;
+    }
+
+    .alert-box {
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin: 18px 0;
+      font-size: 0.9rem;
+    }
+
+    .alert-important {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .alert-info {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      color: #075985;
+    }
+
+    .footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .toc {
+        display: none;
+      }
+      .banner {
+        padding: 28px 20px;
+      }
+      .banner h1 {
+        font-size: 1.75rem;
+      }
+    }
+
+    @media print {
+      .toc, .banner-actions, .header-nav, .footer {
+        display: none;
+      }
+      .layout {
+        display: block;
+      }
+      .card {
+        border: none;
+        box-shadow: none;
+        page-break-inside: avoid;
+        padding: 16px 0;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="shell">
-    <nav class="nav">
-      <div class="brand"><span class="mark">M</span><span>MANACHYNA KUSA</span></div>
-      <span class="badge">Acuerdo de uso</span>
-    </nav>
-
-    <header class="hero">
-      <p class="eyebrow">Acuerdo de uso</p>
-      <h1>Condiciones claras para usar la aplicacion.</h1>
-      <p class="intro">Estas condiciones explican las reglas para utilizar MANACHYNA KUSA y los servicios disponibles dentro de la aplicacion.</p>
-      <span class="updated">Ultima actualizacion: 24 de julio de 2026</span>
+  <div class="shell">
+    <header class="header-nav">
+      <a href="/" class="brand">
+        <span class="brand-mark">M</span>
+        <span>MANACHYNA KUSA</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/" class="nav-btn nav-btn-alt">Inicio</a>
+        <a href="/terms" class="nav-btn nav-btn-active">Términos</a>
+        <a href="/privacy" class="nav-btn nav-btn-alt">Privacidad</a>
+      </nav>
     </header>
 
-    <article class="document">
-      <section>
-        <h2>1. Aceptacion</h2>
-        <p>Al crear una cuenta o utilizar MANACHYNA KUSA, aceptas estas condiciones. Si no estas de acuerdo, no debes utilizar la aplicacion.</p>
-      </section>
-      <section>
-        <h2>2. Uso de la aplicacion</h2>
-        <p>Debes proporcionar informacion verdadera, mantener segura tu cuenta y utilizar la aplicacion de forma legal y respetuosa. No puedes intentar acceder sin autorizacion a cuentas, sistemas o datos de otros usuarios.</p>
-      </section>
-      <section>
-        <h2>3. Cuentas y autenticacion</h2>
-        <p>Puedes iniciar sesion mediante proveedores externos como Google, Facebook o Microsoft. Eres responsable de la actividad realizada desde tu cuenta y de mantener actualizados tus datos de contacto.</p>
-      </section>
-      <section>
-        <h2>4. Servicios y reservas</h2>
-        <p>MANACHYNA KUSA facilita la conexion entre usuarios y proveedores de servicios. La disponibilidad, precios, horarios y condiciones particulares pueden depender del proveedor correspondiente.</p>
-      </section>
-      <section>
-        <h2>5. Conducta y seguridad</h2>
-        <p>No publiques contenido falso, ilegal, ofensivo o que infrinja derechos de terceros. Podemos limitar o suspender cuentas que incumplan estas condiciones o comprometan la seguridad de la plataforma.</p>
-      </section>
-      <section>
-        <h2>6. Privacidad</h2>
-        <p>El tratamiento de datos personales se explica en nuestra politica de privacidad. Puedes solicitar la eliminacion de tu cuenta escribiendo a willian.cerda@est.itstena.edu.ec.</p>
-      </section>
-      <div class="contact"><strong>Contacto:</strong> willian.cerda@est.itstena.edu.ec</div>
-    </article>
+    <div class="banner">
+      <span class="badge-pill">Documento Oficial · Vigente 2026</span>
+      <h1>Términos y Condiciones de Uso</h1>
+      <p>
+        Acuerdo contractual de intermediación tecnológica, reglas de convivencia y uso de la plataforma digital MANACHYNA KUSA en la provincia de Napo, República del Ecuador.
+      </p>
+      <div class="banner-actions">
+        <button class="action-btn" onclick="window.print()">Imprimir / Guardar en PDF</button>
+        <a href="/privacy" class="action-btn">Ver Política de Privacidad</a>
+      </div>
+    </div>
 
-    <footer>MANACHYNA KUSA - Documento legal publico</footer>
-  </main>
+    <div class="layout">
+      <!-- Índice lateral -->
+      <aside class="toc">
+        <div class="toc-title">Índice del Contrato</div>
+        <ul class="toc-list">
+          <li><a href="#c1" class="toc-link"><span class="toc-num">01</span> Aceptación y Ámbito</a></li>
+          <li><a href="#c2" class="toc-link"><span class="toc-num">02</span> Naturaleza del Servicio</a></li>
+          <li><a href="#c3" class="toc-link"><span class="toc-num">03</span> Cuentas y Autenticación</a></li>
+          <li><a href="#c4" class="toc-link"><span class="toc-num">04</span> Proveedores y Especialistas</a></li>
+          <li><a href="#c5" class="toc-link"><span class="toc-num">05</span> Solicitud de Servicios y GPS</a></li>
+          <li><a href="#c6" class="toc-link"><span class="toc-num">06</span> Tarifas, Pagos y Facturación</a></li>
+          <li><a href="#c7" class="toc-link"><span class="toc-num">07</span> Cancelaciones y No-Show</a></li>
+          <li><a href="#c8" class="toc-link"><span class="toc-num">08</span> Conducta y Seguridad</a></li>
+          <li><a href="#c9" class="toc-link"><span class="toc-num">09</span> Garantías y Mediación</a></li>
+          <li><a href="#c10" class="toc-link"><span class="toc-num">10</span> Calificaciones y Reseñas</a></li>
+          <li><a href="#c11" class="toc-link"><span class="toc-num">11</span> Propiedad Intelectual</a></li>
+          <li><a href="#c12" class="toc-link"><span class="toc-num">12</span> Baja y Cierre de Cuenta</a></li>
+          <li><a href="#c13" class="toc-link"><span class="toc-num">13</span> Legislación Ecuatoriana</a></li>
+          <li><a href="#c14" class="toc-link"><span class="toc-num">14</span> Canales de Soporte</a></li>
+        </ul>
+      </aside>
+
+      <!-- Cláusulas -->
+      <main>
+        <article class="card" id="c1">
+          <div class="card-header">
+            <span class="card-num">01</span>
+            <h2>Aceptación de los Términos y Ámbito Territorial</h2>
+          </div>
+          <div class="highlight-box">
+            El uso de la aplicación móvil y plataforma web implica la aceptación plena de este acuerdo legal vinculante.
+          </div>
+          <p>
+            Bienvenido a MANACHYNA KUSA. Los presentes Términos y Condiciones constituyen un acuerdo legal vinculante celebrado entre cualquier persona natural o jurídica que descargue, instale, acceda o utilice la aplicación móvil o la plataforma web (en adelante, el "Usuario") y MANACHYNA KUSA, proyecto tecnológico con operaciones orientadas a la provincia de Napo (Tena, Archidona y sectores aledaños), República del Ecuador.
+          </p>
+          <p>
+            Al pulsar en "Aceptar", crear una cuenta de usuario, iniciar sesión mediante proveedores de identidad (Google, Microsoft o correo) o interactuar con nuestros servicios, usted declara de forma expresa, libre e informada que ha leído, comprendido y aceptado en su totalidad las cláusulas aquí estipuladas.
+          </p>
+          <div class="alert-box alert-important">
+            <strong>Capacidad Legal Requerida:</strong> Nuestros servicios están destinados únicamente a personas con capacidad jurídica para contratar (mayores de 18 años según la legislación ecuatoriana). Queda prohibido el registro a menores de edad sin la supervisión directa de sus padres o tutores legales.
+          </div>
+        </article>
+
+        <article class="card" id="c2">
+          <div class="card-header">
+            <span class="card-num">02</span>
+            <h2>Naturaleza de la Plataforma e Intermediación Digital</h2>
+          </div>
+          <div class="highlight-box">
+            Manachyna Kusa es una plataforma de enlace tecnológico y no una empresa contratista ni empleadora directa de los técnicos.
+          </div>
+          <p>
+            MANACHYNA KUSA opera estrictamente como una plataforma digital de intermediación tecnológica y comunicación que conecta a personas o empresas que solicitan servicios técnicos o domésticos ("Clientes") con técnicos, artesanos o trabajadores independientes calificados ("Proveedores" o "Especialistas").
+          </p>
+          <p>
+            MANACHYNA KUSA NO es una empresa de servicios de fontanería, electricidad, limpieza, construcción o agronomía, ni actúa como empleador, contratista directo, mandatario o agente de los Proveedores registrados. Cada Proveedor actúa de manera autónoma, independiente y por cuenta propia.
+          </p>
+          <p>
+            En consecuencia, la relación laboral o de dependencia contemplada en los Artículos 8 y 11 del Código del Trabajo de la República del Ecuador no existe entre MANACHYNA KUSA y los Proveedores. El contrato final de prestación de servicios se perfecciona directa y exclusivamente entre el Cliente y el Proveedor adjudicado.
+          </p>
+        </article>
+
+        <article class="card" id="c3">
+          <div class="card-header">
+            <span class="card-num">03</span>
+            <h2>Registro de Cuenta, Autenticación y Veracidad</h2>
+          </div>
+          <p>
+            Para solicitar u ofertar servicios en MANACHYNA KUSA, el Usuario debe registrarse y mantener una cuenta personal activa. La autenticación se realiza mediante credenciales seguras de proveedores OAuth 2.0 (Google, Microsoft, Facebook) o correo electrónico validado.
+          </p>
+          <p>
+            El Usuario se compromete a suministrar información exacta, verídica, vigente y comprobable. Queda terminantemente prohibido utilizar identidades falsas, fotografías de terceros sin autorización o crear múltiples cuentas con fines fraudulentos.
+          </p>
+          <div class="bullet-box">
+            <h4>Puntos clave a considerar:</h4>
+            <ul>
+              <li>Prohibido ceder, transferir o prestar la cuenta a terceras personas.</li>
+              <li>Obligación de mantener actualizados el número de teléfono móvil y el correo de contacto.</li>
+              <li>Verificación periódica de la identidad de usuarios y proveedores mediante mecanismos de seguridad.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" id="c4">
+          <div class="card-header">
+            <span class="card-num">04</span>
+            <h2>Requisitos y Compromiso de los Proveedores / Especialistas</h2>
+          </div>
+          <div class="highlight-box">
+            Los especialistas pasan por un filtro de verificación de antecedentes y competencias antes de prestar servicios en Napo.
+          </div>
+          <p>
+            Los Usuarios que se registren en calidad de Proveedores o Técnicos deberán superar el proceso de validación documental establecido por la plataforma, garantizando que disponen de las herramientas, equipos de protección individual (EPI) y conocimientos necesarios.
+          </p>
+          <div class="bullet-box">
+            <h4>Documentación requerida para especialistas:</h4>
+            <ul>
+              <li>Cédula de ciudadanía o documento de identidad oficial emitido en el Ecuador.</li>
+              <li>Certificado de antecedentes penales actualizado emitido por el Ministerio del Interior.</li>
+              <li>Títulos de bachiller técnico, artesano calificado o certificados laborales avalados.</li>
+              <li>Comprobante de domicilio o residencia en la provincia de Napo (Tena / Archidona).</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" id="c5">
+          <div class="card-header">
+            <span class="card-num">05</span>
+            <h2>Solicitud de Servicios y Uso de Geolocalización (GPS)</h2>
+          </div>
+          <p>
+            La solicitud de servicios se realiza seleccionando la categoría correspondiente (ej. Plomería, Electricidad, Limpieza, Mantenimiento, Agronomía, Soporte Técnico), describiendo detalladamente la necesidad y precisando la ubicación exacta del domicilio mediante las funciones de mapa y GPS integradas en la app.
+          </p>
+          <p>
+            Para que la plataforma pueda conectar al Cliente con el técnico disponible más cercano y calcular los tiempos estimados de arribo, es indispensable que el Usuario otorgue los permisos de geolocalización en su dispositivo móvil mientras utiliza la aplicación.
+          </p>
+          <div class="alert-box alert-info">
+            <strong>Precisión en Napo:</strong> Es responsabilidad del Cliente confirmar que el punto de ubicación en el mapa de Tena o Napo corresponda exactamente al lugar de intervención, proporcionando referencias claras para evitar retrasos.
+          </div>
+        </article>
+
+        <article class="card" id="c6">
+          <div class="card-header">
+            <span class="card-num">06</span>
+            <h2>Tarifas, Pagos, Comisiones y Facturación</h2>
+          </div>
+          <p>
+            Los precios mostrados en el catálogo de la plataforma corresponden a tarifas base referenciales (por hora o por labor inicial). En casos donde el servicio requiera materiales, repuestos o trabajos de mayor complejidad, el Proveedor acordará de forma previa y transparente con el Cliente el presupuesto final antes de iniciar la obra.
+          </p>
+          <p>
+            <strong>Métodos de Pago:</strong> El pago se efectúa preferentemente en efectivo una vez concluida y revisada la labor a entera satisfacción del Cliente, o mediante transferencia bancaria directa (Banco Pichincha, Guayaquil, Cooperativas locales de Napo) según convengan las partes.
+          </p>
+          <p>
+            <strong>Facturación:</strong> Cada Proveedor es responsable de cumplir con las obligaciones tributarias que le correspondan ante el Servicio de Rentas Internas (SRI) del Ecuador (ej. notas de venta o facturas bajo régimen RIMPE).
+          </p>
+        </article>
+
+        <article class="card" id="c7">
+          <div class="card-header">
+            <span class="card-num">07</span>
+            <h2>Cancelaciones, Puntualidad y Política de "No Presentación"</h2>
+          </div>
+          <p>
+            <strong>Cancelación por el Cliente:</strong> Puede cancelar una solicitud sin costo alguno siempre que lo haga antes de que el técnico inicie su desplazamiento hacia el domicilio.
+          </p>
+          <p>
+            Si el Cliente cancela cuando el técnico ya se encuentra en camino o ha llegado al domicilio convenido, deberá abonar una tarifa mínima de movilización ($2.50 a $5.00 USD según la distancia en la zona de Napo) en compensación por el tiempo y gasto de traslado del profesional.
+          </p>
+          <p>
+            <strong>Inasistencia del Proveedor:</strong> Las inasistencias injustificadas ("No-Show") afectarán gravemente la calificación del técnico y podrán derivar en la suspensión temporal o definitiva de su cuenta.
+          </p>
+        </article>
+
+        <article class="card" id="c8">
+          <div class="card-header">
+            <span class="card-num">08</span>
+            <h2>Reglas de Conducta, Convivencia y Seguridad en el Domicilio</h2>
+          </div>
+          <p>
+            MANACHYNA KUSA promueve un ambiente de respeto, integridad, equidad y dignidad humana. Se aplican las siguientes reglas de estricto cumplimiento para Clientes y Proveedores:
+          </p>
+          <div class="bullet-box">
+            <h4>Normas obligatorias:</h4>
+            <ul>
+              <li>Tolerancia cero ante cualquier acto de discriminación por etnia, género o condición social.</li>
+              <li>Prohibición total de agresiones verbales, amenazas, acoso o violencia física.</li>
+              <li>Prohibición de presentarse bajo la influencia de alcohol o sustancias estupefacientes.</li>
+              <li>Obligación del Cliente de proveer un entorno seguro para la ejecución de la tarea.</li>
+              <li>Prohibición absoluta de solicitar labores ilícitas o peligrosas.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" id="c9">
+          <div class="card-header">
+            <span class="card-num">09</span>
+            <h2>Garantía del Trabajo, Reclamos y Deslinde de Responsabilidad</h2>
+          </div>
+          <p>
+            <strong>Período de Revisión:</strong> Los servicios técnicos como plomería o electricidad cuentan con un período de revisión de hasta 48 horas tras su culminación para que el Cliente verifique el correcto funcionamiento del trabajo realizado.
+          </p>
+          <p>
+            Si se presentare una falla directamente atribuible a mano de obra defectuosa, el Cliente podrá solicitar la revisión para que el técnico subsane el inconveniente sin costo adicional de mano de obra.
+          </p>
+          <p>
+            <strong>Mediación:</strong> MANACHYNA KUSA actúa activamente como canal de mediación de buena fe para alcanzar resoluciones justas entre ambas partes.
+          </p>
+        </article>
+
+        <article class="card" id="c10">
+          <div class="card-header">
+            <span class="card-num">10</span>
+            <h2>Sistema de Calificaciones, Reseñas y Comentarios</h2>
+          </div>
+          <p>
+            Al finalizar cada servicio, tanto el Cliente como el Proveedor tienen la oportunidad de calificarse mutuamente mediante un sistema de 1 a 5 estrellas y dejar comentarios honestos sobre la experiencia vivida.
+          </p>
+          <p>
+            MANACHYNA KUSA se reserva el derecho de auditar y eliminar comentarios ofensivos o reseñas fraudulentas destinadas a alterar artificialmente las métricas.
+          </p>
+        </article>
+
+        <article class="card" id="c11">
+          <div class="card-header">
+            <span class="card-num">11</span>
+            <h2>Propiedad Intelectual y Licencia de Software</h2>
+          </div>
+          <p>
+            Todo el contenido de la plataforma, incluyendo el nombre comercial MANACHYNA KUSA, logotipos, marcas, código fuente, interfaces y diseños, son propiedad exclusiva de MANACHYNA KUSA y están protegidos por la Ley de Propiedad Intelectual del Ecuador y convenios internacionales.
+          </p>
+        </article>
+
+        <article class="card" id="c12">
+          <div class="card-header">
+            <span class="card-num">12</span>
+            <h2>Suspensión, Terminación y Cierre de Cuenta</h2>
+          </div>
+          <p>
+            El Usuario puede dar de baja su cuenta en cualquier momento solicitándolo directamente desde el menú de la aplicación móvil o escribiendo a los canales oficiales de contacto.
+          </p>
+        </article>
+
+        <article class="card" id="c13">
+          <div class="card-header">
+            <span class="card-num">13</span>
+            <h2>Legislación Aplicable y Jurisdicción</h2>
+          </div>
+          <p>
+            Estos Términos y Condiciones se rigen e interpretan en su totalidad bajo las leyes vigentes de la República del Ecuador. Cualquier controversia se someterá a los jueces y tribunales competentes de la ciudad de Tena, provincia de Napo.
+          </p>
+        </article>
+
+        <article class="card" id="c14">
+          <div class="card-header">
+            <span class="card-num">14</span>
+            <h2>Canales Oficiales de Soporte y Notificaciones</h2>
+          </div>
+          <div class="bullet-box">
+            <h4>Datos de Contacto:</h4>
+            <ul>
+              <li>Correo institucional: willian.cerda@est.itstena.edu.ec</li>
+              <li>Plataforma oficial: https://manachynakusa.duckdns.org</li>
+              <li>Ubicación: Tena, Provincia de Napo, República del Ecuador</li>
+            </ul>
+          </div>
+        </article>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <div>MANACHYNA KUSA · Napo, Ecuador · 2026</div>
+      <div>Desarrollado para la comunidad de Tena y Archidona</div>
+    </footer>
+  </div>
 </body>
 </html>

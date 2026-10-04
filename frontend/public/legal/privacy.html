@@ -3,200 +3,619 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Politica de privacidad - MANACHYNA KUSA</title>
+  <title>Política de Privacidad y Protección de Datos · MANACHYNA KUSA</title>
   <style>
     :root {
-      --green: #176b32;
-      --green-2: #2f8f46;
-      --ink: #173022;
-      --muted: #617369;
-      --line: #dfe9e1;
-      --soft: #f3f8f3;
-      --paper: #ffffff;
+      --primary: #064e3b;
+      --primary-light: #059669;
+      --primary-bg: #ecfdf5;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --accent-badge: #dcfce7;
+      --accent-text: #166534;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      margin: 0;
-      background: #eef5ef;
-      color: var(--ink);
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
     }
 
     .shell {
-      max-width: 960px;
+      max-width: 1040px;
       margin: 0 auto;
-      padding: 28px 16px 54px;
+      padding: 32px 16px 64px;
     }
 
-    .nav {
+    .header-nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      margin-bottom: 22px;
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 12px;
-      color: var(--green);
-      font-weight: 900;
-      letter-spacing: .04em;
-    }
-
-    .mark {
-      display: grid;
-      place-items: center;
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: var(--green);
-      color: #fff;
-      font-weight: 900;
-    }
-
-    .badge {
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .hero {
-      padding: 40px;
-      border-radius: 22px;
-      background: linear-gradient(135deg, var(--green), var(--green-2));
-      color: #fff;
-      box-shadow: 0 18px 48px rgba(23, 48, 34, .20);
-    }
-
-    .eyebrow {
-      margin: 0 0 10px;
-      color: rgba(255, 255, 255, .76);
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin: 0;
-      max-width: 720px;
-      font-size: clamp(34px, 7vw, 62px);
-      line-height: 1.05;
-    }
-
-    .intro {
-      max-width: 700px;
-      margin: 16px 0 0;
-      color: rgba(255, 255, 255, .9);
-      font-size: 17px;
-    }
-
-    .updated {
-      display: inline-flex;
-      margin-top: 20px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .14);
-      font-size: 13px;
+      text-decoration: none;
+      color: var(--primary);
       font-weight: 800;
+      font-size: 1.1rem;
     }
 
-    .document {
-      margin-top: 20px;
-      padding: 8px 36px 30px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--paper);
-      box-shadow: 0 16px 40px rgba(23, 48, 34, .08);
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.25rem;
     }
 
-    section {
-      padding: 24px 0;
-      border-bottom: 1px solid var(--line);
+    .nav-links {
+      display: flex;
+      gap: 12px;
     }
 
-    section:last-child { border-bottom: 0; }
-
-    h2 {
-      margin: 0 0 8px;
-      color: var(--green);
-      font-size: 21px;
-      line-height: 1.25;
+    .nav-btn {
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 10px;
+      transition: all 0.2s;
     }
 
-    p {
-      margin: 0;
-      color: #43534a;
+    .nav-btn-active {
+      background: var(--primary-bg);
+      color: var(--primary);
     }
 
-    .contact {
-      margin-top: 18px;
-      padding: 18px;
-      border-radius: 14px;
-      background: var(--soft);
-      color: var(--muted);
+    .nav-btn-alt {
+      background: #f1f5f9;
+      color: var(--text-muted);
     }
 
-    footer {
-      padding: 24px 0 0;
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
+    .nav-btn-alt:hover {
+      background: #e2e8f0;
+      color: var(--text);
     }
 
-    @media (max-width: 700px) {
-      .shell { padding: 14px 10px 34px; }
-      .nav { margin-bottom: 14px; }
-      .hero { padding: 28px 20px; border-radius: 18px; }
-      .document { padding: 2px 18px 20px; border-radius: 16px; }
-      .badge { display: none; }
+    .banner {
+      background: linear-gradient(135deg, #022c22, #064e3b, #0f172a);
+      color: #fff;
+      border-radius: 24px;
+      padding: 40px 32px;
+      margin-bottom: 36px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge-pill {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+      margin-bottom: 16px;
+    }
+
+    .banner h1 {
+      font-size: 2.25rem;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .banner p {
+      color: #d1fae5;
+      font-size: 1rem;
+      max-width: 720px;
+      margin-bottom: 24px;
+    }
+
+    .banner-actions {
+      display: flex;
+      gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 20px;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .google-play-box {
+      background: linear-gradient(to right, #fffbeb, #fef3c7);
+      border: 2px solid #f59e0b;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .google-play-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #92400e;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .google-play-box p {
+      font-size: 0.9rem;
+      color: #78350f;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .google-play-box ol {
+      padding-left: 20px;
+      color: #78350f;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
+
+    .toc-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toc-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.825rem;
+      font-weight: 500;
+      line-height: 1.4;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: all 0.15s;
+    }
+
+    .toc-link:hover {
+      background: var(--primary-bg);
+      color: var(--primary);
+    }
+
+    .toc-num {
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 0.75rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 24px;
+      scroll-margin-top: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      font-family: monospace;
+    }
+
+    .card-header h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .highlight-box {
+      background: #f0fdf4;
+      border-left: 4px solid var(--primary-light);
+      padding: 14px 18px;
+      border-radius: 0 12px 12px 0;
+      color: #065f46;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    .card p {
+      color: #334155;
+      font-size: 0.925rem;
+      margin-bottom: 14px;
+    }
+
+    .card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .bullet-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 24px;
+      margin: 18px 0;
+    }
+
+    .bullet-box h4 {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .bullet-box ul {
+      padding-left: 18px;
+      color: #334155;
+      font-size: 0.9rem;
+    }
+
+    .bullet-box li {
+      margin-bottom: 8px;
+    }
+
+    .footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .toc {
+        display: none;
+      }
+      .banner {
+        padding: 28px 20px;
+      }
+      .banner h1 {
+        font-size: 1.75rem;
+      }
+    }
+
+    @media print {
+      .toc, .banner-actions, .header-nav, .footer {
+        display: none;
+      }
+      .layout {
+        display: block;
+      }
+      .card {
+        border: none;
+        box-shadow: none;
+        page-break-inside: avoid;
+        padding: 16px 0;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="shell">
-    <nav class="nav">
-      <div class="brand"><span class="mark">M</span><span>MANACHYNA KUSA</span></div>
-      <span class="badge">Privacidad y confianza</span>
-    </nav>
-
-    <header class="hero">
-      <p class="eyebrow">Privacidad y confianza</p>
-      <h1>Tu informacion merece claridad.</h1>
-      <p class="intro">Conoce que datos usamos en MANACHYNA KUSA, para que los necesitamos y como puedes solicitar su eliminacion.</p>
-      <span class="updated">Ultima actualizacion: 24 de julio de 2026</span>
+  <div class="shell">
+    <header class="header-nav">
+      <a href="/" class="brand">
+        <span class="brand-mark">M</span>
+        <span>MANACHYNA KUSA</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/" class="nav-btn nav-btn-alt">Inicio</a>
+        <a href="/terms" class="nav-btn nav-btn-alt">Términos</a>
+        <a href="/privacy" class="nav-btn nav-btn-active">Privacidad</a>
+      </nav>
     </header>
 
-    <article class="document">
-      <section>
-        <h2>1. Informacion que recopilamos</h2>
-        <p>Podemos recibir nombre, correo electronico, foto de perfil e identificador de cuenta cuando inicias sesion con Google, Facebook o Microsoft. Tambien podemos recibir los datos que agregues voluntariamente a tu perfil, como telefono, ciudad, direccion y preferencias de servicio.</p>
-      </section>
-      <section>
-        <h2>2. Como usamos la informacion</h2>
-        <p>Usamos estos datos para crear y proteger tu cuenta, mostrar tu perfil, permitir reservas y solicitudes de servicios, enviar notificaciones relacionadas con la aplicacion y mejorar la seguridad y funcionamiento de MANACHYNA KUSA.</p>
-      </section>
-      <section>
-        <h2>3. Servicios de terceros</h2>
-        <p>La autenticacion puede realizarse mediante Google, Facebook o Microsoft. Los datos se procesan de acuerdo con sus respectivas politicas de privacidad. Usamos Supabase para autenticacion, almacenamiento y base de datos.</p>
-      </section>
-      <section>
-        <h2>4. Seguridad y conservacion</h2>
-        <p>Aplicamos controles de acceso y medidas razonables para proteger la informacion. Conservamos los datos mientras mantengas tu cuenta o cuando sea necesario para prestar el servicio y cumplir obligaciones legales.</p>
-      </section>
-      <section>
-        <h2>5. Eliminacion de datos</h2>
-        <p>Puedes solicitar la eliminacion de tu cuenta y datos escribiendo a willian.cerda@est.itstena.edu.ec. Verificaremos la solicitud y eliminaremos los datos que no debamos conservar por razones legales o de seguridad.</p>
-      </section>
-      <div class="contact"><strong>Contacto:</strong> willian.cerda@est.itstena.edu.ec</div>
-    </article>
+    <div class="banner">
+      <span class="badge-pill">Conformidad LOPDP Ecuador · Google Play</span>
+      <h1>Política de Privacidad y Protección de Datos</h1>
+      <p>
+        Compromiso estricto con el tratamiento seguro, confidencial y lícito de la información personal de clientes y técnicos en Napo, Ecuador.
+      </p>
+      <div class="banner-actions">
+        <button class="action-btn" onclick="window.print()">Imprimir / Guardar en PDF</button>
+        <a href="/terms" class="action-btn">Ver Términos y Condiciones</a>
+      </div>
+    </div>
 
-    <footer>MANACHYNA KUSA - Documento legal publico</footer>
-  </main>
+    <!-- Banner Requisito Oficial Google Play para Eliminación de Datos -->
+    <div class="google-play-box">
+      <div class="google-play-title">
+        <span>⚠ Procedimiento de Eliminación de Cuenta y Datos Personales</span>
+      </div>
+      <p>
+        De acuerdo con las políticas oficiales de Google Play Store y la Ley Orgánica de Protección de Datos Personales de Ecuador, garantizamos a todos los usuarios el derecho a eliminar de forma definitiva su cuenta y todos sus datos almacenados:
+      </p>
+      <ol>
+        <li><strong>Desde la aplicación móvil:</strong> Ingrese a <em>Perfil &gt; Configuración de Cuenta y Privacidad &gt; Eliminar mi cuenta</em>.</li>
+        <li><strong>Vía correo electrónico:</strong> Escriba a <strong>willian.cerda@est.itstena.edu.ec</strong> desde el correo asociado a su cuenta con el asunto <em>"Solicitud de Eliminación de Datos"</em>.</li>
+      </ol>
+      <p style="margin-top: 8px; margin-bottom: 0; font-size: 0.8rem; font-weight: 600;">
+        La purga completa de datos se realiza en un plazo máximo de 72 horas hábiles.
+      </p>
+    </div>
+
+    <div class="layout">
+      <!-- Índice lateral -->
+      <aside class="toc">
+        <div class="toc-title">Índice de Privacidad</div>
+        <ul class="toc-list">
+          <li><a href="#p1" class="toc-link"><span class="toc-num">01</span> Responsable del Tratamiento</a></li>
+          <li><a href="#p2" class="toc-link"><span class="toc-num">02</span> Datos Recopilados</a></li>
+          <li><a href="#p3" class="toc-link"><span class="toc-num">03</span> Geolocalización (GPS)</a></li>
+          <li><a href="#p4" class="toc-link"><span class="toc-num">04</span> Finalidades del Tratamiento</a></li>
+          <li><a href="#p5" class="toc-link"><span class="toc-num">05</span> Seguridad y Cifrado Cloud</a></li>
+          <li><a href="#p6" class="toc-link"><span class="toc-num">06</span> Compartición con Terceros</a></li>
+          <li><a href="#p7" class="toc-link"><span class="toc-num">07</span> Derechos del Titular (ARCO)</a></li>
+          <li><a href="#p8" class="toc-link"><span class="toc-num">08</span> Eliminación de Cuenta</a></li>
+          <li><a href="#p9" class="toc-link"><span class="toc-num">09</span> Cookies y LocalStorage</a></li>
+          <li><a href="#p10" class="toc-link"><span class="toc-num">10</span> Privacidad de Menores</a></li>
+          <li><a href="#p11" class="toc-link"><span class="toc-num">11</span> Modificaciones</a></li>
+          <li><a href="#p12" class="toc-link"><span class="toc-num">12</span> Canales de Atención</a></li>
+        </ul>
+      </aside>
+
+      <!-- Cláusulas -->
+      <main>
+        <article class="card" id="p1">
+          <div class="card-header">
+            <span class="card-num">01</span>
+            <h2>Responsable del Tratamiento de Datos Personales</h2>
+          </div>
+          <div class="highlight-box">
+            Comprometidos con el respeto a la privacidad y la protección de datos conforme a la legislación ecuatoriana.
+          </div>
+          <p>
+            MANACHYNA KUSA, con domicilio en la ciudad de Tena, provincia de Napo, República del Ecuador, actúa como responsable del tratamiento de los datos personales recopilados a través de la aplicación móvil y la plataforma web oficial.
+          </p>
+          <p>
+            Dando estricto cumplimiento a la Ley Orgánica de Protección de Datos Personales (LOPDP) de la República del Ecuador, publicada en el Registro Oficial Suplemento 459 el 26 de mayo de 2021, garantizamos el tratamiento lícito, leal, transparente y seguro de la información de todos nuestros usuarios.
+          </p>
+        </article>
+
+        <article class="card" id="p2">
+          <div class="card-header">
+            <span class="card-num">02</span>
+            <h2>Datos Personales que Recopilamos</h2>
+          </div>
+          <p>
+            Únicamente recolectamos la información estrictamente necesaria y proporcional para garantizar la correcta prestación, coordinación y seguridad de los servicios solicitados:
+          </p>
+          <div class="bullet-box">
+            <h4>Categorías de datos:</h4>
+            <ul>
+              <li><strong>Identidad y Contacto:</strong> Nombre completo, correo electrónico autenticado, teléfono móvil y fotografía.</li>
+              <li><strong>Geolocalización Precisa (GPS):</strong> Coordenadas en tiempo real para emparejamiento con el técnico más cercano en Napo.</li>
+              <li><strong>Datos del Servicio:</strong> Historial de pedidos, direcciones de intervención, descripción de la falla y monto acordado.</li>
+              <li><strong>Dispositivo:</strong> IP, modelo de teléfono, versión del SO y token de notificaciones Firebase (FCM).</li>
+              <li><strong>Documentación de Especialistas:</strong> Cédula ecuatoriana y certificado de antecedentes penales.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" id="p3">
+          <div class="card-header">
+            <span class="card-num">03</span>
+            <h2>Geolocalización en Tiempo Real y Permisos Sensibles</h2>
+          </div>
+          <div class="highlight-box">
+            La ubicación por GPS solo se utiliza para calcular distancias, rutas de llegada y encontrar técnicos cercanos en Tena y Napo.
+          </div>
+          <p>
+            <strong>Permiso ACCESS_FINE_LOCATION:</strong> La aplicación requiere acceso a la ubicación en primer plano cuando usted solicita un servicio o cuando un técnico navega hacia el domicilio.
+          </p>
+          <p>
+            No rastreamos su ubicación cuando la aplicación se encuentra totalmente cerrada y sin órdenes activas en curso. No vendemos ni compartimos datos de ubicación con redes publicitarias.
+          </p>
+        </article>
+
+        <article class="card" id="p4">
+          <div class="card-header">
+            <span class="card-num">04</span>
+            <h2>Finalidades del Tratamiento de los Datos</h2>
+          </div>
+          <div class="bullet-box">
+            <h4>Finalidades principales:</h4>
+            <ul>
+              <li>Conectar eficientemente a Clientes y Proveedores mediante emparejamiento geográfico en Napo.</li>
+              <li>Coordinar el despacho, ejecución y verificación de los trabajos técnicos.</li>
+              <li>Enviar notificaciones push en tiempo real sobre el estado de la solicitud.</li>
+              <li>Prevenir fraudes y validar la idoneidad de los especialistas.</li>
+              <li>Cumplir con requerimientos fiscales y legales en Ecuador.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" id="p5">
+          <div class="card-header">
+            <span class="card-num">05</span>
+            <h2>Seguridad de la Información y Arquitectura Cloud</h2>
+          </div>
+          <div class="highlight-box">
+            Todos los datos se protegen con cifrado SSL/TLS de grado bancario y políticas de seguridad a nivel de fila (RLS).
+          </div>
+          <p>
+            Nuestra base de datos PostgreSQL está alojada en la nube mediante Supabase Cloud, la cual implementa cifrado en reposo (AES-256) y políticas Row Level Security (RLS) que aíslan completamente los datos de cada usuario.
+          </p>
+          <p>
+            Las contraseñas no se almacenan en texto plano y las conexiones viajan cifradas con certificados SSL Let's Encrypt (HTTPS / TLS 1.3).
+          </p>
+        </article>
+
+        <article class="card" id="p6">
+          <div class="card-header">
+            <span class="card-num">06</span>
+            <h2>Compartición de Datos con Terceros de Confianza</h2>
+          </div>
+          <p>
+            MANACHYNA KUSA no vende ni alquila datos personales. Solo se comparten los datos necesarios entre el cliente y el técnico asignado (nombre, foto, teléfono y dirección del servicio), y con nuestros proveedores tecnológicos esenciales (Supabase y Firebase para notificaciones push).
+          </p>
+        </article>
+
+        <article class="card" id="p7">
+          <div class="card-header">
+            <span class="card-num">07</span>
+            <h2>Derechos del Titular (Derechos ARCO)</h2>
+          </div>
+          <p>
+            De conformidad con la Ley Orgánica de Protección de Datos Personales del Ecuador, usted puede ejercer de forma gratuita sus derechos de <strong>Acceso, Rectificación, Supresión, Oposición y Portabilidad</strong> escribiendo a willian.cerda@est.itstena.edu.ec. Las solicitudes se resuelven en un plazo máximo de 15 días hábiles.
+          </p>
+        </article>
+
+        <article class="card" id="p8">
+          <div class="card-header">
+            <span class="card-num">08</span>
+            <h2>Mecanismo de Eliminación de Cuenta y Retención</h2>
+          </div>
+          <p>
+            En cumplimiento con Google Play Store y la LOPDP, usted puede eliminar su cuenta en cualquier momento desde la app móvil o enviando un correo a willian.cerda@est.itstena.edu.ec.
+          </p>
+          <p>
+            Los datos personales se eliminan de forma irreversible de nuestras bases de datos en un plazo no mayor a 72 horas, conservando únicamente comprobantes tributarios legalmente exigibles por el SRI.
+          </p>
+        </article>
+
+        <article class="card" id="p9">
+          <div class="card-header">
+            <span class="card-num">09</span>
+            <h2>Cookies y Almacenamiento Local</h2>
+          </div>
+          <p>
+            Solo usamos almacenamiento técnico imprescindible para mantener activa la sesión y recordar las preferencias del usuario. Cero rastreo publicitario invasivo.
+          </p>
+        </article>
+
+        <article class="card" id="p10">
+          <div class="card-header">
+            <span class="card-num">10</span>
+            <h2>Privacidad de Menores de Edad</h2>
+          </div>
+          <p>
+            La plataforma no está dirigida a menores de 18 años. Si detectamos datos de menores sin consentimiento parental, serán eliminados inmediatamente.
+          </p>
+        </article>
+
+        <article class="card" id="p11">
+          <div class="card-header">
+            <span class="card-num">11</span>
+            <h2>Modificaciones a esta Política</h2>
+          </div>
+          <p>
+            Cualquier cambio sustancial será notificado oportunamente mediante aviso en la aplicación móvil o por correo electrónico.
+          </p>
+        </article>
+
+        <article class="card" id="p12">
+          <div class="card-header">
+            <span class="card-num">12</span>
+            <h2>Canales de Atención Oficial</h2>
+          </div>
+          <div class="bullet-box">
+            <h4>Contacto:</h4>
+            <ul>
+              <li>Responsable: Willian Cerda · MANACHYNA KUSA</li>
+              <li>Correo: willian.cerda@est.itstena.edu.ec</li>
+              <li>Ubicación: Tena, Provincia de Napo, República del Ecuador</li>
+            </ul>
+          </div>
+        </article>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <div>MANACHYNA KUSA · Napo, Ecuador · 2026</div>
+      <div>Comprometidos con la privacidad y la confianza ciudadana</div>
+    </footer>
+  </div>
 </body>
 </html>

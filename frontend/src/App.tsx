@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
+import { TERMS_SECTIONS } from './data/termsData';
+import { PRIVACY_SECTIONS } from './data/privacyData';
+import { LegalViewer } from './components/LegalViewer';
 import {
   ShieldCheck,
   FileText,
@@ -268,126 +271,89 @@ export function App() {
                 ))}
               </div>
             </section>
+
+            {/* Confianza, Seguridad y Transparencia Legal */}
+            <section className="bg-emerald-950 text-white py-14 px-4 border-t border-emerald-900">
+              <div className="max-w-6xl mx-auto">
+                <div className="text-center max-w-2xl mx-auto mb-10">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300 bg-emerald-900/60 px-3 py-1 rounded-full border border-emerald-800">
+                    Compromiso y Seguridad
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-black mt-3 mb-2">
+                    Garantía y Confianza en Cada Servicio
+                  </h2>
+                  <p className="text-emerald-200/80 text-xs sm:text-sm">
+                    Construido bajo altos estándares éticos, técnicos y normativos en la provincia de Napo
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:bg-white/10 transition-colors">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center mb-4">
+                      <ShieldCheck className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-bold text-base mb-2 text-white">Protección de Datos (LOPDP)</h3>
+                    <p className="text-emerald-100/70 text-xs sm:text-sm leading-relaxed mb-4">
+                      Tratamiento lícito, seguro y transparente de tu información personal conforme a la Ley Orgánica de Protección de Datos Personales del Ecuador.
+                    </p>
+                    <button
+                      onClick={() => navigateTo('privacy')}
+                      className="text-xs font-bold text-emerald-300 hover:text-emerald-200 flex items-center gap-1 cursor-pointer"
+                    >
+                      Leer Política de Privacidad &rarr;
+                    </button>
+                  </div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:bg-white/10 transition-colors">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center mb-4">
+                      <FileText className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-bold text-base mb-2 text-white">Términos Claros y Transparentes</h3>
+                    <p className="text-emerald-100/70 text-xs sm:text-sm leading-relaxed mb-4">
+                      Tarifas justas, políticas de cancelación sin sorpresas y reglas claras de convivencia y seguridad entre clientes y técnicos de Napo.
+                    </p>
+                    <button
+                      onClick={() => navigateTo('terms')}
+                      className="text-xs font-bold text-emerald-300 hover:text-emerald-200 flex items-center gap-1 cursor-pointer"
+                    >
+                      Ver Términos y Condiciones &rarr;
+                    </button>
+                  </div>
+
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:bg-white/10 transition-colors">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center mb-4">
+                      <Sparkles className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-bold text-base mb-2 text-white">Proveedores Verificados</h3>
+                    <p className="text-emerald-100/70 text-xs sm:text-sm leading-relaxed mb-4">
+                      Revisión de antecedentes penales, cédula y experiencia técnica para brindarte la máxima confianza y tranquilidad en tu domicilio.
+                    </p>
+                    <span className="text-xs font-bold text-emerald-400">
+                      Tena · Archidona · Napo
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
         )}
 
         {/* Tab Términos y Condiciones */}
         {currentTab === 'terms' && (
-          <div className="max-w-4xl mx-auto px-4 py-12">
-            <div className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/80 shadow-sm">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-                Acuerdo Legal
-              </span>
-              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mt-4 mb-2">
-                Condiciones del Servicio
-              </h1>
-              <p className="text-slate-500 text-sm mb-8">
-                MANACHYNA KUSA · Última actualización: 2026
-              </p>
-
-              <div className="space-y-6 text-sm text-slate-700 leading-relaxed">
-                <section className="pb-6 border-b border-slate-100">
-                  <h3 className="font-bold text-base text-emerald-900 mb-2">1. Aceptación de los Términos</h3>
-                  <p>
-                    Al descargar, acceder o utilizar la aplicación móvil o la plataforma web de MANACHYNA KUSA, el usuario acepta de manera expresa e irrevocable cumplir con los presentes Términos y Condiciones de Uso. Si no está de acuerdo con alguno de los términos, no deberá utilizar la aplicación.
-                  </p>
-                </section>
-
-                <section className="pb-6 border-b border-slate-100">
-                  <h3 className="font-bold text-base text-emerald-900 mb-2">2. Naturaleza del Servicio</h3>
-                  <p>
-                    MANACHYNA KUSA es una plataforma tecnológica que facilita el contacto y la intermediación entre clientes residenciales y proveedores independientes de servicios domésticos y técnicos en la provincia de Napo, República del Ecuador.
-                  </p>
-                </section>
-
-                <section className="pb-6 border-b border-slate-100">
-                  <h3 className="font-bold text-base text-emerald-900 mb-2">3. Cuentas y Autenticación</h3>
-                  <p>
-                    El usuario puede autenticarse utilizando proveedores autorizados (Google, Facebook o Microsoft). Cada usuario es responsable de salvaguardar sus credenciales de acceso y de toda actividad originada bajo su cuenta.
-                  </p>
-                </section>
-
-                <section className="pb-6 border-b border-slate-100">
-                  <h3 className="font-bold text-base text-emerald-900 mb-2">4. Compromiso de los Proveedores</h3>
-                  <p>
-                    Los proveedores que ofrecen sus servicios en la plataforma declaran contar con los conocimientos, herramientas y aptitudes necesarias para ejecutar las tareas ofrecidas con altos estándares de calidad, seguridad y respeto.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="font-bold text-base text-emerald-900 mb-2">5. Contacto Legal</h3>
-                  <p>
-                    Para cualquier consulta, reclamo o notificación relativa a estas condiciones, puede comunicarse directamente al correo electrónico oficial:{' '}
-                    <a
-                      href="mailto:willian.cerda@est.itstena.edu.ec"
-                      className="text-emerald-700 font-bold hover:underline"
-                    >
-                      willian.cerda@est.itstena.edu.ec
-                    </a>
-                  </p>
-                </section>
-              </div>
-            </div>
-          </div>
+          <LegalViewer
+            type="terms"
+            sections={TERMS_SECTIONS}
+            onSwitchType={navigateTo}
+          />
         )}
 
         {/* Tab Política de Privacidad */}
         {currentTab === 'privacy' && (
-          <div className="max-w-4xl mx-auto px-4 py-12">
-            <div className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/80 shadow-sm">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-                Protección de Datos
-              </span>
-              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mt-4 mb-2">
-                Política de Privacidad
-              </h1>
-              <p className="text-slate-500 text-sm mb-8">
-                MANACHYNA KUSA · Conforme a las normativas de protección de datos
-              </p>
-
-              <div className="space-y-6 text-sm text-slate-700 leading-relaxed">
-                <section className="pb-6 border-b border-slate-100">
-                  <h3 className="font-bold text-base text-emerald-900 mb-2">1. Información que recopilamos</h3>
-                  <p>
-                    Recopilamos únicamente la información necesaria para coordinar y prestar los servicios: nombre, correo electrónico autenticado, datos básicos de perfil proporcionados por el proveedor OAuth (Google, Facebook o Microsoft), y ubicación geográfica cuando el usuario solicita un servicio a domicilio.
-                  </p>
-                </section>
-
-                <section className="pb-6 border-b border-slate-100">
-                  <h3 className="font-bold text-base text-emerald-900 mb-2">2. Uso de la Información</h3>
-                  <p>
-                    La información se emplea exclusivamente para:
-                  </p>
-                  <ul className="list-disc pl-5 mt-2 space-y-1 text-slate-600">
-                    <li>Conectar al cliente con el proveedor más cercano.</li>
-                    <li>Gestionar las solicitudes y reservas de servicios.</li>
-                    <li>Notificar el estado de las órdenes en curso mediante Firebase Cloud Messaging (FCM).</li>
-                    <li>Mejorar la seguridad y prevenir fraudes o conductas abusivas.</li>
-                  </ul>
-                </section>
-
-                <section className="pb-6 border-b border-slate-100">
-                  <h3 className="font-bold text-base text-emerald-900 mb-2">3. Eliminación y Derechos del Usuario</h3>
-                  <p>
-                    Usted tiene derecho a solicitar la rectificación o eliminación total de sus datos personales en cualquier momento escribiendo a:{' '}
-                    <a
-                      href="mailto:willian.cerda@est.itstena.edu.ec"
-                      className="text-emerald-700 font-bold hover:underline"
-                    >
-                      willian.cerda@est.itstena.edu.ec
-                    </a>.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="font-bold text-base text-emerald-900 mb-2">4. Almacenamiento Seguro</h3>
-                  <p>
-                    Todos los datos son transmitidos bajo cifrado SSL/TLS y almacenados en bases de datos PostgreSQL con políticas estrictas de seguridad a nivel de fila (Row Level Security - RLS).
-                  </p>
-                </section>
-              </div>
-            </div>
-          </div>
+          <LegalViewer
+            type="privacy"
+            sections={PRIVACY_SECTIONS}
+            onSwitchType={navigateTo}
+          />
         )}
       </main>
 
