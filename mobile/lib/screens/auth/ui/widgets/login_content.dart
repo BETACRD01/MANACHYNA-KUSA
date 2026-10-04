@@ -27,6 +27,7 @@ class LoginContent extends StatefulWidget {
 
 class _LoginContentState extends State<LoginContent> {
   LoginController? _controller;
+  AuthProvider? _authProvider;
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _LoginContentState extends State<LoginContent> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final auth = context.read<AuthProvider>();
+      _authProvider = auth;
       _controller = LoginController(auth);
       auth.addListener(_handleAuthStateChanged);
       _handleAuthStateChanged();
@@ -42,8 +44,9 @@ class _LoginContentState extends State<LoginContent> {
 
   @override
   void dispose() {
-    context.read<AuthProvider>().removeListener(_handleAuthStateChanged);
+    _authProvider?.removeListener(_handleAuthStateChanged);
     _controller?.dispose();
+    _controller = null;
     super.dispose();
   }
 
@@ -76,7 +79,7 @@ class _LoginContentState extends State<LoginContent> {
   }
 
   Future<void> _signInWithProvider(OAuthProvider provider) async {
-    if (_controller != null) {
+    if (_controller != null && mounted) {
       await _controller!.signInWithProvider(provider);
     }
   }

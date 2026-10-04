@@ -1,4 +1,4 @@
-# Archivos y carpetas generados por Flutter
+# Archivos y carpetas generados por Flutter / Dart
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -6,26 +6,40 @@
 .pub-cache/
 .pub/
 build/
-# Archivos de Android
-/android/app/debug
-/android/app/profile
-/android/app/release
-# Archivos de iOS
-/ios/Flutter/.last_build_id
-/ios/Flutter/App.framework
-/ios/Flutter/Flutter.framework
-/ios/Flutter/Generated.xcconfig
-/ios/Flutter/app.flx
-/ios/Flutter/app.zip
-/ios/Flutter/flutter_assets/
-/ios/ServiceDefinitions.json
-/ios/Runner/GeneratedPluginRegistrant.*
-# Archivos de configuración local
+
+# Android
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+**/android/.gradle
+**/android/local.properties
+
+# iOS / macOS
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/Pods/
+**/.symlinks/
+
+# React / Node / Web
+node_modules/
+dist/
+.next/
+out/
+
+# Archivos de configuración local y logs
 *.lock
 *.log
 .DS_Store
 
-# Credenciales locales y secretos de Edge Functions
+# Credenciales locales y secretos
 .env
 .env.*
-.env.example
+!.env.example
+

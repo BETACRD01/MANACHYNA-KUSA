@@ -5,7 +5,6 @@ import 'core/di/app_providers.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'providers/theme_provider.dart';
-
 class ManachynaKusaApp extends StatelessWidget {
   const ManachynaKusaApp({Key? key}) : super(key: key);
 
