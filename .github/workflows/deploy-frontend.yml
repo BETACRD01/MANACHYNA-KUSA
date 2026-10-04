@@ -1,59 +1,141 @@
-name: Deploy Frontend to Google Cloud VM
+name: Deploy Manachyna Frontend
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
     paths:
-      - 'frontend/**'
-      - '.github/workflows/deploy-frontend.yml'
-  workflow_dispatch:
+      - "frontend/**"
+      - ".github/workflows/deploy-frontend.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: manachyna-frontend-production
+  cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Build & Deploy React Frontend
+  validate:
+    name: Validar y compilar frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout repository
+      - name: Descargar codigo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "20"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
-        run: |
-          cd frontend
-          npm ci
+      - name: Instalar dependencias
+        working-directory: frontend
+        run: npm ci
 
-      - name: Build frontend for production
-        run: |
-          cd frontend
-          npm run build
+      - name: Compilar para produccion
+        working-directory: frontend
+        run: npm run build
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+      - name: Empaquetar build frontend
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          include-hidden-files: true
+          if-no-files-found: error
 
-      - name: Deploy build to VM via rsync
-        run: |
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
-            frontend/dist/ ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/var/www/manachyna-kusa/
+  deploy:
+    name: Desplegar frontend a VM
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: validate
 
-      - name: Reload Nginx on VM
-        run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "sudo systemctl reload nginx && echo 'Nginx recargado OK'"
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
 
-      - name: Verify deployment health
+      - name: Descargar build frontend
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend-dist
+
+      - name: Configurar SSH
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY || secrets.VM_SSH_KEY }}
+
+      - name: Verificar identidad del servidor
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "curl -sI -H 'Host: manachynakusa.duckdns.org' http://127.0.0.1 | head -n 5"
+          install -d -m 700 ~/.ssh
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -H "${{ secrets.SSH_HOST || secrets.VM_HOST }}" >> ~/.ssh/known_hosts
+          fi
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Empaquetar build para deploy
+        run: tar -czf frontend-dist.tgz -C frontend-dist .
+
+      - name: Deploy remoto
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST || secrets.VM_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER || secrets.VM_USER }}
+        run: |
+          SSH_OPTS=(
+            -o BatchMode=yes
+            -o ConnectTimeout=20
+            -o ConnectionAttempts=3
+            -o ServerAliveInterval=30
+            -o ServerAliveCountMax=20
+            -o IPQoS=none
+          )
+
+          retry() {
+            local attempts=4
+            local delay=15
+            local n=1
+            until "$@"; do
+              if [ "$n" -ge "$attempts" ]; then
+                return 1
+              fi
+              echo "Intento $n fallido; reintentando en ${delay}s..."
+              sleep "$delay"
+              n=$((n + 1))
+            done
+          }
+
+          retry scp "${SSH_OPTS[@]}" frontend-dist.tgz "$SSH_USER@$SSH_HOST:/tmp/manachyna-frontend-dist.tgz"
+          retry ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" "bash -s" <<'DEPLOY_SCRIPT'
+            set -Eeuo pipefail
+
+            TARGET_DIR=/var/www/manachyna-kusa
+
+            echo "Asegurando directorio de destino: $TARGET_DIR"
+            sudo mkdir -p "$TARGET_DIR"
+            sudo chown -R $(whoami):$(whoami) "$TARGET_DIR"
+
+            echo "Actualizando archivos compilados del frontend..."
+            rm -rf "$TARGET_DIR"/*
+            tar -xzf /tmp/manachyna-frontend-dist.tgz -C "$TARGET_DIR"
+            rm -f /tmp/manachyna-frontend-dist.tgz
+
+            echo "Ajustando permisos y recargando Nginx..."
+            sudo chmod -R 755 "$TARGET_DIR"
+            sudo systemctl reload nginx
+
+            echo "Verificando servicio web..."
+            curl -sI -H "Host: manachynakusa.duckdns.org" http://127.0.0.1 | head -n 5
+
+            echo "Frontend desplegado correctamente."
+          DEPLOY_SCRIPT
