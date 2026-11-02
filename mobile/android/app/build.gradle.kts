@@ -127,6 +127,54 @@ fun resolveNdkToolchainBinDir(sdkDir: File, ndkVersion: String): File {
     return toolchainDir
 }
 
+fun resolveJarsignerBinary(): File {
+    val javaHome = System.getenv("JAVA_HOME") ?: System.getProperty("java.home")
+    val candidate = File(javaHome, "bin/jarsigner")
+    if (candidate.isFile) return candidate
+    val studioJbr = File("/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/jarsigner")
+    if (studioJbr.isFile) return studioJbr
+    return File("jarsigner")
+}
+
+fun resolveReleaseSigning(project: Project): Map<String, String> {
+    val keyPropsFile = project.rootProject.file("key.properties")
+    val props = Properties()
+    if (keyPropsFile.isFile) {
+        FileInputStream(keyPropsFile).use { props.load(it) }
+    }
+    val storeFilePath = props.getProperty("storeFile") ?: "upload-keystore.jks"
+    val storeFile = listOf(
+        project.file(storeFilePath),
+        project.rootProject.file(storeFilePath),
+        File(project.projectDir, "upload-keystore.jks"),
+        File(project.rootProject.projectDir, "upload-keystore.jks"),
+    ).firstOrNull { it.isFile }
+
+    if (storeFile != null) {
+        val pass = props.getProperty("storePassword")
+            ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            ?: error("Configura storePassword en key.properties o ANDROID_KEYSTORE_PASSWORD.")
+        val keyPass = props.getProperty("keyPassword")
+            ?: System.getenv("ANDROID_KEY_PASSWORD")
+            ?: pass
+        val alias = props.getProperty("keyAlias") ?: "upload"
+        return mapOf(
+            "storeFile" to storeFile.absolutePath,
+            "storePassword" to pass,
+            "keyAlias" to alias,
+            "keyPassword" to keyPass,
+        )
+    }
+
+    val debugStore = File(System.getProperty("user.home"), ".android/debug.keystore")
+    return mapOf(
+        "storeFile" to debugStore.absolutePath,
+        "storePassword" to "android",
+        "keyAlias" to "androiddebugkey",
+        "keyPassword" to "android",
+    )
+}
+
 fun prepareNativeLibsForPackaging(
     project: Project,
     sdkDir: File,
@@ -147,21 +195,27 @@ fun prepareNativeLibsForPackaging(
     if (targetDir.exists()) targetDir.deleteRecursively()
     targetDir.mkdirs()
 
+    val allowedAbis = setOf("arm64-v8a", "armeabi-v7a", "x86_64")
+
     sourceDir.walkTopDown()
         .filter { it.isFile }
         .sortedBy { it.relativeTo(sourceDir).invariantSeparatorsPath }
         .forEach { libFile ->
-            val outputFile = File(targetDir, libFile.relativeTo(sourceDir).invariantSeparatorsPath)
-            outputFile.parentFile.mkdirs()
-            libFile.copyTo(outputFile, overwrite = true)
+            val relPath = libFile.relativeTo(sourceDir).invariantSeparatorsPath
+            val abi = relPath.substringBefore('/')
+            if (abi in allowedAbis) {
+                val outputFile = File(targetDir, relPath)
+                outputFile.parentFile.mkdirs()
+                libFile.copyTo(outputFile, overwrite = true)
 
-            if (outputFile.extension == "so") {
-                project.exec {
-                    commandLine(
-                        objcopyBinary.absolutePath,
-                        "--strip-unneeded",
-                        outputFile.absolutePath,
-                    )
+                if (outputFile.extension == "so") {
+                    project.exec {
+                        commandLine(
+                            objcopyBinary.absolutePath,
+                            "--strip-unneeded",
+                            outputFile.absolutePath,
+                        )
+                    }
                 }
             }
         }
@@ -186,11 +240,14 @@ android {
         applicationId = "com.manachynakusa.app"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = flutter.versionCode ?: 2
+        versionName = flutter.versionName ?: "1.0.1"
         multiDexEnabled = true
         manifestPlaceholders["googleMapsApiKey"] = googleMapsApiKey
         manifestPlaceholders["appAuthRedirectScheme"] = "com.manachynakusa.app"
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a", "x86_64"))
+        }
     }
 
     signingConfigs {
@@ -360,14 +417,7 @@ val repairReleaseApk = tasks.register("repairReleaseApk") {
             )
         }
 
-        val debugSigningConfig = android.signingConfigs.getByName("debug")
-        val keystorePath =
-            debugSigningConfig.storeFile?.absolutePath
-                ?: File(System.getProperty("user.home"), ".android/debug.keystore").absolutePath
-        val storePassword = debugSigningConfig.storePassword ?: "android"
-        val keyAliasKeystore = debugSigningConfig.keyAlias ?: "androiddebugkey"
-        val keyPassword = debugSigningConfig.keyPassword ?: "android"
-
+        val signingInfo = resolveReleaseSigning(project)
         val signedApk = File(buildDir, "tmp/release-apk-repair/app-release-signed.apk")
         project.exec {
             environment("JAVA_HOME", System.getProperty("java.home"))
@@ -375,13 +425,13 @@ val repairReleaseApk = tasks.register("repairReleaseApk") {
                 File(buildToolsDir, "apksigner").absolutePath,
                 "sign",
                 "--ks",
-                keystorePath,
+                signingInfo["storeFile"]!!,
                 "--ks-key-alias",
-                keyAliasKeystore,
+                signingInfo["keyAlias"]!!,
                 "--ks-pass",
-                "pass:$storePassword",
+                "pass:${signingInfo["storePassword"]!!}",
                 "--key-pass",
-                "pass:$keyPassword",
+                "pass:${signingInfo["keyPassword"]!!}",
                 "--out",
                 signedApk.absolutePath,
                 alignedApk.absolutePath,
@@ -394,11 +444,80 @@ val repairReleaseApk = tasks.register("repairReleaseApk") {
     }
 }
 
+val repairReleaseBundle = tasks.register("repairReleaseBundle") {
+    dependsOn("bundleRelease")
+
+    doLast {
+        val releaseBundle = File(buildDir, "outputs/bundle/release/app-release.aab")
+        if (!releaseBundle.isFile) {
+            println("repairReleaseBundle: No se encontro el archivo bundle en ${releaseBundle.absolutePath}")
+            return@doLast
+        }
+
+        val nativeLibDir = File(
+            buildDir,
+            "intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib",
+        )
+        if (!nativeLibDir.isDirectory) {
+            println("repairReleaseBundle: No se encontro el directorio de librerias nativas en ${nativeLibDir.absolutePath}")
+            return@doLast
+        }
+
+        val preparedNativeLibDir = File(buildDir, "tmp/release-bundle-repair/stripped-lib")
+        val sdkDir = resolveAndroidSdkDir(localProperties)
+
+        prepareNativeLibsForPackaging(
+            project = project,
+            sdkDir = sdkDir,
+            ndkVersion = android.ndkVersion,
+            sourceDir = nativeLibDir,
+            targetDir = preparedNativeLibDir,
+        )
+
+        val rewrittenBundle = File(buildDir, "tmp/release-bundle-repair/app-release.aab").apply {
+            parentFile.mkdirs()
+        }
+        rewriteArchiveWithNativeLibs(
+            sourceArchive = releaseBundle,
+            nativeLibDir = preparedNativeLibDir,
+            targetArchive = rewrittenBundle,
+            archiveRoot = "base",
+        )
+
+        val signingInfo = resolveReleaseSigning(project)
+        val jarsignerBin = resolveJarsignerBinary()
+
+        project.exec {
+            commandLine(
+                jarsignerBin.absolutePath,
+                "-sigalg",
+                "SHA256withRSA",
+                "-digestalg",
+                "SHA-256",
+                "-keystore",
+                signingInfo["storeFile"]!!,
+                "-storepass",
+                signingInfo["storePassword"]!!,
+                "-keypass",
+                signingInfo["keyPassword"]!!,
+                rewrittenBundle.absolutePath,
+                signingInfo["keyAlias"]!!,
+            )
+        }
+
+        rewrittenBundle.copyTo(releaseBundle, overwrite = true)
+        println("repairReleaseBundle: Bundle (.aab) reparado e inyectado con librerias nativas en base/lib y firmado con ${signingInfo["keyAlias"]}.")
+    }
+}
+
 afterEvaluate {
     tasks.matching { it.name == "assembleDebug" }.configureEach {
         finalizedBy(repairDebugApk)
     }
     tasks.matching { it.name == "assembleRelease" }.configureEach {
         finalizedBy(repairReleaseApk)
+    }
+    tasks.matching { it.name == "bundleRelease" }.configureEach {
+        finalizedBy(repairReleaseBundle)
     }
 }
